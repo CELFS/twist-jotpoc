@@ -465,7 +465,14 @@
     "theme": "主题",
     "themeSystem": "跟随系统",
     "themeLight": "浅色",
-    "themeDark": "深色"
+    "themeDark": "深色",
+    "credentialUnreadable": "无法读取本机授权凭证",
+    "keychainHint": "请在 macOS 钥匙串提示中允许 JotPoc 访问登录钥匙串。",
+    "credentialManagerHint": "请检查 Windows 凭据管理器的访问权限，然后重试。",
+    "credentialStoreHint": "请检查系统凭证存储的访问权限，然后重试。",
+    "retryRead": "重新读取",
+    "reauthorize": "账户授权已过期或失效，需要重新授权。",
+    "reconnect": "重新连接 TwistBalance"
   },
   "settings": {
     "shortLabel": "设置"

@@ -36,7 +36,7 @@ const tokenSchema = z.object({
 
 type Pending = z.infer<typeof pendingSchema>;
 type SessionState = {
-  phase: "restoring" | "disconnected" | "authorizing" | "connected";
+  phase: "credentialUnreadable" | "reauthorize" | "restoring" | "disconnected" | "authorizing" | "connected";
   credential: Credential | null;
   pending: Pending | null;
   error: string | null;
@@ -104,15 +104,24 @@ export function restoreSession(): Promise<void> {
   publish({ phase: "restoring", error: null });
   restoration = (async () => {
     let cached: Credential | null = null;
+    let stored: unknown;
     try {
-      const stored = await readStoredCredential();
+      stored = await readStoredCredential();
+    } catch (error) {
+      if (current !== revision) return;
+      reportFailure("read-credential", error);
+      setActiveCredential(null);
+      publish({ phase: "credentialUnreadable", credential: null });
+      return;
+    }
+    try {
       if (current !== revision) return;
       const parsed = credentialSchema.safeParse(stored);
       if (stored === null || !parsed.success || parsed.data.expiresAt <= Date.now()) {
         if (stored !== null) await removeStoredCredential();
         if (current === revision) {
           setActiveCredential(null);
-          publish({ phase: "disconnected", credential: null });
+          publish({ phase: stored === null ? "disconnected" : "reauthorize", credential: null });
         }
         return;
       }
@@ -127,18 +136,19 @@ export function restoreSession(): Promise<void> {
       publish({ phase: "connected", credential, error: null });
     } catch (error) {
       if (current !== revision) return;
-      reportFailure(cached ? "restore-session" : "read-credential", error);
+      reportFailure("restore-session", error);
       if (cached && error instanceof ApiError && error.code === "network_error") {
         setActiveCredential(cached);
         publish({ phase: "connected", credential: cached, error: error.code });
         return;
       }
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      const rejected = error instanceof ApiError && (error.status === 401 || error.status === 403);
+      if (rejected) {
         await removeStoredCredential().catch(() => undefined);
       }
       if (current !== revision) return;
       setActiveCredential(null);
-      publish({ phase: "disconnected", credential: null, error: error instanceof ApiError ? error.code : "storage_failed" });
+      publish({ phase: rejected ? "reauthorize" : "disconnected", credential: null, error: rejected ? null : error instanceof ApiError ? error.code : "storage_failed" });
     }
   })().finally(() => { restoration = null; });
   return restoration;
@@ -261,7 +271,7 @@ window.addEventListener("jotpoc:authorization-required", () => {
   ++revision;
   authorization?.abort();
   setActiveCredential(null);
-  publish({ phase: "disconnected", credential: null, pending: null, error: "authorization_required", busy: false });
+  publish({ phase: "reauthorize", credential: null, pending: null, error: null, busy: false });
   void removeStoredCredential().catch(() => publish({ error: "storage_failed" }));
 });
 

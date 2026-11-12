@@ -88,8 +88,8 @@ export function App() {
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
-      <main hidden={settingsOpen} className="app-content custom-scrollbar" data-connection={!credential || undefined}>
-        {credential ? <Workspace key={credential.accountId} accountId={credential.accountId} onTranslationChange={setTranslationChange} /> : <AccountPanel />}
+      <main hidden={settingsOpen} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>
+        {credential ? <Workspace key={credential.accountId} accountId={credential.accountId} onTranslationChange={setTranslationChange} /> : <AccountPanel platform={windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other"} />}
       </main>
       {settingsOpen && <SettingsPage language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
         onAutoHideChange={value => {

@@ -465,7 +465,14 @@
     "theme": "Theme",
     "themeSystem": "Follow system",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "credentialUnreadable": "Unable to read the saved credential",
+    "keychainHint": "Allow JotPoc to access your login keychain when macOS prompts you.",
+    "credentialManagerHint": "Check access to Windows Credential Manager, then try again.",
+    "credentialStoreHint": "Check access to your device’s credential store, then try again.",
+    "retryRead": "Retry reading credential",
+    "reauthorize": "Account authorization has expired or is no longer valid.",
+    "reconnect": "Reconnect to TwistBalance"
   },
   "settings": {
     "shortLabel": "Settings"

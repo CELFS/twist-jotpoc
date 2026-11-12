@@ -7,13 +7,15 @@ import { getText } from "@/i18n/get-text";
 import { RequestError } from "@/features/shell/request-error";
 import { useSession, connectAccount, disconnectAccount, cancelAuthorization, reopenAuthorization, restoreSession } from "./session-store";
 
-export function AccountPanel() {
+export function AccountPanel({ platform = "other" }: { platform?: "macos" | "windows" | "other" }) {
   const state = useSession();
   const [confirming, setConfirming] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
 
   const connected = state.phase === "connected";
   const pending = state.phase === "authorizing";
+  const unreadable = state.phase === "credentialUnreadable";
+  const reauthorize = state.phase === "reauthorize";
   const disconnectLabel = getText(confirming ? "client.cancel" : "client.disconnect");
 
   return <section className="account-panel" data-connected={connected || undefined}>
@@ -47,7 +49,8 @@ export function AccountPanel() {
     </> : <>
       <div className="connection-status" data-pending={pending || undefined} role="status">
         <span className="connection-dot" aria-hidden="true" />
-        <div>{getText(pending ? "client.waitingApproval" : state.phase === "restoring" ? "client.restoring" : "client.readyToConnect")}
+        <div>{getText(pending ? "client.waitingApproval" : state.phase === "restoring" ? "client.restoring" : unreadable ? "client.credentialUnreadable" : reauthorize ? "client.reauthorize" : "client.readyToConnect")}
+          {unreadable && <p>{getText(platform === "macos" ? "client.keychainHint" : platform === "windows" ? "client.credentialManagerHint" : "client.credentialStoreHint")}</p>}
           {pending && <>
             <p>{getText("client.authorizationPending")}</p>
             <div className="authorization-code"><span>{getText("client.authorizationCode")}</span><strong>{state.pending?.userCode}</strong></div>
@@ -57,9 +60,9 @@ export function AccountPanel() {
       {pending ? <>
         <Button onClick={() => void reopenAuthorization().catch(() => setOpenError("unavailable"))}>{getText("client.openAuthorization")}</Button>
         <Button variant="secondary" onClick={() => void cancelAuthorization()}>{getText("client.cancelAuthorization")}</Button>
-      </> : state.phase !== "restoring" && <>
+      </> : unreadable ? <Button onClick={() => void restoreSession()}>{getText("client.retryRead")}</Button> : state.phase !== "restoring" && <>
         <Button disabled={state.busy} onClick={() => void connectAccount()}><Cable size={16} aria-hidden="true" />
-          {getText(state.busy ? "client.connecting" : "client.connect")}</Button>
+          {getText(state.busy ? "client.connecting" : reauthorize ? "client.reconnect" : "client.connect")}</Button>
         {state.error && <Button variant="secondary" onClick={() => void restoreSession()}>{getText("client.retry")}</Button>}
       </>}
     </>}

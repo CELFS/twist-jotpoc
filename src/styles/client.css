@@ -61,12 +61,64 @@
   min-height: 32px;
 }
 .app-content { margin: 0 6px 6px; background: var(--app-background); border-radius: 12px 12px 5px 5px; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
-.workspace { max-width: 1080px; margin: 0 auto; }
-.workspace-panel { padding-top: 16px; min-width: 0; }
+.workspace-host, .workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.workspace-panel > section { max-width: 1080px; margin-inline: auto; }
+.workspace .workspace-tabs {
+  display: flex;
+  flex: none;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  margin-inline-start: 18px;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.workspace-tabs .ui-tab {
+  position: relative;
+  min-height: 32px;
+  padding-inline: 10px;
+  gap: 5px;
+  border-radius: 8px 8px 0 0;
+  color: var(--frame-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+.workspace-tabs .ui-tab:hover {
+  --tab-fill: rgb(var(--frame-interaction) / 8%);
+  background: var(--tab-fill);
+}
+.workspace-tabs .ui-tab[data-selected="true"] {
+  --tab-fill: var(--app-background);
+  z-index: 1;
+  background: var(--tab-fill);
+  color: var(--app-text);
+  box-shadow: none;
+}
+.workspace-tabs .ui-tab:is(:hover, [data-selected="true"])::before,
+.workspace-tabs .ui-tab:is(:hover, [data-selected="true"])::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--corner-x) 0, transparent 11.5px, var(--tab-fill) 12.5px);
+}
+.workspace-tabs .ui-tab:is(:hover, [data-selected="true"])::before { right: 100%; --corner-x: 0%; }
+.workspace-tabs .ui-tab:is(:hover, [data-selected="true"])::after { left: 100%; --corner-x: 100%; }
+.workspace-tabs .ui-tab:focus-visible { outline-offset: -3px; }
+.workspace-tabs .ui-tab svg { width: 15px; height: 15px; }
+
 .workspace-toolbar { flex-wrap: wrap; margin-bottom: 12px; }
 .workspace-toolbar time { font-variant-numeric: tabular-nums; }
-.workspace .ui-tabs { width: 100%; }
-.workspace .ui-tab { flex: 1; }
 .memo-workspace > .ui-field, .note-editor > .ui-field { margin: 12px 0; }
 .memo-workspace .daily-memo-rich-text-editor, .note-editor .daily-memo-rich-text-editor {
   height: max(320px, calc(100dvh - 390px));

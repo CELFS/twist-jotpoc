@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Languages, NotebookPen, StickyNote } from "lucide-react";
+import { Globe, Languages, NotebookPen } from "lucide-react";
 import { z } from "zod";
 import { Tabs } from "@/components/ui/tabs";
 import { getText } from "@/i18n/get-text";
@@ -69,19 +69,19 @@ export function Workspace({ accountId, onTranslationChange }: {
   }, [accountId]);
 
   return <div className="workspace">
-    <Tabs id="workspace" ariaLabel={getText("client.tabs")} value={tab} onValueChange={selectTab}
+    <Tabs labelOnSelection className="workspace-tabs" id="workspace" ariaLabel={getText("client.tabs")} value={tab} onValueChange={selectTab}
       items={[
-        { value: "translation", label: getText("client.translation"), icon: <Languages size={17} /> },
-        { value: "memos", label: getText("client.memos"), icon: <StickyNote size={17} /> },
-        { value: "notes", label: getText("client.notes"), icon: <NotebookPen size={17} /> },
+        { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
+        { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
+        { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
       ]} />
-    <div id="workspace-panel-translation" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-translation" hidden={tab !== "translation"}>
+    <div id="workspace-panel-translation" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-translation" hidden={tab !== "translation"}>
       {visited.translation && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><TranslationModule accountId={accountId} active={tab === "translation"} onChange={onTranslationChange} /></Suspense>}
     </div>
-    <div id="workspace-panel-memos" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-memos" hidden={tab !== "memos"}>
+    <div id="workspace-panel-memos" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-memos" hidden={tab !== "memos"}>
       <MemoWorkspace accountId={accountId} />
     </div>
-    <div id="workspace-panel-notes" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-notes" hidden={tab !== "notes"}>
+    <div id="workspace-panel-notes" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-notes" hidden={tab !== "notes"}>
       {visited.notes && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><NotesWorkspace selectedId={noteId} onSelect={setNoteId} active={tab === "notes"} /></Suspense>}
     </div>
   </div>;

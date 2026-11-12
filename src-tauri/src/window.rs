@@ -15,6 +15,7 @@ pub enum WindowMode {
 pub struct WindowState {
     desktop: bool,
     macos: bool,
+    windows: bool,
     mode: WindowMode,
     resume_mode: WindowMode,
     pinned: bool,
@@ -25,6 +26,7 @@ impl Default for WindowState {
         Self {
             desktop: cfg!(desktop),
             macos: cfg!(target_os = "macos"),
+            windows: cfg!(target_os = "windows"),
             mode: WindowMode::Full,
             resume_mode: WindowMode::Full,
             pinned: false,

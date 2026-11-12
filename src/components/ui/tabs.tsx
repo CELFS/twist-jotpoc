@@ -10,6 +10,7 @@ export type TabOption<Value extends string> = {
 export type TabsProps<Value extends string> = {
   ariaLabel: string;
   className?: string;
+  labelOnSelection?: boolean;
   id: string;
   items: readonly TabOption<Value>[];
   value: Value;
@@ -19,6 +20,7 @@ export type TabsProps<Value extends string> = {
 export function Tabs<Value extends string>({
   ariaLabel,
   className = "",
+  labelOnSelection = false,
   id,
   items,
   value,
@@ -59,6 +61,7 @@ export function Tabs<Value extends string>({
         <button
           aria-controls={`${id}-panel-${item.value}`}
           aria-selected={value === item.value}
+          title={labelOnSelection && value !== item.value ? item.label : undefined}
           className="ui-tab"
           data-selected={value === item.value}
           id={`${id}-tab-${item.value}`}
@@ -72,7 +75,7 @@ export function Tabs<Value extends string>({
           }
         >
           {item.icon}
-          {item.label}
+          <span className={labelOnSelection && item.icon && value !== item.value ? "visually-hidden" : undefined}>{item.label}</span>
         </button>
       ))}
     </div>

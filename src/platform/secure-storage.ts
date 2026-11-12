@@ -11,7 +11,12 @@ function serialize<T>(operation: () => Promise<T>): Promise<T> {
 
 async function readValue(): Promise<unknown> {
   const result = await invoke<{ value: string | null }>("plugin:secure-keystore|get_item", { key: credentialKey });
-  return result.value === null ? null : JSON.parse(result.value);
+  if (result.value === null) return null;
+  try { return JSON.parse(result.value) ?? result.value; }
+  catch (error) {
+    if (error instanceof SyntaxError) return result.value;
+    throw error;
+  }
 }
 
 export function readStoredCredential(): Promise<unknown> {

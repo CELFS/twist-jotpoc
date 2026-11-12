@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9 - Unreleased
+
+- Use compact workspace tabs joined to the content panel in the main and mini windows.
+- Retry reading saved credentials when the system credential store is unavailable, and show when account authorization must be renewed.
+
 ## 1.0.8 - Unreleased
 
 - Follow the system appearance by default or choose a light or dark theme for the main window, mini panel, floating toolbar, and docked handle.

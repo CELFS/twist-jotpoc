@@ -5,6 +5,7 @@ export type WindowMode = "full" | "mini" | "collapsed";
 export type WindowState = {
   desktop: boolean;
   macos: boolean;
+  windows: boolean;
   mode: WindowMode;
   resume_mode: WindowMode;
   pinned: boolean;
