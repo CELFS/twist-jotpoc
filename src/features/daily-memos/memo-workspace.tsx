@@ -1,3 +1,4 @@
+import { HistoryGroups, historyDate } from "@/features/shell/history-groups";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw, Undo2, Redo2, Type, BookOpen } from "lucide-react";
@@ -22,7 +23,9 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
   const controller = useMemo(() => memoController(accountId, dateKey), [accountId, dateKey]);
   const state = useMemoController(controller);
   const [sources, setSources] = useState<MemoSourcePreset[]>([]);
-  const [history, setHistory] = useState<Array<{ dateKey: string; title: string }>>([]);
+  const [history, setHistory] = useState<Awaited<ReturnType<typeof cloudApi.memo.history>>["memos"]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const historyRevision = useRef(0);
   const toolbarPreference = useTranslationPreference("dailyMemo.syntaxToolbarExpanded", false);
   const toolbar = toolbarPreference.value;
   const { preview, setPreview } = useDailyMemoPreviewPreference();
@@ -31,14 +34,16 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
   const editor = useRef<DailyMemoRichTextEditorHandle>(null);
 
   const refresh = useCallback(async () => {
-    setError(null);
+    const revision = ++historyRevision.current;
+    setHistoryLoading(true); setError(null);
     try {
       const [sourceResult, memoHistory] = await Promise.all([cloudApi.sources(), cloudApi.memo.history()]);
+      if (revision !== historyRevision.current) return;
       setSources(sourceResult.sources);
       setHistory(memoHistory.memos);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "unavailable");
-    }
+      if (revision === historyRevision.current) setError(error instanceof Error ? error.message : "unavailable");
+    } finally { if (revision === historyRevision.current) setHistoryLoading(false); }
   }, []);
 
   useEffect(() => { void controller.load(); }, [controller]);
@@ -66,13 +71,16 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
     <SidebarHistory tab="memos">
       <h2>{getText("client.history")}</h2>
       <RequestError code={error} />
-      {history.length === 0 && !error && <p>{getText("client.noMemoHistory")}</p>}
-      {history.map(item => <button type="button" className="history-item" key={item.dateKey}
+      {historyLoading && <p role="status">{getText("client.load")}</p>}
+      {error && <Button variant="ghost" onClick={() => void refresh()}>{getText("client.refresh")}</Button>}
+      {!historyLoading && history.length === 0 && !error && <p>{getText("client.noMemoHistory")}</p>}
+      <HistoryGroups items={history} groupKey={item => item.dateKey.slice(0, 7)}>{item => <button type="button" className="history-item" key={item.dateKey}
         aria-current={item.dateKey === dateKey || undefined}
         onClick={() => { setDateKey(item.dateKey); finishSelection?.(); }}>
-        <strong>{item.title || item.dateKey}</strong>
-        {item.title && <time dateTime={item.dateKey}>{item.dateKey}</time>}
-      </button>)}
+        <strong>{item.title || getText("dailyMemo.defaultTitle")}</strong>
+        <time dateTime={item.dateKey}>{historyDate(item.dateKey)}</time>
+        {item.preview && <span>{item.preview}</span>}
+      </button>}</HistoryGroups>
     </SidebarHistory>
     <RequestError code={state.error ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
     {!state.ready ? <p role="status">{getText("client.load")}</p> : <>

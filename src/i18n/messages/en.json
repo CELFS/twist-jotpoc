@@ -284,7 +284,10 @@
     "vocabularyTitle": "Key vocabulary",
     "vocabularyWord": "Word",
     "vocabularyPhrase": "Phrase",
-    "vocabularyAbbreviation": "Abbreviation"
+    "vocabularyAbbreviation": "Abbreviation",
+    "library": "Translation history",
+    "libraryHint": "Local history and your account’s cloud collections",
+    "cloudUnavailable": "Cloud collections are unavailable. Only local records are shown"
   },
   "sourceNotes": {
     "title": "Web notes",

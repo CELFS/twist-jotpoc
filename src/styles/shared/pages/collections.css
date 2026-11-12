@@ -31,7 +31,10 @@
 
 .collection-collapse { display: inline-flex; flex-shrink: 0; align-items: center; gap: var(--space-2); margin-left: auto; color: var(--app-text-muted); cursor: pointer; }
 .collection-source-count { display: inline-grid; min-width: 1.55rem; height: 1.55rem; flex: 0 0 auto; place-items: center; border-radius: var(--radius-pill); background: var(--app-surface-muted); color: var(--app-text-muted); font-size: var(--font-size-xs); font-weight: 800; }
-.collection-entry { grid-template-columns: 4.5rem minmax(0, 1fr) auto; }
+.collection-entry { grid-template-columns: minmax(0, 1fr) auto; }
+.collection-kind { grid-column: 1 / -1; }
+.collections-heading .experiments-heading { display: flex; align-items: center; gap: var(--space-2); }
+.collections-heading h2 { margin: 0; font-size: var(--font-size-sm); }
 .collection-entry-copy { min-width: 0; }
 .collection-entry-actions, .collection-kind-options { display: flex; gap: var(--space-1); }
 .collection-copy-target { cursor: copy; }

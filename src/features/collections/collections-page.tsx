@@ -1,3 +1,4 @@
+import { SidebarHistory } from "@/features/shell/workspace-sidebar";
 import { authenticatedFetch } from "@/platform/http";
 
 import { Star, RefreshCw } from "lucide-react";
@@ -16,7 +17,7 @@ const responseSchema = z.object({
   nextCursor: translationCursorSchema.nullable(),
 });
 
-export function CollectionsPage({ embedded = false, active = true }: { embedded?: boolean; active?: boolean }) {
+export function CollectionsPage({ active = true }: { active?: boolean }) {
   const [items, setItems] = useState<CollectionListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<z.infer<typeof translationCursorSchema> | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "signedOut">("loading");
@@ -75,17 +76,16 @@ export function CollectionsPage({ embedded = false, active = true }: { embedded?
     }
   }
 
-  return (
+  const library = (
     <div className="collections-page">
       <header className="collections-heading">
         <div className="experiments-heading">
-          {embedded ? <h2>{getText("translation.webCollections")}</h2> : <h1>{getText("collections.title")}</h1>}
+          <Star aria-hidden="true" size={16} /><h2>{getText("collections.title")}</h2>
         </div>
         <Button variant="ghost" size="icon" aria-label={getText("collections.refresh")} title={getText("collections.refresh")} disabled={status === "loading"} onClick={() => void load()}>
           <RefreshCw aria-hidden="true" size={16} />
         </Button>
       </header>
-      {!embedded && <div className="collections-domain"><Star aria-hidden="true" size={16} />{getText("collections.en")}</div>}
       <CollectionStatus status={status} empty={items.length === 0} onRetry={() => void load(items.length > 0 ? nextCursor : null)} />
       <section className="collections-list" aria-label={getText("collections.title")}>
         {groupCollectionsBySource(items).map((group) => <CollectionCard key={group.urlKey} group={group} onManage={manage} />)}
@@ -97,4 +97,5 @@ export function CollectionsPage({ embedded = false, active = true }: { embedded?
       )}
     </div>
   );
+  return <>{library}<SidebarHistory tab="collections">{library}</SidebarHistory></>;
 }

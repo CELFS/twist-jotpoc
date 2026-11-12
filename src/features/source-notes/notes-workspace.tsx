@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cloudApi } from "@/data/cloud-api";
-import type { CloudNote } from "@/data/contracts";
+import { HistoryGroups } from "@/features/shell/history-groups";
 import { subscribeToDataChanges } from "@/data/change-bus";
 import { getText } from "@/i18n/get-text";
 import { RequestError } from "@/features/shell/request-error";
@@ -15,10 +15,11 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
   active: boolean;
 }) {
   const finishSelection = useSidebarSelection();
-  const [notes, setNotes] = useState<CloudNote[]>([]);
+  const [notes, setNotes] = useState<Awaited<ReturnType<typeof cloudApi.note.summaries>>["notes"]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const listVersion = useRef<string | null>(null);
   const request = useRef<AbortController | null>(null);
   const load = useCallback(async (cursor?: string) => {
     request.current?.abort();
@@ -26,9 +27,14 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
     request.current = controller;
     setLoading(true); setError(null);
     try {
-      const page = await cloudApi.note.list(cursor, controller.signal);
+      let page = await cloudApi.note.summaries(cursor, controller.signal);
+      if (cursor && page.resourceVersion !== listVersion.current) {
+        cursor = undefined;
+        page = await cloudApi.note.summaries(undefined, controller.signal);
+      }
       if (controller.signal.aborted) return;
-      setNotes(previous => cursor ? [...previous, ...page.notes.filter(note => !previous.some(item => item.record.id === note.record.id))] : page.notes);
+      listVersion.current = page.resourceVersion;
+      setNotes(previous => cursor ? [...previous, ...page.notes.filter(note => !previous.some(item => item.id === note.id))] : page.notes);
       setCursor(page.nextCursor);
     } catch (error) {
       if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "unavailable");
@@ -49,17 +55,18 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
     <SidebarHistory tab="notes">
       <h2>{getText("client.notes")}</h2>
       <div className="workspace-toolbar">
-        <Button variant="secondary" onClick={() => { onSelect(null); finishSelection?.(); }}><Plus size={16} />{getText("client.newNote")}</Button>
         <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} disabled={loading} onClick={() => void load()}><RefreshCw size={17} /></Button>
       </div>
       <RequestError code={error} />
       {!notes.length && !loading && !error && <p>{getText("client.noNotes")}</p>}
-      {notes.map(note => <button className="history-item" key={note.record.id} type="button"
-        aria-current={selectedId === note.record.id || undefined} onClick={() => { onSelect(note.record.id); finishSelection?.(); }}>
-        <strong>{note.resource.customTitle || note.resource.pageTitle || note.resource.url}</strong>
-        <time dateTime={note.record.dateKey}>{note.record.dateKey}</time>
-        <span>{note.record.content.slice(0, 120)}</span>
-      </button>)}
+      {loading && <p role="status">{getText("client.load")}</p>}
+      <HistoryGroups items={notes} groupKey={note => note.dateKey}>{note =>
+        <button className="history-item" key={note.id} type="button" aria-current={selectedId === note.id || undefined}
+          onClick={() => { onSelect(note.id); finishSelection?.(); }}>
+          <strong>{note.pageTitle || getText("dailyMemo.sourceNote.untitledPage")}</strong>
+          <span>{note.url}</span>
+          {note.summary.trim() && <span>{note.summary.replace(/\s+/g, " ").trim().slice(0, 96)}</span>}
+        </button>}</HistoryGroups>
       {cursor && <Button variant="secondary" disabled={loading} onClick={() => void load(cursor)}>{getText("client.more")}</Button>}
     </SidebarHistory>
     <NoteEditor key={selectedId ?? "new"} id={selectedId} onSaved={id => {

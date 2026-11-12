@@ -42,6 +42,17 @@ export const cloudApi = {
       if (result.note) resources.set(resourceKey(result.note.resource.id), result.note.resource);
       return result.note;
     },
+    async summaries(cursor?: string, signal?: AbortSignal) {
+      const owner = getActiveCredential();
+      const query = new URLSearchParams({ view: "summary", limit: "30" });
+      if (cursor) query.set("cursor", cursor);
+      const response = await authenticatedFetch(`/api/extension/source-notes?${query}`, { signal });
+      const page = z.object({ notes: z.array(z.object({
+        id: z.string(), url: z.string(), pageTitle: z.string(), dateKey: z.string(), summary: z.string(),
+      })), nextCursor: z.string().nullable() }).parse(await readJson(response));
+      if (getActiveCredential() !== owner) throw new DOMException("Account changed", "AbortError");
+      return { ...page, resourceVersion: response.headers.get("X-Resource-Version") };
+    },
     list: (cursor?: string, signal?: AbortSignal) => getApi(`source-notes?limit=30${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`,
       z.object({ notes: z.array(cloudNoteSchema), nextCursor: z.string().nullable() }), signal),
     context: (url: string, dateKey: string, signal?: AbortSignal) => getApi(

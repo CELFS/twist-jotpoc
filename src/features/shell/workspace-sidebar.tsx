@@ -22,17 +22,14 @@ export function useSidebarSelection() {
   return useContext(SidebarContext)?.onSelect;
 }
 
-export function WorkspaceSidebar({ open, setTarget, onManage, onCollections, collections }: {
+export function WorkspaceSidebar({ open, setTarget, onManage }: {
   open: boolean;
   setTarget: (target: HTMLDivElement | null) => void;
   onManage: () => void;
-  onCollections: () => void;
-  collections: boolean;
 }) {
   return <aside id="workspace-sidebar" hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
     <div className="sidebar-scroll custom-scrollbar">
       <div ref={setTarget} />
-      {collections && <Button variant="ghost" onClick={onCollections}>{getText("client.collections")}</Button>}
     </div>
     <Button className="sidebar-management" variant="ghost" onClick={onManage}>
       <Settings size={16} aria-hidden="true" />{getText("client.management")}

@@ -95,8 +95,7 @@ export function App() {
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
       <div className="shell-body">
-        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={openManagement}
-          collections={Boolean(credential && tab === "collections")} onCollections={() => openPage("collections")} />
+        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={openManagement} />
         <div className="shell-page">
           <SidebarContext.Provider value={{ target: sidebarOpen ? sidebarTarget : null, tab, onSelect: () => openPage(tab) }}>
             <main hidden={settingsOpen} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>

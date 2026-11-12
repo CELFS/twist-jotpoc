@@ -5,12 +5,11 @@ import { MemoWorkspace } from "@/features/daily-memos/memo-workspace";
 import { getApi } from "@/data/cloud-api";
 import { publishDataChange } from "@/data/change-bus";
 import { stopMemoControllers } from "@/features/daily-memos/memo-controller";
-import type { TranslationChange } from "@/features/translation/translation-change";
 
 const NotesWorkspace = lazy(() => import("@/features/source-notes/notes-workspace").then(module => ({ default: module.NotesWorkspace })));
 const TranslationModule = lazy(() => import("@/features/translation/translation-module").then(module => ({ default: module.TranslationModule })));
 
-const CollectionsPanel = lazy(() => import("@/features/shell/collections-panel").then(module => ({ default: module.CollectionsPanel })));
+const CollectionsPanel = lazy(() => import("@/features/collections/collections-page").then(module => ({ default: module.CollectionsPage })));
 
 export type WorkspaceTab = "memos" | "translation" | "notes" | "collections";
 
@@ -19,7 +18,7 @@ export function Workspace({ accountId, tab, setTab }: {
   setTab: (tab: WorkspaceTab) => void;
   accountId: string;
 }) {
-  const [translationChange, setTranslationChange] = useState<TranslationChange>();
+
   const [noteId, setNoteId] = useState<string | null>(null);
   const [visited, setVisited] = useState({ translation: false, notes: false, collections: false });
   useEffect(() => {
@@ -73,11 +72,11 @@ export function Workspace({ accountId, tab, setTab }: {
   return <div className="workspace">
     <div id="workspace-panel-collections" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-collections" hidden={tab !== "collections"}>
       {visited.collections && <Suspense fallback={<p role="status">{getText("client.load")}</p>}>
-        <CollectionsPanel accountId={accountId} active={tab === "collections"} change={translationChange} onChange={setTranslationChange} />
+        <CollectionsPanel active={tab === "collections"} />
       </Suspense>}
     </div>
     <div id="workspace-panel-translation" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-translation" hidden={tab !== "translation"}>
-      {visited.translation && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><TranslationModule accountId={accountId} active={tab === "translation"} onChange={setTranslationChange} /></Suspense>}
+      {visited.translation && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><TranslationModule accountId={accountId} active={tab === "translation"} /></Suspense>}
     </div>
     <div id="workspace-panel-memos" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-memos" hidden={tab !== "memos"}>
       <MemoWorkspace accountId={accountId} />

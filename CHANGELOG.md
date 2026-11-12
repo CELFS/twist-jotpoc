@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.11 - Unreleased
+
+- Group memo and note histories by date, browse web collections by source, and show local and collected translations in the translation sidebar.
+
 ## 1.0.10 - Unreleased
 
 - Browse memo, note, and translation history in a responsive workspace sidebar.

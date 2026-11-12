@@ -197,8 +197,22 @@
 .history-item:hover, .history-item[aria-current="true"] { background: var(--app-primary-soft); }
 .history-item time, .history-item span, .save-status { color: var(--app-text-muted); font-size: var(--font-size-xs); }
 .history-item span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.translation-history-row { display: flex; align-items: center; }
-.translation-history-row .history-item { flex: 1; }
+.history-groups { display: grid; gap: var(--space-3); }
+.history-group-toggle { display: flex; width: 100%; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border: 0; background: transparent; color: var(--app-text-muted); text-align: start; font: inherit; font-size: var(--font-size-xs); }
+.history-group-toggle span { margin-inline-start: auto; padding-inline: var(--space-1); border-radius: 4px; background: var(--app-surface-muted); }
+.history-group-toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.history-groups .history-item { margin-bottom: var(--space-1); border: 1px solid var(--app-border); }
+.history-groups .history-item[aria-current="true"] { border-color: var(--app-primary); }
+.sidebar-scroll .translation-library header, .sidebar-row-actions { display: flex; align-items: center; justify-content: space-between; }
+.sidebar-translation-row { padding-block: var(--space-1); border-bottom: 1px solid var(--app-border); }
+.sidebar-row-actions { justify-content: flex-end; }
+.sidebar-row-actions .translation-tag { margin-inline-end: auto; }
+.sidebar-scroll .collection-card, .sidebar-scroll .collection-status { padding: var(--space-2); }
+.sidebar-scroll .collection-source { flex-wrap: wrap; gap: var(--space-1); }
+.sidebar-scroll .collection-source > a:first-child { flex-basis: 100%; }
+.sidebar-scroll .collection-source a { overflow-wrap: anywhere; }
+.sidebar-scroll .collection-entry { grid-template-columns: minmax(0, 1fr); }
+.sidebar-scroll .collection-entry-actions { justify-content: flex-end; }
 .note-editor { min-width: 0; }
 .sidebar-toggle {
   align-self: center;

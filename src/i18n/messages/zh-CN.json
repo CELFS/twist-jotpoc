@@ -284,7 +284,10 @@
     "vocabularyTitle": "重点词汇",
     "vocabularyWord": "单词",
     "vocabularyPhrase": "短语",
-    "vocabularyAbbreviation": "缩写"
+    "vocabularyAbbreviation": "缩写",
+    "library": "翻译记录",
+    "libraryHint": "本地历史与当前账号的云端收藏",
+    "cloudUnavailable": "云端收藏暂时无法加载，当前仅显示本地记录"
   },
   "sourceNotes": {
     "title": "网页笔记",
