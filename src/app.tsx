@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ExternalLink, Star, UserRound, X } from "lucide-react";
+import { ExternalLink, Settings2, Star, UserRound, X } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
@@ -22,7 +22,7 @@ export function App() {
   const [windowState, setState] = useState<WindowState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [drawer, setDrawer] = useState<"account" | "collections" | null>(null);
+  const [drawer, setDrawer] = useState<"settings" | "account" | "collections" | null>(null);
   const [translationChange, setTranslationChange] = useState<TranslationChange>();
   const changing = useRef(false);
   const session = useSession();
@@ -39,7 +39,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (!credential) { setDrawer(null); setTranslationChange(undefined); return; }
+    if (!credential) { setDrawer(current => current === "settings" ? current : null); setTranslationChange(undefined); return; }
     let timer: number;
     const scheduleExpiration = () => {
       const remaining = credential.expiresAt - Date.now();
@@ -64,12 +64,15 @@ export function App() {
     } finally { changing.current = false; setBusy(false); }
   };
 
+  const drawerTitle = getText(drawer === "settings" ? "settings.shortLabel" : drawer === "account" ? "client.account" : "client.collections");
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
     <div className="expanded-shell" hidden={collapsed}>
       <header className="app-header" data-macos={windowState?.macos || undefined} data-tauri-drag-region>
         <div className="app-identity"><img src={appIcon} alt="" width={32} height={32} /><strong>{getText("app.name")}</strong></div>
         <div className="app-header-actions">
+          <Button variant="ghost" size="icon" aria-label={getText("settings.shortLabel")} title={getText("settings.shortLabel")}
+            aria-expanded={drawer === "settings"} onClick={() => setDrawer("settings")}><Settings2 size={17} aria-hidden="true" /></Button>
           {credential && <>
             <Button variant="ghost" size="icon" aria-label={getText("client.collections")} title={getText("client.collections")} onClick={() => setDrawer("collections")}><Star size={18} /></Button>
             <Button variant="ghost" size="icon" aria-label={getText("client.account")} title={getText("client.account")} onClick={() => setDrawer("account")}><UserRound size={18} /></Button>
@@ -87,21 +90,20 @@ export function App() {
         {credential ? <Workspace key={credential.accountId} accountId={credential.accountId} onTranslationChange={setTranslationChange} /> : <AccountPanel />}
       </main>
     </div>
-    {collapsed && <FloatingEntry busy={busy} onExpand={() => void updateWindow(() => setWindowMode("mini"))} onError={() => setError(getText("app.windowError"))} />}
+    {collapsed && <FloatingEntry macos={windowState.macos} busy={busy} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
     {collapsed && error && <span className="visually-hidden" role="alert">{error}</span>}
-    {drawer && credential && !collapsed && <Drawer ariaLabel={getText(drawer === "account" ? "client.account" : "client.collections")}
+    {drawer && (drawer === "settings" || credential) && !collapsed && <Drawer ariaLabel={drawerTitle}
       className="client-drawer" contentClassName="custom-scrollbar" onClose={() => setDrawer(null)}
-      header={<div className="client-drawer-heading"><h2>{getText(drawer === "account" ? "client.account" : "client.collections")}</h2>
+      header={<div className="client-drawer-heading"><h2>{drawerTitle}</h2>
         <Button variant="ghost" size="icon" aria-label={getText("common.close")} onClick={() => setDrawer(null)}><X size={18} /></Button></div>}>
-      {drawer === "account" ? <>
-        <AccountPanel />
+      {drawer === "account" ? <AccountPanel /> : drawer === "settings" ?
         <SelectField label={getText("client.language")} value={language}
           onChange={event => setAppLanguagePreference(event.target.value as AppLanguagePreference)}>
           <option value="zh">{getText("client.languageZh")}</option>
           <option value="en">{getText("client.languageEn")}</option>
           <option value="system">{getText("client.languageSystem")}</option>
         </SelectField>
-      </> : <Suspense fallback={<p role="status">{getText("client.load")}</p>}><CollectionsPanel accountId={credential.accountId} change={translationChange} onChange={setTranslationChange} /></Suspense>}
+      : credential && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><CollectionsPanel accountId={credential.accountId} change={translationChange} onChange={setTranslationChange} /></Suspense>}
     </Drawer>}
   </div>;
 }

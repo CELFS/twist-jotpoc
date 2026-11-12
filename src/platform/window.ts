@@ -6,6 +6,7 @@ export type WindowState = {
   desktop: boolean;
   macos: boolean;
   mode: WindowMode;
+  resume_mode: WindowMode;
   pinned: boolean;
 };
 

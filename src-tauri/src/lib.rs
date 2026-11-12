@@ -14,6 +14,7 @@ pub fn run() {
         .manage(window::WindowController::default())
         .invoke_handler(tauri::generate_handler![
             log_auth_failure,
+            window::move_floating_entry,
             window::read_window_state,
             window::set_window_mode,
             window::set_window_pinned,

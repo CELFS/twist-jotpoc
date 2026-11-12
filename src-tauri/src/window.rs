@@ -16,6 +16,7 @@ pub struct WindowState {
     desktop: bool,
     macos: bool,
     mode: WindowMode,
+    resume_mode: WindowMode,
     pinned: bool,
 }
 
@@ -25,6 +26,7 @@ impl Default for WindowState {
             desktop: cfg!(desktop),
             macos: cfg!(target_os = "macos"),
             mode: WindowMode::Full,
+            resume_mode: WindowMode::Full,
             pinned: false,
         }
     }
@@ -60,6 +62,7 @@ pub fn read_window_state(controller: State<'_, WindowController>) -> Result<Wind
 fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode) -> tauri::Result<()> {
     // Clear minimum dimensions before shrinking into the floating entry.
     window.set_min_size(None::<tauri::LogicalSize<f64>>)?;
+    window.set_max_size(None::<tauri::LogicalSize<f64>>)?;
     match mode {
         WindowMode::Full => {
             window.set_decorations(true)?;
@@ -84,11 +87,38 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
         WindowMode::Collapsed => {
             window.set_decorations(false)?;
             window.set_resizable(false)?;
-            window.set_size(tauri::LogicalSize::new(64.0, 64.0))?;
+            let size = tauri::LogicalSize::new(64.0, 64.0);
+            window.set_size(size)?;
+            window.set_max_size(Some(size))?;
+            window.set_min_size(Some(size))?;
             if let Some(geometry) = &controller.collapsed {
                 window.set_position(geometry.position)?;
             }
         }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        if mode != WindowMode::Collapsed {
+            window.set_title_bar_style(tauri::TitleBarStyle::Overlay)?;
+        }
+        let native_window = window.clone();
+        window.run_on_main_thread(move || {
+            use objc2_app_kit::{NSColor, NSWindow};
+            let Ok(handle) = native_window.ns_window() else { return };
+            // Tauri owns this NSWindow; AppKit operations run on its main thread.
+            let native = unsafe { &*handle.cast::<NSWindow>() };
+            let Some(view) = native.contentView() else { return };
+            view.setWantsLayer(true);
+            if let Some(layer) = view.layer() {
+                let collapsed = mode == WindowMode::Collapsed;
+                layer.setCornerRadius(if collapsed { 32.0 } else { 0.0 });
+                layer.setMasksToBounds(collapsed);
+                native.setOpaque(!collapsed);
+                let background = if collapsed { NSColor::clearColor() } else { NSColor::windowBackgroundColor() };
+                native.setBackgroundColor(Some(&background));
+                native.invalidateShadow();
+            }
+        })?;
     }
     window.set_always_on_top(mode == WindowMode::Collapsed || controller.state.pinned)?;
     window.set_focus()?;
@@ -124,6 +154,9 @@ pub fn set_window_mode(
             })?;
             return Err(error.to_string());
         }
+        if mode == WindowMode::Collapsed {
+            controller.state.resume_mode = previous;
+        }
         controller.state.mode = mode;
         return Ok(controller.state.clone());
     }
@@ -153,4 +186,28 @@ pub fn set_window_pinned(
         let _ = (window, pinned);
         Err("Desktop pinning requires a desktop platform".into())
     }
+}
+
+#[tauri::command]
+pub fn move_floating_entry(window: WebviewWindow, controller: State<'_, WindowController>, x: f64, y: f64) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let state = controller.0.lock().map_err(|_| "Window state unavailable")?;
+        if state.state.mode != WindowMode::Collapsed || !(0.0..=64.0).contains(&x) || !(0.0..=64.0).contains(&y) {
+            return Ok(());
+        }
+        // Synchronous Tauri commands run on the main thread. Moving the frame directly
+        // keeps AppKit's interactive edge-tiling gesture out of floating-entry drags.
+        let handle = window.ns_window().map_err(|e| e.to_string())?;
+        let native = unsafe { &*handle.cast::<objc2_app_kit::NSWindow>() };
+        let mouse = native.mouseLocationOutsideOfEventStream();
+        let frame = native.frame();
+        let mut origin = frame.origin;
+        origin.x += mouse.x - x;
+        origin.y += mouse.y - (frame.size.height - y);
+        native.setFrameOrigin(origin);
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = (window, controller, x, y);
+    Ok(())
 }

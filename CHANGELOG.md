@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.6 - Unreleased
+
+- Added a header settings button for language selection before and after connecting.
+
+- Keep the collapsed entry at its fixed size and move it directly on macOS to avoid edge tiling.
+
+- Rounded the floating entry and added a gradient border. Expanding restores the previous desktop window mode and size, including the integrated macOS title bar.
+
 ## 1.0.5 - Unreleased
 
 - Aligned the account connection card with Twill and added the TwistBalance icon as a direct link to the main site.
