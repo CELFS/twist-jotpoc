@@ -3,6 +3,7 @@ import { ExternalLink, Settings2, Star, UserRound, X } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
+import { Switch } from "@/components/ui/switch";
 import { SelectField } from "@/components/ui/select-field";
 import { FloatingEntry } from "@/features/shell/floating-entry";
 import { WindowControls } from "@/features/shell/window-controls";
@@ -24,6 +25,7 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<"settings" | "account" | "collections" | null>(null);
   const [translationChange, setTranslationChange] = useState<TranslationChange>();
+  const [autoHide, setAutoHide] = useState(() => localStorage.getItem("jotpoc.floating.autoHide") !== "false");
   const changing = useRef(false);
   const session = useSession();
   const language = useSyncExternalStore(subscribeAppLanguagePreference, getStoredAppLanguage);
@@ -90,20 +92,27 @@ export function App() {
         {credential ? <Workspace key={credential.accountId} accountId={credential.accountId} onTranslationChange={setTranslationChange} /> : <AccountPanel />}
       </main>
     </div>
-    {collapsed && <FloatingEntry macos={windowState.macos} busy={busy} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
+    {collapsed && <FloatingEntry autoHide={autoHide} busy={busy} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
     {collapsed && error && <span className="visually-hidden" role="alert">{error}</span>}
     {drawer && (drawer === "settings" || credential) && !collapsed && <Drawer ariaLabel={drawerTitle}
       className="client-drawer" contentClassName="custom-scrollbar" onClose={() => setDrawer(null)}
       header={<div className="client-drawer-heading"><h2>{drawerTitle}</h2>
         <Button variant="ghost" size="icon" aria-label={getText("common.close")} onClick={() => setDrawer(null)}><X size={18} /></Button></div>}>
-      {drawer === "account" ? <AccountPanel /> : drawer === "settings" ?
+      {drawer === "account" ? <AccountPanel /> : drawer === "settings" ? <>
         <SelectField label={getText("client.language")} value={language}
           onChange={event => setAppLanguagePreference(event.target.value as AppLanguagePreference)}>
           <option value="zh">{getText("client.languageZh")}</option>
           <option value="en">{getText("client.languageEn")}</option>
           <option value="system">{getText("client.languageSystem")}</option>
         </SelectField>
-      : credential && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><CollectionsPanel accountId={credential.accountId} change={translationChange} onChange={setTranslationChange} /></Suspense>}
+        {windowState?.desktop && <div className="floating-setting">
+          <span>{getText("client.floatingAutoHide")}</span>
+          <Switch label={getText("client.floatingAutoHide")} checked={autoHide} onCheckedChange={value => {
+            localStorage.setItem("jotpoc.floating.autoHide", String(value));
+            setAutoHide(value);
+          }} />
+        </div>}
+      </> : credential && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><CollectionsPanel accountId={credential.accountId} change={translationChange} onChange={setTranslationChange} /></Suspense>}
     </Drawer>}
   </div>;
 }

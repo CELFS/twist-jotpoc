@@ -40,6 +40,8 @@ struct Geometry {
 
 #[derive(Default)]
 struct Controller {
+    #[cfg(desktop)]
+    reveal_position: Option<tauri::PhysicalPosition<i32>>,
     state: WindowState,
     #[cfg(desktop)]
     full: Option<Geometry>,
@@ -65,8 +67,11 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
     window.set_max_size(None::<tauri::LogicalSize<f64>>)?;
     match mode {
         WindowMode::Full => {
-            window.set_decorations(true)?;
-            window.set_resizable(true)?;
+            #[cfg(not(target_os = "macos"))]
+            {
+                window.set_decorations(true)?;
+                window.set_resizable(true)?;
+            }
             if let Some(geometry) = &controller.full {
                 window.set_size(geometry.size)?;
                 window.set_position(geometry.position)?;
@@ -74,8 +79,11 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
             window.set_min_size(Some(tauri::LogicalSize::new(320.0, 360.0)))?;
         }
         WindowMode::Mini => {
-            window.set_decorations(true)?;
-            window.set_resizable(true)?;
+            #[cfg(not(target_os = "macos"))]
+            {
+                window.set_decorations(true)?;
+                window.set_resizable(true)?;
+            }
             if let Some(geometry) = &controller.mini {
                 window.set_size(geometry.size)?;
                 window.set_position(geometry.position)?;
@@ -85,9 +93,12 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
             window.set_min_size(Some(tauri::LogicalSize::new(320.0, 360.0)))?;
         }
         WindowMode::Collapsed => {
-            window.set_decorations(false)?;
-            window.set_resizable(false)?;
-            let size = tauri::LogicalSize::new(64.0, 64.0);
+            #[cfg(not(target_os = "macos"))]
+            {
+                window.set_decorations(false)?;
+                window.set_resizable(false)?;
+            }
+            let size = tauri::LogicalSize::new(ORB, ORB);
             window.set_size(size)?;
             window.set_max_size(Some(size))?;
             window.set_min_size(Some(size))?;
@@ -107,11 +118,16 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
             let Ok(handle) = native_window.ns_window() else { return };
             // Tauri owns this NSWindow; AppKit operations run on its main thread.
             let native = unsafe { &*handle.cast::<NSWindow>() };
+            for kind in [objc2_app_kit::NSWindowButton::CloseButton, objc2_app_kit::NSWindowButton::MiniaturizeButton, objc2_app_kit::NSWindowButton::ZoomButton] {
+                if let Some(button) = native.standardWindowButton(kind) {
+                    button.setHidden(mode == WindowMode::Collapsed);
+                }
+            }
             let Some(view) = native.contentView() else { return };
             view.setWantsLayer(true);
             if let Some(layer) = view.layer() {
                 let collapsed = mode == WindowMode::Collapsed;
-                layer.setCornerRadius(if collapsed { 32.0 } else { 0.0 });
+                layer.setCornerRadius(if collapsed { ORB / 2.0 } else { 0.0 });
                 layer.setMasksToBounds(collapsed);
                 native.setOpaque(!collapsed);
                 let background = if collapsed { NSColor::clearColor() } else { NSColor::windowBackgroundColor() };
@@ -157,6 +173,7 @@ pub fn set_window_mode(
         if mode == WindowMode::Collapsed {
             controller.state.resume_mode = previous;
         }
+        controller.reveal_position = None;
         controller.state.mode = mode;
         return Ok(controller.state.clone());
     }
@@ -188,26 +205,91 @@ pub fn set_window_pinned(
     }
 }
 
+#[cfg(desktop)]
+const ORB: f64 = 56.0;
+#[cfg(desktop)]
+const HANDLE: f64 = 12.0;
+#[cfg(desktop)]
+const HANDLE_LENGTH: f64 = 30.0;
+
+#[cfg(desktop)]
+fn fix_entry_size(window: &WebviewWindow, width: f64, height: f64) -> tauri::Result<()> {
+    let size = tauri::LogicalSize::new(width, height);
+    window.set_min_size(None::<tauri::LogicalSize<f64>>)?;
+    window.set_max_size(None::<tauri::LogicalSize<f64>>)?;
+    window.set_size(size)?;
+    window.set_max_size(Some(size))?;
+    window.set_min_size(Some(size))
+}
+
 #[tauri::command]
-pub fn move_floating_entry(window: WebviewWindow, controller: State<'_, WindowController>, x: f64, y: f64) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
+pub fn position_floating_entry(window: WebviewWindow, controller: State<'_, WindowController>, action: String, x: f64, y: f64) -> Result<String, String> {
+    #[cfg(desktop)]
     {
-        let state = controller.0.lock().map_err(|_| "Window state unavailable")?;
-        if state.state.mode != WindowMode::Collapsed || !(0.0..=64.0).contains(&x) || !(0.0..=64.0).contains(&y) {
-            return Ok(());
+        let mut state = controller.0.lock().map_err(|_| "Window state unavailable")?;
+        if state.state.mode != WindowMode::Collapsed { return Ok(String::new()); }
+        let moving = action == "move";
+        let cursor = window.cursor_position().map_err(|e| e.to_string())?;
+        let monitor = if moving { window.monitor_from_point(cursor.x, cursor.y) } else { window.current_monitor() }
+            .map_err(|e| e.to_string())?.or(window.primary_monitor().map_err(|e| e.to_string())?)
+            .ok_or("Display unavailable")?;
+        let scale = monitor.scale_factor();
+        let size = (ORB * scale).round() as i32;
+        let area = monitor.work_area();
+        let left = area.position.x;
+        let top = area.position.y;
+        let right = (left + area.size.width as i32 - size).max(left);
+        let bottom = (top + area.size.height as i32 - size).max(top);
+        let mut point = window.outer_position().map_err(|e| e.to_string())?;
+        if let Some(saved) = state.reveal_position {
+            point = saved;
         }
-        // Synchronous Tauri commands run on the main thread. Moving the frame directly
-        // keeps AppKit's interactive edge-tiling gesture out of floating-entry drags.
-        let handle = window.ns_window().map_err(|e| e.to_string())?;
-        let native = unsafe { &*handle.cast::<objc2_app_kit::NSWindow>() };
-        let mouse = native.mouseLocationOutsideOfEventStream();
-        let frame = native.frame();
-        let mut origin = frame.origin;
-        origin.x += mouse.x - x;
-        origin.y += mouse.y - (frame.size.height - y);
-        native.setFrameOrigin(origin);
+        if moving {
+            point.x = (cursor.x - x.clamp(0.0, ORB) * scale).round() as i32;
+            point.y = (cursor.y - y.clamp(0.0, ORB) * scale).round() as i32;
+        }
+        point.x = point.x.clamp(left, right);
+        point.y = point.y.clamp(top, bottom);
+        let mut edge = "";
+        let progress = if action == "dock" { x.clamp(0.0, 1.0) } else { 0.0 };
+        let mut width = ORB;
+        let mut height = ORB;
+        if progress > 0.0 {
+            let (name, distance) = [("left", point.x-left), ("right", right-point.x),
+                ("top", point.y-top), ("bottom", bottom-point.y)].into_iter().min_by_key(|item| item.1).unwrap();
+            if distance > (8.0 * scale).round() as i32 { return Ok(String::new()); }
+            edge = name;
+            state.reveal_position = Some(point);
+            let vertical = edge == "left" || edge == "right";
+            let depth = ORB + (HANDLE - ORB) * progress;
+            let length = ORB + (HANDLE_LENGTH - ORB) * progress;
+            (width, height) = if vertical { (depth, length) } else { (length, depth) };
+            let dx = ((ORB - width) * scale).round() as i32;
+            let dy = ((ORB - height) * scale).round() as i32;
+            if vertical {
+                point.x = if edge == "left" { left } else { right + dx };
+                point.y += dy / 2;
+            } else {
+                point.x += dx / 2;
+                point.y = if edge == "top" { top } else { bottom + dy };
+            }
+        }
+        if progress > 0.0 || state.reveal_position.is_some() {
+            fix_entry_size(&window, width, height).map_err(|e| e.to_string())?;
+            #[cfg(target_os = "macos")]
+            {
+                let handle = window.ns_window().map_err(|e| e.to_string())?;
+                // Match the native mask to the animation; a fixed orb radius rounds the docked edge twice.
+                let native = unsafe { &*handle.cast::<objc2_app_kit::NSWindow>() };
+                if let Some(layer) = native.contentView().and_then(|view| view.layer()) {
+                    layer.setCornerRadius(ORB * 0.5 * (1.0 - progress));
+                }
+            }
+        }
+        if progress == 0.0 { state.reveal_position = None; }
+        window.set_position(point).map_err(|e| e.to_string())?;
+        Ok(edge.to_owned())
     }
-    #[cfg(not(target_os = "macos"))]
-    let _ = (window, controller, x, y);
-    Ok(())
+    #[cfg(mobile)]
+    { let _ = (window, controller, action, x, y); Ok(String::new()) }
 }

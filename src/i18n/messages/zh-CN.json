@@ -460,7 +460,8 @@
     "languageSystem": "跟随系统",
     "connectionStatus": "状态",
     "waitingApproval": "等待授权",
-    "readyToConnect": "等待连接"
+    "readyToConnect": "等待连接",
+    "floatingAutoHide": "浮球贴边自动收起"
   },
   "settings": {
     "shortLabel": "设置"

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.7 - Unreleased
+
+- Added animated edge hiding with a compact flat handle and hover reveal for the smaller gradient floating entry.
+- Kept floating-entry drags within the display work area and preserved the integrated macOS title bar across mode changes.
+
 ## 1.0.6 - Unreleased
 
 - Added a header settings button for language selection before and after connecting.

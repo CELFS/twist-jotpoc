@@ -143,6 +143,6 @@ The desktop icon paths are configured in `src-tauri/tauri.conf.json`.
 
 ## Versioning
 
-The initial shell version is **1.0.0**. The current integration version is **1.0.6**. Subsequent versions increment the final number. Keep the application version aligned across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Cargo updates the workspace package entry in `src-tauri/Cargo.lock` when the Rust package version changes.
+The initial shell version is **1.0.0**. The current integration version is **1.0.7**. Subsequent versions increment the final number. Keep the application version aligned across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Cargo updates the workspace package entry in `src-tauri/Cargo.lock` when the Rust package version changes.
 
 Record changes in [CHANGELOG.md](CHANGELOG.md).

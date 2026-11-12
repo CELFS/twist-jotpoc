@@ -460,7 +460,8 @@
     "languageSystem": "System language",
     "connectionStatus": "Status",
     "waitingApproval": "Waiting for approval",
-    "readyToConnect": "Ready to connect"
+    "readyToConnect": "Ready to connect",
+    "floatingAutoHide": "Auto-hide the floating entry at screen edges"
   },
   "settings": {
     "shortLabel": "Settings"
