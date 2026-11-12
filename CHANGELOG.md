@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.12 - Unreleased
+
+- Slide the sidebar in from the right and open settings or account directly from its footer.
+
 ## 1.0.11 - Unreleased
 
 - Group memo and note histories by date, browse web collections by source, and show local and collected translations in the translation sidebar.

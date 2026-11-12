@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { getThemePreference, setThemePreference, subscribeThemePreference } from "@/platform/theme";
 import { Tabs } from "@/components/ui/tabs";
 import { AccountPanel } from "@/features/auth/account-panel";
@@ -9,7 +9,11 @@ import { Switch } from "@/components/ui/switch";
 import { setAppLanguagePreference, type AppLanguagePreference } from "@/i18n/app-language";
 import { getText } from "@/i18n/get-text";
 
-export function SettingsPage({ platform, language, desktop, autoHide, onAutoHideChange, onBack }: {
+export type ManagementTab = "settings" | "account";
+
+export function SettingsPage({ tab, setTab, platform, language, desktop, autoHide, onAutoHideChange, onBack }: {
+  tab: ManagementTab;
+  setTab: (tab: ManagementTab) => void;
   platform: "macos" | "windows" | "other";
   language: AppLanguagePreference;
   desktop: boolean;
@@ -17,7 +21,6 @@ export function SettingsPage({ platform, language, desktop, autoHide, onAutoHide
   onAutoHideChange: (value: boolean) => void;
   onBack: () => void;
 }) {
-  const [tab, setTab] = useState<"settings" | "account">("settings");
   const theme = useSyncExternalStore(subscribeThemePreference, getThemePreference);
   return (
     <main className="app-content settings-page custom-scrollbar" aria-label={getText("client.management")}>

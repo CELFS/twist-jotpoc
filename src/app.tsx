@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Globe, Languages, NotebookPen, PanelLeft, Star } from "lucide-react";
+import { Globe, Languages, NotebookPen, PanelRight, Star } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
 import { SidebarContext, WorkspaceSidebar } from "@/features/shell/workspace-sidebar";
-import { SettingsPage } from "@/features/shell/settings-page";
+import { SettingsPage, type ManagementTab } from "@/features/shell/settings-page";
 import { FloatingEntry } from "@/features/shell/floating-entry";
 import { WindowControls } from "@/features/shell/window-controls";
 import { RequestError } from "@/features/shell/request-error";
@@ -21,7 +21,7 @@ export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarTarget, setSidebarTarget] = useState<HTMLDivElement | null>(null);
   const [tab, setTab] = useState<WorkspaceTab>("memos");
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [managementTab, setManagementTab] = useState<ManagementTab | null>(null);
   const [autoHide, setAutoHide] = useState(() => localStorage.getItem("jotpoc.floating.autoHide") !== "false");
   const changing = useRef(false);
   const session = useSession();
@@ -64,8 +64,7 @@ export function App() {
   };
 
   const changePin = (pinned: boolean) => void updateWindow(() => setWindowPinned(pinned));
-  const openPage = (next: WorkspaceTab) => { setTab(next); setSettingsOpen(false); };
-  const openManagement = () => setSettingsOpen(true);
+  const openPage = (next: WorkspaceTab) => { setTab(next); setManagementTab(null); };
   const items = [
     { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
     { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
@@ -84,36 +83,36 @@ export function App() {
         </div>
         <div className="header-pages" data-tauri-drag-region>
           {credential && <Tabs<WorkspaceTab> labelOnSelection className="workspace-tabs" id="workspace"
-            ariaLabel={getText("client.tabs")} value={settingsOpen ? null : tab}
+            ariaLabel={getText("client.tabs")} value={managementTab ? null : tab}
             onValueChange={openPage} items={items} />}
           <button type="button" className="sidebar-toggle"
             title={getText("client.sidebar")} aria-label={getText("client.sidebar")}
             aria-expanded={sidebarOpen} aria-controls="workspace-sidebar"
-            onClick={() => setSidebarOpen(open => !open)}><PanelLeft size={17} aria-hidden="true" /></button>
+            onClick={() => setSidebarOpen(open => !open)}><PanelRight size={17} aria-hidden="true" /></button>
         </div>
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
-      <div className="shell-body">
-        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={openManagement} />
+      <div className="shell-body" data-sidebar-open={sidebarOpen}>
         <div className="shell-page">
           <SidebarContext.Provider value={{ target: sidebarOpen ? sidebarTarget : null, tab, onSelect: () => openPage(tab) }}>
-            <main hidden={settingsOpen} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>
+            <main hidden={Boolean(managementTab)} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>
               {credential ? <Workspace tab={tab} setTab={setTab} key={credential.accountId} accountId={credential.accountId} /> : <AccountPanel platform={platform} />}
             </main>
           </SidebarContext.Provider>
-          {settingsOpen && <SettingsPage platform={platform} language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
+          {managementTab && <SettingsPage tab={managementTab} setTab={setManagementTab} platform={platform} language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
             onAutoHideChange={value => {
               localStorage.setItem("jotpoc.floating.autoHide", String(value));
               setAutoHide(value);
-            }} onBack={() => setSettingsOpen(false)} />}
+            }} onBack={() => setManagementTab(null)} />}
         </div>
+        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={setManagementTab} current={managementTab} />
       </div>
     </div>
     {collapsed && <FloatingEntry autoHide={autoHide} busy={busy} pinned={windowState.pinned} onPinChange={changePin}
       onSettings={() => void updateWindow(async () => {
         const restored = await setWindowMode(windowState.resume_mode);
-        openManagement();
+        setManagementTab("settings");
         return restored;
       })} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
     {collapsed && error && <span className="visually-hidden" role="alert">{error}</span>}

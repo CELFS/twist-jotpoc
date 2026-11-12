@@ -1,7 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Settings, UserRound } from "lucide-react";
+import type { ManagementTab } from "./settings-page";
 import { getText } from "@/i18n/get-text";
 import type { WorkspaceTab } from "./workspace";
 
@@ -22,17 +22,21 @@ export function useSidebarSelection() {
   return useContext(SidebarContext)?.onSelect;
 }
 
-export function WorkspaceSidebar({ open, setTarget, onManage }: {
+export function WorkspaceSidebar({ open, setTarget, onManage, current }: {
   open: boolean;
   setTarget: (target: HTMLDivElement | null) => void;
-  onManage: () => void;
+  current: ManagementTab | null;
+  onManage: (tab: ManagementTab) => void;
 }) {
-  return <aside id="workspace-sidebar" hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
+  return <aside id="workspace-sidebar" inert={!open} aria-hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
     <div className="sidebar-scroll custom-scrollbar">
       <div ref={setTarget} />
     </div>
-    <Button className="sidebar-management" variant="ghost" onClick={onManage}>
-      <Settings size={16} aria-hidden="true" />{getText("client.management")}
-    </Button>
+    <footer className="sidebar-management">
+      <button type="button" aria-label={getText("settings.shortLabel")} title={getText("settings.shortLabel")}
+        aria-current={current === "settings" ? "page" : undefined} onClick={() => onManage("settings")}><Settings size={17} aria-hidden="true" /></button>
+      <button type="button" aria-label={getText("client.account")} title={getText("client.account")}
+        aria-current={current === "account" ? "page" : undefined} onClick={() => onManage("account")}><UserRound size={17} aria-hidden="true" /></button>
+    </footer>
   </aside>;
 }
