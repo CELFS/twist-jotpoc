@@ -457,7 +457,10 @@
     },
     "languageZh": "简体中文",
     "languageEn": "English",
-    "languageSystem": "跟随系统"
+    "languageSystem": "跟随系统",
+    "connectionStatus": "状态",
+    "waitingApproval": "等待授权",
+    "readyToConnect": "等待连接"
   },
   "settings": {
     "shortLabel": "设置"

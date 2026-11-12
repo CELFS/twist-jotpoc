@@ -457,7 +457,10 @@
     },
     "languageZh": "简体中文",
     "languageEn": "English",
-    "languageSystem": "System language"
+    "languageSystem": "System language",
+    "connectionStatus": "Status",
+    "waitingApproval": "Waiting for approval",
+    "readyToConnect": "Ready to connect"
   },
   "settings": {
     "shortLabel": "Settings"

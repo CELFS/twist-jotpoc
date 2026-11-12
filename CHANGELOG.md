@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 - Unreleased
+
+- Aligned the account connection card with Twill and added the TwistBalance icon as a direct link to the main site.
+
 ## 1.0.4 - Unreleased
 
 - Reduced the initial desktop window to 520 × 380 and aligned the macOS title bar controls with the application toolbar.
