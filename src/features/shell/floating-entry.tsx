@@ -1,5 +1,5 @@
 import { PinButton } from "./pin-button";
-import { Settings2 } from "lucide-react";
+import { Settings } from "lucide-react";
 import appIcon from "../../../src-tauri/icons/128x128.png";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -115,7 +115,7 @@ export function FloatingEntry({
         <img src={appIcon} alt="" width={24} height={24} draggable={false} />
       </button>
       <button type="button" disabled={busy} title={getText("settings.shortLabel")} aria-label={getText("settings.shortLabel")} onClick={onSettings}>
-        <Settings2 size={17} />
+        <Settings size={17} />
       </button>
       <PinButton busy={busy} pinned={pinned} onPinChange={onPinChange} />
     </div>

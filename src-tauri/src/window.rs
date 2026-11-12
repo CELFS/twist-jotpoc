@@ -85,7 +85,7 @@ pub fn update_inactive_controls(native: &objc2_app_kit::NSWindow) {
     if native.isKeyWindow() || !style.contains(NSWindowStyleMask::Titled) || style.contains(NSWindowStyleMask::FullScreen) {
         return;
     }
-    let color = NSColor::lightGrayColor().CGColor();
+    let color = NSColor::colorWithSRGBRed_green_blue_alpha(80.0 / 255.0, 86.0 / 255.0, 77.0 / 255.0, 0.82).CGColor();
     for kind in [NSWindowButton::CloseButton, NSWindowButton::MiniaturizeButton, NSWindowButton::ZoomButton] {
         let Some(button) = native.standardWindowButton(kind) else { continue };
         let mut frame = view.convertRect_fromView(button.bounds(), Some(&button));
@@ -366,7 +366,7 @@ pub fn position_floating_entry(window: WebviewWindow, controller: State<'_, Wind
                             _ => Corners::all(),
                         };
                         layer.setMaskedCorners(corners);
-                        layer.setCornerRadius(width.min(height) * TOOLBAR_RADIUS / ENTRY_HEIGHT);
+                        layer.setCornerRadius((width.min(height) * TOOLBAR_RADIUS / ENTRY_HEIGHT).max(6.0));
                     }
                 }
                 native.setAlphaValue(0.92 + 0.08 * progress);

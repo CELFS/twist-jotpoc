@@ -11,20 +11,28 @@
 
 [hidden] { display: none !important; }
 
-.expanded-shell { background: var(--app-surface-muted); display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.expanded-shell, .floating-button {
+  background:
+    radial-gradient(ellipse at 0% 12%, rgb(46 41 54 / var(--toolbar-alpha, 1)), transparent 64%),
+    linear-gradient(to bottom, transparent 40%, rgb(18 23 31 / 20%)),
+    linear-gradient(to right, rgb(39 47 50 / var(--toolbar-alpha, 1)), rgb(44 56 59 / var(--toolbar-alpha, 1)) 50%, rgb(57 68 81 / var(--toolbar-alpha, 1)));
+}
+.expanded-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .app-identity, .app-header-actions, .workspace-toolbar, .client-actions, .client-drawer-heading {
   display: flex; align-items: center; gap: 8px;
 }
 .app-identity { flex-shrink: 0; }
 .app-identity img { border-radius: 8px; }
 .app-header-actions { gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
-.app-header { padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
+.app-header { --app-primary-soft: rgb(255 255 255 / 12%); --app-focus: #e3edf7; color: #f2f4f6; background: transparent; padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
+.app-header .ui-button--ghost { color: inherit; }
 .app-header[data-macos] {
   box-sizing: border-box;
   flex: 0 0 44px;
   height: 44px;
   padding: 0 10px 0 74px;
 }
+.app-header-actions .window-controls { margin-inline-start: 4px; }
 .app-header[data-macos] .app-header-actions { flex-wrap: nowrap; }
 .app-header[data-macos] .app-header-actions button {
   width: 30px;
@@ -35,7 +43,7 @@
 @media (max-width: 370px) {
   .app-header[data-macos] .app-identity strong { display: none; }
 }
-.app-content { background: var(--app-background); border-radius: 12px 12px 0 0; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.app-content { margin: 0 6px 6px; background: var(--app-background); border-radius: 12px 12px 5px 5px; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 .workspace { max-width: 1080px; margin: 0 auto; }
 .workspace-panel { padding-top: 16px; min-width: 0; }
 .workspace-toolbar { flex-wrap: wrap; margin-bottom: 12px; }
@@ -105,14 +113,60 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
   inset: 0;
   overflow: hidden;
   --toolbar-alpha: calc(.94 + .06 * var(--dock-progress, 0));
-  border-radius: 20vmin;
-  color: #242629;
-  background: linear-gradient(145deg, rgb(187 168 228 / var(--toolbar-alpha)), rgb(131 185 231 / var(--toolbar-alpha)) 50%, rgb(116 85 161 / var(--toolbar-alpha)));
+  border-radius: max(6px, 20vmin);
+  color: #f2f4f6;
+  --app-focus: #e3edf7;
 }
 .floating-button[data-edge="left"] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .floating-button[data-edge="right"] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .floating-button[data-edge="top"] { border-top-left-radius: 0; border-top-right-radius: 0; }
 .floating-button[data-edge="bottom"] { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+@property --handle-border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.floating-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--handle-border-angle),
+    rgb(144 178 223 / 80%) 0deg,
+    rgb(144 178 223 / 80%) 230deg,
+    rgb(139 92 246 / 85%) 285deg,
+    rgb(147 197 253) 320deg,
+    rgb(144 178 223 / 80%) 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: handleBorder 5s linear infinite;
+}
+
+.floating-button[data-edge="left"]::after { padding-left: 0; }
+.floating-button[data-edge="right"]::after { padding-right: 0; }
+.floating-button[data-edge="top"]::after { padding-top: 0; }
+.floating-button[data-edge="bottom"]::after { padding-bottom: 0; }
+
+@keyframes handleBorder {
+  to {
+    --handle-border-angle: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-button::after {
+    animation: none;
+  }
+}
+
 .floating-actions {
   position: absolute;
   left: 50%;
@@ -134,10 +188,10 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
   border: 0;
   border-radius: 8px;
 }
-.floating-actions button:hover { background: rgb(36 38 41 / 10%); }
-.floating-actions button:active { background: rgb(36 38 41 / 18%); }
+.floating-actions button:hover { background: rgb(255 255 255 / 12%); }
+.floating-actions button:active { background: rgb(255 255 255 / 18%); }
 .floating-actions button:focus-visible { outline-offset: -2px; }
-.floating-actions img { display: block; border-radius: 6px; mix-blend-mode: multiply; pointer-events: none; }
+.floating-actions img { display: block; border-radius: 6px; pointer-events: none; }
 
 .account-panel {
   width: min(100%, 400px);
@@ -163,4 +217,8 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .connection-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 
 body:has(.floating-button) { overflow: hidden; }
+.settings-page { min-width: 0; }
+.settings-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.settings-heading h2 { margin: 0; font-size: 18px; }
+.floating-setting .ui-switch { flex-shrink: 0; }
 .floating-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }

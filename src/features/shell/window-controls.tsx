@@ -1,4 +1,4 @@
-import { Maximize2, Minimize2, Minus } from "lucide-react";
+import { Expand, PanelBottomClose, PictureInPicture2 } from "lucide-react";
 import { PinButton } from "./pin-button";
 import { getText } from "@/i18n/get-text";
 import type { WindowMode, WindowState } from "@/platform/window";
@@ -26,7 +26,7 @@ export function WindowControls({
         type="button"
         onClick={() => onModeChange(state.mode === "full" ? "mini" : "full")}
       >
-        {state.mode === "full" ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+        {state.mode === "full" ? <PictureInPicture2 size={18} /> : <Expand size={18} />}
       </button>
       <button
         aria-label={getText("app.collapse")}
@@ -35,7 +35,7 @@ export function WindowControls({
         type="button"
         onClick={() => onModeChange("collapsed")}
       >
-        <Minus size={18} />
+        <PanelBottomClose size={18} />
       </button>
     </div>
   );

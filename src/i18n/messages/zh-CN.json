@@ -357,7 +357,7 @@
     "openMainSite": "打开 TwistBalance",
     "mainSiteError": "无法打开 TwistBalance，请稍后重试。",
     "expand": "展开面板",
-    "collapse": "收起为悬浮球",
+    "collapse": "收起为悬浮横条",
     "fullWindow": "完整窗口",
     "miniWindow": "小面板",
     "pin": "置顶",
@@ -461,7 +461,7 @@
     "connectionStatus": "状态",
     "waitingApproval": "等待授权",
     "readyToConnect": "等待连接",
-    "floatingAutoHide": "浮球贴边自动收起"
+    "floatingAutoHide": "悬浮横条贴边自动收起"
   },
   "settings": {
     "shortLabel": "设置"

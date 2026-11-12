@@ -357,7 +357,7 @@
     "openMainSite": "Open TwistBalance",
     "mainSiteError": "Unable to open TwistBalance. Please try again.",
     "expand": "Expand panel",
-    "collapse": "Collapse to floating button",
+    "collapse": "Collapse to floating toolbar",
     "fullWindow": "Full window",
     "miniWindow": "Mini panel",
     "pin": "Keep on top",
@@ -461,7 +461,7 @@
     "connectionStatus": "Status",
     "waitingApproval": "Waiting for approval",
     "readyToConnect": "Ready to connect",
-    "floatingAutoHide": "Auto-hide the floating entry at screen edges"
+    "floatingAutoHide": "Auto-hide the floating toolbar at screen edges"
   },
   "settings": {
     "shortLabel": "Settings"

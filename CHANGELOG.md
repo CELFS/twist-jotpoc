@@ -2,11 +2,10 @@
 
 ## 1.0.7 - Unreleased
 
-- Show three gray window-control placeholders when the macOS main window or mini panel loses focus.
-- Use a borderless macOS frame for the floating toolbar and docked handle with translucency on the expanded toolbar. The docked handle matches the toolbar height in length and scales its inward-facing corners with its thickness.
-
-- Added animated edge hiding with a compact flat handle and hover reveal for the compact floating toolbar with workspace, settings, and pin actions.
-- Kept floating-entry drags within the display work area and preserved the integrated macOS title bar across mode changes.
+- Added an in-window settings page accessible from the header and floating toolbar.
+- Added workspace and pin controls to the floating toolbar. It stays within the display, can hide at screen edges, and reappears on hover.
+- Updated the window and toolbar styling and clarified the controls for switching to the mini panel or collapsing to the toolbar.
+- Kept the macOS title bar integrated when switching window modes.
 
 ## 1.0.6 - Unreleased
 
