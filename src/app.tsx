@@ -74,7 +74,7 @@ export function App() {
   const platform = windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other";
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
-    <div className="expanded-shell" hidden={collapsed}>
+    <div className="expanded-shell" data-sidebar-open={sidebarOpen} hidden={collapsed}>
       <header className="app-header" data-macos={windowState?.macos || undefined} data-tauri-drag-region>
         <div className="header-window" data-tauri-drag-region>
           {windowState && <WindowControls busy={busy} state={windowState}
@@ -85,15 +85,15 @@ export function App() {
           {credential && <Tabs<WorkspaceTab> labelOnSelection className="workspace-tabs" id="workspace"
             ariaLabel={getText("client.tabs")} value={managementTab ? null : tab}
             onValueChange={openPage} items={items} />}
-          <button type="button" className="sidebar-toggle"
+        </div>
+        <button type="button" className="sidebar-toggle"
             title={getText("client.sidebar")} aria-label={getText("client.sidebar")}
             aria-expanded={sidebarOpen} aria-controls="workspace-sidebar"
             onClick={() => setSidebarOpen(open => !open)}><PanelRight size={17} aria-hidden="true" /></button>
-        </div>
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
-      <div className="shell-body" data-sidebar-open={sidebarOpen}>
+      <div className="shell-body">
         <div className="shell-page">
           <SidebarContext.Provider value={{ target: sidebarOpen ? sidebarTarget : null, tab, onSelect: () => openPage(tab) }}>
             <main hidden={Boolean(managementTab)} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>

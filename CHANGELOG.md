@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.14 - Unreleased
+
+- Align workspace tabs with the content panel as the right sidebar opens and closes.
+
 ## 1.0.13 - Unreleased
 
 - Use shared loading skeletons in workspace pages and compact sidebar histories.
