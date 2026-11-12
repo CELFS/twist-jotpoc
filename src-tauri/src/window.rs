@@ -158,10 +158,22 @@ fn apply_mode(window: &WebviewWindow, controller: &mut Controller, mode: WindowM
                 window.set_decorations(false)?;
                 window.set_resizable(false)?;
             }
-            let size = tauri::LogicalSize::new(ENTRY_WIDTH, ENTRY_HEIGHT);
-            window.set_size(size)?;
-            window.set_max_size(Some(size))?;
-            window.set_min_size(Some(size))?;
+            #[cfg(not(target_os = "macos"))]
+            fix_entry_size(window, ENTRY_WIDTH, ENTRY_HEIGHT)?;
+            #[cfg(target_os = "macos")]
+            {
+                // Tao queues set_size on macOS. Finish the borderless resize before
+                // WebKit lays out the entry or the fixed size constraints are applied.
+                let handle = window.ns_window()?;
+                let native = unsafe { &*handle.cast::<objc2_app_kit::NSWindow>() };
+                let size = objc2_foundation::NSSize::new(ENTRY_WIDTH, ENTRY_HEIGHT);
+                native.setContentSize(size);
+                native.setContentMaxSize(size);
+                native.setContentMinSize(size);
+                if let Some(view) = native.contentView() {
+                    view.layoutSubtreeIfNeeded();
+                }
+            }
             if let Some(geometry) = &controller.collapsed {
                 window.set_position(geometry.position)?;
             }

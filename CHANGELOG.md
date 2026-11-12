@@ -3,6 +3,7 @@
 ## 1.0.8 - Unreleased
 
 - Follow the system appearance by default or choose a light or dark theme for the main window, mini panel, floating toolbar, and docked handle.
+- Restore the minus icon for collapsing the window and align the floating toolbar on first open on macOS.
 
 ## 1.0.7 - Unreleased
 

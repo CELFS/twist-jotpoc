@@ -1,4 +1,4 @@
-import { Expand, PanelBottomClose, PictureInPicture2 } from "lucide-react";
+import { Expand, Minus, PictureInPicture2 } from "lucide-react";
 import { PinButton } from "./pin-button";
 import { getText } from "@/i18n/get-text";
 import type { WindowMode, WindowState } from "@/platform/window";
@@ -35,7 +35,7 @@ export function WindowControls({
         type="button"
         onClick={() => onModeChange("collapsed")}
       >
-        <PanelBottomClose size={18} />
+        <Minus size={18} />
       </button>
     </div>
   );
