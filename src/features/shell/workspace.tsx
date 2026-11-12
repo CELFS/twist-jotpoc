@@ -1,7 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Globe, Languages, NotebookPen } from "lucide-react";
 import { z } from "zod";
-import { Tabs } from "@/components/ui/tabs";
 import { getText } from "@/i18n/get-text";
 import { MemoWorkspace } from "@/features/daily-memos/memo-workspace";
 import { getApi } from "@/data/cloud-api";
@@ -12,25 +10,29 @@ import type { TranslationChange } from "@/features/translation/translation-chang
 const NotesWorkspace = lazy(() => import("@/features/source-notes/notes-workspace").then(module => ({ default: module.NotesWorkspace })));
 const TranslationModule = lazy(() => import("@/features/translation/translation-module").then(module => ({ default: module.TranslationModule })));
 
-export function Workspace({ accountId, onTranslationChange }: {
+const CollectionsPanel = lazy(() => import("@/features/shell/collections-panel").then(module => ({ default: module.CollectionsPanel })));
+
+export type WorkspaceTab = "memos" | "translation" | "notes" | "collections";
+
+export function Workspace({ accountId, tab, setTab }: {
+  tab: WorkspaceTab;
+  setTab: (tab: WorkspaceTab) => void;
   accountId: string;
-  onTranslationChange: (change: TranslationChange) => void;
 }) {
-  const [tab, setTab] = useState<"memos" | "translation" | "notes">("memos");
+  const [translationChange, setTranslationChange] = useState<TranslationChange>();
   const [noteId, setNoteId] = useState<string | null>(null);
-  const [visited, setVisited] = useState({ translation: false, notes: false });
-  const selectTab = (next: "memos" | "translation" | "notes") => {
-    if (next !== "memos") setVisited(previous => ({ ...previous, [next]: true }));
-    setTab(next);
-  };
+  const [visited, setVisited] = useState({ translation: false, notes: false, collections: false });
+  useEffect(() => {
+    if (tab !== "memos") setVisited(previous => previous[tab] ? previous : { ...previous, [tab]: true });
+  }, [tab]);
   useEffect(() => {
     const navigate = (event: Event) => {
       const id: unknown = (event as CustomEvent).detail;
-      if (typeof id === "string") { setNoteId(id); setVisited(previous => ({ ...previous, notes: true })); setTab("notes"); }
+      if (typeof id === "string") { setNoteId(id); setTab("notes"); }
     };
     window.addEventListener("jotpoc:open-note", navigate);
     return () => { window.removeEventListener("jotpoc:open-note", navigate); stopMemoControllers(); };
-  }, [accountId]);
+  }, [accountId, setTab]);
 
   useEffect(() => {
     let active = true;
@@ -69,14 +71,13 @@ export function Workspace({ accountId, onTranslationChange }: {
   }, [accountId]);
 
   return <div className="workspace">
-    <Tabs labelOnSelection className="workspace-tabs" id="workspace" ariaLabel={getText("client.tabs")} value={tab} onValueChange={selectTab}
-      items={[
-        { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
-        { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
-        { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
-      ]} />
+    <div id="workspace-panel-collections" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-collections" hidden={tab !== "collections"}>
+      {visited.collections && <Suspense fallback={<p role="status">{getText("client.load")}</p>}>
+        <CollectionsPanel accountId={accountId} active={tab === "collections"} change={translationChange} onChange={setTranslationChange} />
+      </Suspense>}
+    </div>
     <div id="workspace-panel-translation" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-translation" hidden={tab !== "translation"}>
-      {visited.translation && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><TranslationModule accountId={accountId} active={tab === "translation"} onChange={onTranslationChange} /></Suspense>}
+      {visited.translation && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><TranslationModule accountId={accountId} active={tab === "translation"} onChange={setTranslationChange} /></Suspense>}
     </div>
     <div id="workspace-panel-memos" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-memos" hidden={tab !== "memos"}>
       <MemoWorkspace accountId={accountId} />

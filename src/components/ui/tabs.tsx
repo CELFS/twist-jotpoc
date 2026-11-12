@@ -13,7 +13,7 @@ export type TabsProps<Value extends string> = {
   labelOnSelection?: boolean;
   id: string;
   items: readonly TabOption<Value>[];
-  value: Value;
+  value: Value | null;
   onValueChange: (value: Value) => void;
 };
 
@@ -67,7 +67,7 @@ export function Tabs<Value extends string>({
           id={`${id}-tab-${item.value}`}
           key={item.value}
           role="tab"
-          tabIndex={value === item.value ? 0 : -1}
+          tabIndex={(value === null ? index === 0 : value === item.value) ? 0 : -1}
           type="button"
           onClick={() => onValueChange(item.value)}
           onKeyDown={(event) =>

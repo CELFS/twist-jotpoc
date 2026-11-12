@@ -21,6 +21,7 @@ export function AccountPanel({ platform = "other" }: { platform?: "macos" | "win
   return <section className="account-panel" data-connected={connected || undefined}>
     <div className="connection-heading">
       <a className="connection-site" href={TWIST_BALANCE_ORIGIN} target="_blank" rel="noopener noreferrer"
+        onClick={event => { event.preventDefault(); void openUrl(TWIST_BALANCE_ORIGIN).catch(() => setOpenError("unavailable")); }}
         aria-label={getText("app.openMainSite")} title={getText("app.openMainSite")}>
         <img src="/branding/twist-balance.png" alt="" width={32} height={32} />
       </a>

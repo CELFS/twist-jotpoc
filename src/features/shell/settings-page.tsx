@@ -16,12 +16,11 @@ export function SettingsPage({ language, desktop, autoHide, onAutoHideChange, on
 }) {
   const theme = useSyncExternalStore(subscribeThemePreference, getThemePreference);
   return (
-    <main className="app-content settings-page custom-scrollbar" aria-labelledby="settings-title">
+    <main className="app-content settings-page custom-scrollbar" aria-label={getText("settings.shortLabel")}>
       <div className="settings-heading">
         <Button variant="ghost" size="icon" onClick={onBack} aria-label={getText("common.back")} title={getText("common.back")}>
           <ArrowLeft size={18} />
         </Button>
-        <h2 id="settings-title">{getText("settings.shortLabel")}</h2>
       </div>
       <SelectField label={getText("client.language")} value={language}
         onChange={event => setAppLanguagePreference(event.target.value as AppLanguagePreference)}>

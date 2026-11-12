@@ -39,28 +39,47 @@
     linear-gradient(to bottom, transparent 40%, rgb(var(--frame-shade) / 20%)),
     linear-gradient(to right, rgb(var(--frame-start) / var(--toolbar-alpha, 1)), rgb(var(--frame-middle) / var(--toolbar-alpha, 1)) 50%, rgb(var(--frame-end) / var(--toolbar-alpha, 1)));
 }
-.expanded-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.app-header-actions, .workspace-toolbar, .client-actions, .client-drawer-heading {
+.expanded-shell { --content-inset: 6px; --content-top-radius: 12px; --tab-join-radius: 12px; display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.workspace-toolbar, .client-actions, .client-drawer-heading {
   display: flex; align-items: center; gap: 8px;
 }
-.app-header-actions { gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
-.app-header { --app-primary-soft: rgb(var(--frame-interaction) / 12%); --app-focus: var(--frame-focus); color: var(--frame-text); background: transparent; padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
-.app-header .ui-button--ghost { color: inherit; }
-.app-header[data-macos] {
-  box-sizing: border-box;
-  flex: 0 0 44px;
-  height: 44px;
-  padding: 0 10px 0 74px;
+.app-header {
+  --app-primary-soft: rgb(var(--frame-interaction) / 12%);
+  --app-focus: var(--frame-focus);
+  --header-button-size: 30px;
+  --header-padding: 5px;
+  --header-height: calc(var(--header-button-size) + 2 * var(--header-padding));
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0 20px;
+  padding: env(safe-area-inset-top, 0px) var(--content-inset) 0 10px;
+  color: var(--frame-text);
+  background: transparent;
 }
-.app-header-actions .window-controls { margin-inline-start: 4px; }
-.app-header[data-macos] .app-header-actions { flex-wrap: nowrap; }
-.app-header[data-macos] .app-header-actions button {
-  width: 30px;
-  min-width: 30px;
-  height: 32px;
-  min-height: 32px;
+.header-window { display: flex; align-items: center; padding-block: var(--header-padding); }
+/* Account for the native top border when centering the visible hover area. */
+.app-header[data-macos] { padding-top: calc(env(safe-area-inset-top, 0px) + 1px); }
+.app-header[data-macos] .header-window { padding-inline-start: 64px; }
+.header-pages {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  min-height: var(--header-height);
+  margin-inline-start: auto;
 }
-.app-content { margin: 0 6px 6px; background: var(--app-background); border-radius: 12px 12px 5px 5px; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.header-utilities { display: flex; align-items: flex-end; min-height: var(--header-height); gap: 2px; }
+.header-utilities .ui-button--ghost { color: inherit; }
+.app-header .window-controls button, .app-header .header-utilities .ui-button--icon {
+  width: var(--header-button-size);
+  min-width: var(--header-button-size);
+  height: var(--header-button-size);
+  min-height: var(--header-button-size);
+  padding: 0;
+  border-radius: 8px;
+}
+.app-content { margin: 0 var(--content-inset, 6px) var(--content-inset, 6px); background: var(--app-background); border-radius: var(--content-top-radius, 12px) var(--content-top-radius, 12px) 5px 5px; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 .workspace-host, .workspace {
   display: flex;
   flex: 1;
@@ -69,21 +88,23 @@
   min-width: 0;
 }
 .workspace-panel > section { max-width: 1080px; margin-inline: auto; }
-.workspace .workspace-tabs {
+.header-pages .ui-tabs {
   display: flex;
   flex: none;
   width: fit-content;
-  max-width: calc(100% - 24px);
-  margin-inline-start: 18px;
   gap: 2px;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
 }
+.header-utilities .ui-button--icon { align-self: center; }
+.header-utilities .ui-button--icon svg { width: 15px; height: 15px; }
 .workspace-tabs .ui-tab {
   position: relative;
-  min-height: 32px;
+  height: calc(var(--header-button-size) + var(--header-padding));
+  min-height: calc(var(--header-button-size) + var(--header-padding));
+  padding-block: 0 var(--header-padding);
   padding-inline: 10px;
   gap: 5px;
   border-radius: 8px 8px 0 0;
@@ -107,13 +128,14 @@
   content: "";
   position: absolute;
   bottom: 0;
-  width: 12px;
-  height: 12px;
+  width: var(--tab-join-radius);
+  height: var(--tab-join-radius);
   pointer-events: none;
-  background: radial-gradient(circle at var(--corner-x) 0, transparent 11.5px, var(--tab-fill) 12.5px);
+  background: radial-gradient(circle at var(--corner-x) 0, transparent calc(var(--tab-join-radius) - .5px), var(--tab-fill) calc(var(--tab-join-radius) + .5px));
 }
 .workspace-tabs .ui-tab:is(:hover, [data-selected="true"])::before { right: 100%; --corner-x: 0%; }
 .workspace-tabs .ui-tab:is(:hover, [data-selected="true"])::after { left: 100%; --corner-x: 100%; }
+.workspace-tabs .settings-tab:is(:hover, [data-selected="true"])::after { content: none; }
 .workspace-tabs .ui-tab:focus-visible { outline-offset: -3px; }
 .workspace-tabs .ui-tab svg { width: 15px; height: 15px; }
 
@@ -148,7 +170,7 @@
 .client-drawer .ui-drawer { width: min(840px, 100vw); }
 .client-drawer-heading { justify-content: space-between; padding: 0 16px; }
 .client-drawer-heading h2 { font-size: 18px; }
-.collections-panel, .client-drawer .account-panel { padding: 16px; }
+.client-drawer .account-panel { padding: 16px; }
 .notes-workspace { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); gap: 20px; }
 .notes-list { min-width: 0; }
 .note-list-item, .translation-history-select {
@@ -166,7 +188,6 @@
 .floating-button { touch-action: none; }
 
 @media (max-width: 620px) {
-  .app-header { padding-inline: 10px; }
   .app-content { padding: 12px; }
   .window-controls { gap: 0; }
   .window-controls button { width: 30px; height: 32px; }
@@ -285,7 +306,7 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .connection-identity .connection-dot { background: var(--app-income); }
 .connection-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 
-.settings-page { min-width: 0; }
+.settings-page { min-width: 0; border-top-right-radius: 0; }
 .settings-page .ui-field + .ui-field { margin-top: 16px; }
 .settings-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
 .settings-heading h2 { margin: 0; font-size: 18px; }
