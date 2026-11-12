@@ -30,8 +30,10 @@ export function WorkspaceSidebar({ open, setTarget, onManage, onCollections, col
   collections: boolean;
 }) {
   return <aside id="workspace-sidebar" hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
-    <div className="sidebar-scroll custom-scrollbar" ref={setTarget} />
-    {collections && <Button variant="ghost" onClick={onCollections}>{getText("client.collections")}</Button>}
+    <div className="sidebar-scroll custom-scrollbar">
+      <div ref={setTarget} />
+      {collections && <Button variant="ghost" onClick={onCollections}>{getText("client.collections")}</Button>}
+    </div>
     <Button className="sidebar-management" variant="ghost" onClick={onManage}>
       <Settings size={16} aria-hidden="true" />{getText("client.management")}
     </Button>

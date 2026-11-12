@@ -178,7 +178,7 @@
 .shell-body { position: relative; }
 .shell-page { flex-direction: column; }
 .workspace-sidebar {
-  display: flex; flex-direction: column; flex: 0 0 clamp(190px, 25vw, 260px);
+  display: flex; flex-direction: column; flex: 0 0 clamp(128px, 32%, 240px);
   min-height: 0; min-width: 0; margin: 0 0 6px 6px;
   padding: var(--space-3); border-radius: 12px;
   color: var(--app-text); background: var(--app-surface);
@@ -207,12 +207,9 @@
   color: inherit; background: transparent;
 }
 .sidebar-toggle:hover, .sidebar-toggle[aria-expanded="true"] { background: var(--app-primary-soft); }
-@media (max-width: 680px) {
-  .shell-body[data-sidebar-open="true"] > .shell-page { display: none; }
-  .workspace-sidebar { flex: 1; margin-inline-end: 6px; }
+@media (max-width: 520px) {
+  .workspace-sidebar { padding-inline: var(--space-1); }
 }
-.app-shell[data-mode="mini"] .shell-body[data-sidebar-open="true"] > .shell-page { display: none; }
-.app-shell[data-mode="mini"] .workspace-sidebar { flex: 1; margin-inline-end: 6px; }
 @media (prefers-reduced-motion: no-preference) {
   .workspace-sidebar:not([hidden]) { animation: sidebar-enter var(--motion-fast) var(--motion-ease); }
   @keyframes sidebar-enter { from { opacity: 0; transform: translateX(-12px); } }

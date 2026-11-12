@@ -20,7 +20,6 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarTarget, setSidebarTarget] = useState<HTMLDivElement | null>(null);
-  const sidebarToggle = useRef<HTMLButtonElement>(null);
   const [tab, setTab] = useState<WorkspaceTab>("memos");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [autoHide, setAutoHide] = useState(() => localStorage.getItem("jotpoc.floating.autoHide") !== "false");
@@ -65,13 +64,14 @@ export function App() {
   };
 
   const changePin = (pinned: boolean) => void updateWindow(() => setWindowPinned(pinned));
-  const finishSelection = () => {
-    if (windowState?.mode === "mini" || window.matchMedia("(max-width: 680px)").matches) {
-      setSidebarOpen(false);
-      sidebarToggle.current?.focus();
-    }
-  };
-  const openManagement = () => { setSidebarOpen(false); setSettingsOpen(true); };
+  const openPage = (next: WorkspaceTab) => { setTab(next); setSettingsOpen(false); };
+  const openManagement = () => setSettingsOpen(true);
+  const items = [
+    { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
+    { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
+    { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
+    { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
+  ] as const;
   const platform = windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other";
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
@@ -85,14 +85,8 @@ export function App() {
         <div className="header-pages" data-tauri-drag-region>
           {credential && <Tabs<WorkspaceTab> labelOnSelection className="workspace-tabs" id="workspace"
             ariaLabel={getText("client.tabs")} value={settingsOpen ? null : tab}
-            onValueChange={next => { setTab(next); setSettingsOpen(false); if (next === "collections") finishSelection(); }}
-            items={[
-              { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
-              { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
-              { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
-              { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
-            ]} />}
-          <button type="button" className="sidebar-toggle" ref={sidebarToggle}
+            onValueChange={openPage} items={items} />}
+          <button type="button" className="sidebar-toggle"
             title={getText("client.sidebar")} aria-label={getText("client.sidebar")}
             aria-expanded={sidebarOpen} aria-controls="workspace-sidebar"
             onClick={() => setSidebarOpen(open => !open)}><PanelLeft size={17} aria-hidden="true" /></button>
@@ -100,11 +94,11 @@ export function App() {
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
-      <div className="shell-body" data-sidebar-open={sidebarOpen}>
+      <div className="shell-body">
         <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={openManagement}
-          collections={Boolean(credential && tab === "collections")} onCollections={() => { setSettingsOpen(false); setSidebarOpen(false); }} />
+          collections={Boolean(credential && tab === "collections")} onCollections={() => openPage("collections")} />
         <div className="shell-page">
-          <SidebarContext.Provider value={{ target: sidebarOpen && !settingsOpen ? sidebarTarget : null, tab, onSelect: finishSelection }}>
+          <SidebarContext.Provider value={{ target: sidebarOpen ? sidebarTarget : null, tab, onSelect: () => openPage(tab) }}>
             <main hidden={settingsOpen} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>
               {credential ? <Workspace tab={tab} setTab={setTab} key={credential.accountId} accountId={credential.accountId} /> : <AccountPanel platform={platform} />}
             </main>

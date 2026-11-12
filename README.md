@@ -12,7 +12,7 @@ Version **1.0.1** connects the native shell to the existing TwistBalance service
 
 - Connect through TwistBalance device authorization, inspect and revoke sessions, and store access credentials through the native secure-keystore plugin.
 - Edit daily memos with the main site's Tiptap editor, custom task lists, source blocks, linked source-note cards, formatting toolbar, undo/redo, and preview mode.
-- Use the calendar to select a date or browse memos, notes, and local translation history in the sidebar. Wide windows keep the list beside the editor. Narrow windows and Mini return to the editor after a selection.
+- Use the calendar to select a date or browse memos, notes, and local translation history in the sidebar. In both the main and Mini windows, the sidebar stays beside the workspace and follows the active page tab.
 - Open settings and account management from the sidebar, including before connecting a device.
 - Preserve account-specific memo drafts locally, autosave permitted edits, retry exact operations after lost acknowledgements, and resolve cloud conflicts explicitly.
 - Browse, create, edit, classify, and delete URL-based notes, retaining local drafts when saving fails.
