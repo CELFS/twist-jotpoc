@@ -165,10 +165,10 @@
 
 .workspace-toolbar { flex-wrap: wrap; margin-bottom: var(--space-3); }
 .workspace-toolbar time { font-variant-numeric: tabular-nums; }
-.memo-workspace > .ui-field, .note-editor > .ui-field { margin: 12px 0; }
+.memo-workspace > .ui-field, .note-editor > .ui-field { margin: var(--field-spacing) 0; }
 .memo-workspace .daily-memo-rich-text-editor, .note-editor .daily-memo-rich-text-editor {
-  height: max(320px, calc(100dvh - 390px));
-  min-height: 320px;
+  height: clamp(12rem, 52dvh, 36rem);
+  min-height: min(16rem, 50dvh);
   border: 1px solid var(--app-border);
   border-radius: 12px;
   background: var(--app-surface);
@@ -181,7 +181,7 @@
   border-radius: 12px; background: var(--app-surface-muted);
 }
 .client-conflict textarea { min-height: 140px; }
-.account-panel { display: grid; gap: 16px; max-width: 640px; margin: 20px auto; }
+.account-panel { display: grid; gap: var(--space-3); max-width: 640px; margin: var(--space-4) auto; }
 .app-content[data-connection] { display: flex; flex-direction: column; }
 .app-content[data-connection] > .account-panel {
   margin: auto;
@@ -190,7 +190,7 @@
 }
 .app-content[data-connection] .client-actions { justify-content: center; flex-wrap: wrap; }
 .authorization-code { display: grid; gap: 8px; }
-.authorization-code strong { font-size: 24px; letter-spacing: 0.1em; }
+.authorization-code strong { font-size: var(--font-size-xl); letter-spacing: 0.1em; }
 .shell-body, .shell-page { display: flex; flex: 1; min-height: 0; min-width: 0; }
 .shell-body { position: relative; overflow: clip; }
 .shell-page { flex-direction: column; }
@@ -439,7 +439,7 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 
 .account-panel {
   width: min(100%, 400px);
-  padding: clamp(16px, 4vw, 20px);
+  padding: var(--space-4);
   border: 1px solid var(--app-border);
   border-radius: 16px;
   background: var(--app-surface);
@@ -461,8 +461,8 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .connection-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 
 .settings-page { min-width: 0; }
-.settings-page .ui-field + .ui-field { margin-top: 16px; }
-.settings-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.settings-page .ui-field + .ui-field { margin-top: var(--field-spacing); }
+.settings-heading { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
 .floating-setting .ui-switch { flex-shrink: 0; }
 .floating-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
 

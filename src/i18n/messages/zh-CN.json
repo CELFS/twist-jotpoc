@@ -481,7 +481,11 @@
     "noMemoHistory": "暂无历史备忘"
   },
   "settings": {
-    "shortLabel": "设置"
+    "shortLabel": "设置",
+    "textSize": "字体大小",
+    "textSmall": "小",
+    "textStandard": "标准",
+    "textLarge": "大"
   },
   "collections": {
     "title": "收藏",

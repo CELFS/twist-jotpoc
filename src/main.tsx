@@ -5,6 +5,10 @@ import { App } from "./app";
 import "./styles/app.css";
 import "./styles/client.css";
 
+import { initializeTextSize } from "./platform/text-size";
+
+const disposeTextSize = initializeTextSize();
+if (import.meta.hot) import.meta.hot.dispose(disposeTextSize);
 const disposeTheme = initializeTheme();
 if (import.meta.hot) import.meta.hot.dispose(disposeTheme);
 

@@ -1,5 +1,8 @@
 @import "./tokens.css";
 
+:root[data-text-size="small"] { font-size: 92.857%; }
+:root[data-text-size="large"] { font-size: 114.286%; }
+
 * { box-sizing: border-box; }
 
 html, body, #root {
@@ -12,6 +15,8 @@ body {
   background: var(--app-background);
   color: var(--app-text);
   font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--body-leading);
 }
 
 button {

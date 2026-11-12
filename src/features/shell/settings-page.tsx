@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { getThemePreference, setThemePreference, subscribeThemePreference } from "@/platform/theme";
+import { getTextSize, setTextSize, subscribeTextSize } from "@/platform/text-size";
 import { Tabs } from "@/components/ui/tabs";
 import { AccountPanel } from "@/features/auth/account-panel";
 import { ArrowLeft } from "lucide-react";
@@ -21,6 +22,7 @@ export function SettingsPage({ tab, setTab, platform, language, desktop, autoHid
   onAutoHideChange: (value: boolean) => void;
   onBack: () => void;
 }) {
+  const textSize = useSyncExternalStore(subscribeTextSize, getTextSize);
   const theme = useSyncExternalStore(subscribeThemePreference, getThemePreference);
   return (
     <main className="app-content settings-page custom-scrollbar" aria-label={getText("client.management")}>
@@ -46,6 +48,12 @@ export function SettingsPage({ tab, setTab, platform, language, desktop, autoHid
           <option value="system">{getText("client.themeSystem")}</option>
           <option value="light">{getText("client.themeLight")}</option>
           <option value="dark">{getText("client.themeDark")}</option>
+        </SelectField>
+        <SelectField label={getText("settings.textSize")} value={textSize}
+          onChange={event => setTextSize(event.target.value)}>
+          <option value="small">{getText("settings.textSmall")}</option>
+          <option value="standard">{getText("settings.textStandard")}</option>
+          <option value="large">{getText("settings.textLarge")}</option>
         </SelectField>
         {desktop && <div className="floating-setting">
           <span>{getText("client.floatingAutoHide")}</span>

@@ -481,7 +481,11 @@
     "noMemoHistory": "No memo history yet"
   },
   "settings": {
-    "shortLabel": "Settings"
+    "shortLabel": "Settings",
+    "textSize": "Text size",
+    "textSmall": "Small",
+    "textStandard": "Standard",
+    "textLarge": "Large"
   },
   "collections": {
     "title": "Collections",

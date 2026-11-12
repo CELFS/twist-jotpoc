@@ -2,7 +2,7 @@
 .translation-editor, .translation-history, .translation-library { padding: var(--space-4, 16px); border: 1px solid var(--app-border, #444); border-radius: var(--radius-md, 12px); background: var(--app-surface, #25211d); }
 .translation-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto; align-items: end; gap: 8px; }
 .translation-controls > label, .translation-controls > .ui-field, .translation-controls > .twill-field { min-width: 0; max-width: 100%; }
-.translation-languages { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.translation-languages { display: flex; align-items: center; gap: 12px; font-size: var(--font-size-md); }
 .translation-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .translation-collect-button[data-collected="true"] { opacity: 1; }
 .translation-collect-button[data-collected="true"] > svg { stroke: #eab308; fill: #eab308; }
@@ -10,17 +10,17 @@
 .translation-result > header, .translation-history > header, .translation-library > header { display: flex; align-items: center; gap: 8px; }
 .translation-result > header > :last-child, .translation-history > header > :last-child, .translation-library > header > :last-child { margin-left: auto; }
 .translation-result p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
-.translation-result a { overflow-wrap: anywhere; color: var(--app-primary, #ff923a); font-size: 13px; }
-.translation-tag { display: inline-flex; flex-shrink: 0; align-items: center; padding: 2px 7px; border: 1px solid var(--app-border, #555); border-radius: 6px; color: var(--app-primary, #ff923a); font-size: 11px; line-height: 1.5; }
-.translation-model, .translation-hint { font-size: 12px; color: var(--app-text-muted, #b8b0a7); }
-.translation-history h2, .translation-library h2 { margin: 0; font-size: 16px; }
+.translation-result a { overflow-wrap: anywhere; color: var(--app-primary, #ff923a); font-size: var(--font-size-sm); }
+.translation-tag { display: inline-flex; flex-shrink: 0; align-items: center; padding: 2px 7px; border: 1px solid var(--app-border, #555); border-radius: 6px; color: var(--app-primary, #ff923a); font-size: .6875rem; line-height: 1.5; }
+.translation-model, .translation-hint { font-size: var(--font-size-xs); color: var(--app-text-muted, #b8b0a7); }
+.translation-history h2, .translation-library h2 { margin: 0; font-size: var(--font-size-lg); }
 .translation-hint { margin: 0; line-height: 1.6; }
-.translation-error { color: var(--app-danger, #fb7185); font-size: 13px; }
+.translation-error { color: var(--app-danger, #fb7185); font-size: var(--font-size-sm); }
 .translation-history-item { display: flex; align-items: start; gap: 8px; border-bottom: 1px solid var(--app-border, #444); padding-bottom: 10px; }
 .translation-history-open { display: grid; width: 100%; min-width: 0; gap: 7px; padding: 8px; border: 0; border-radius: 8px; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
 .translation-history-open:hover, .translation-history-open[aria-pressed="true"] { background: var(--app-hover, #ffffff0d); }
 .translation-history-open:focus-visible { outline: 2px solid var(--app-primary, #ff923a); outline-offset: 2px; }
-.translation-history-open > span:not(.translation-tag) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-size: 14px; line-height: 1.6; }
+.translation-history-open > span:not(.translation-tag) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-size: var(--font-size-md); line-height: 1.6; }
 .translation-history-open > .translation-tag { justify-self: start; }
 .translation-library-layout, .translation-library-list { display: grid; gap: 16px; min-width: 0; }
 
@@ -28,14 +28,14 @@
 .translation-learning, .translation-learning-section, .translation-dictionary-entry { display: grid; gap: 12px; min-width: 0; }
 .translation-learning-section { border-top: 1px solid var(--app-border, #444); padding-top: 14px; }
 .translation-learning-section > header, .translation-phonetics, .translation-attribution { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.translation-learning h3, .translation-learning h4 { margin: 0; font-size: 14px; }
+.translation-learning h3, .translation-learning h4 { margin: 0; font-size: var(--font-size-md); }
 .translation-learning ul, .translation-learning ol { margin: 0; padding-inline-start: 22px; }
 .translation-learning li { padding: 4px 0; line-height: 1.7; overflow-wrap: anywhere; }
 .translation-learning blockquote { margin: 8px 0 0; padding: 8px 12px; border-inline-start: 2px solid var(--app-primary, #ff923a); background: var(--app-hover, #ffffff0d); }
 .translation-learning p > button { margin-inline-start: 6px; vertical-align: middle; }
 .translation-phonetics > span { color: var(--app-text-muted, #b8b0a7); }
 .translation-learning-section > .ui-field, .translation-learning-section > .twill-field { min-width: 0; max-width: 100%; }
-.translation-attribution { font-size: 12px; }
+.translation-attribution { font-size: var(--font-size-xs); }
 .translation-analysis-controls { display: flex; align-items: center; gap: 12px; }
 .translation-analysis-controls > .ui-field { flex: 0 0 auto; min-width: 0; max-width: 100%; }
 .translation-analysis-controls > .ui-button { flex: 1; min-width: 0; }
@@ -44,7 +44,7 @@
 .language-page [hidden], .translation-result-body[hidden] { display: none; }
 .translation-input { position: relative; min-width: 0; }
 .translation-input .ui-textarea { min-height: 132px; padding-bottom: 60px; padding-right: 44px; resize: vertical; }
-.translation-input-footer .translation-input-action { margin-left: auto; flex-shrink: 0; min-height: 32px; height: 32px; padding: 5px 9px; font-size: 12px; }
+.translation-input-footer .translation-input-action { margin-left: auto; flex-shrink: 0; min-height: 32px; height: 32px; padding: 5px 9px; font-size: var(--font-size-xs); }
 .translation-result-toggle { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 4px 0; border: 0; background: transparent; color: inherit; text-align: start; font: inherit; cursor: pointer; }
 .translation-result-toggle .translation-model { margin-inline-start: auto; text-align: end; }
 .translation-result-toggle > svg { flex-shrink: 0; color: var(--app-primary); }
@@ -64,13 +64,13 @@
 .ui-drawer.translation-drawer { grid-template-rows: auto auto minmax(0, 1fr); }
 .translation-drawer .translation-editor, .translation-drawer .translation-history { padding: 0; border: 0; background: transparent; }
 .translation-drawer .ui-drawer-content { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-4); min-height: 0; min-width: 0; padding: 0 var(--space-4) calc(var(--space-4) + var(--app-safe-bottom)); overflow-y: auto; overscroll-behavior: contain; }
-.language-collections .collections-heading h2 { margin: 0; font-size: 16px; }
+.language-collections .collections-heading h2 { margin: 0; font-size: var(--font-size-lg); }
 @media (max-width: 480px) {
   .translation-controls { gap: 6px; }
-  .translation-controls .ui-field-label { font-size: 11px; }
-  .translation-controls .ui-select-trigger { padding-inline: 8px; font-size: 12px; }
+  .translation-controls .ui-field-label { font-size: .6875rem; }
+  .translation-controls .ui-select-trigger { padding-inline: 8px; font-size: var(--font-size-xs); }
   .translation-controls .ui-select-option-content { gap: 4px; }
-  .translation-history-item .translation-tag { padding-inline: 4px; font-size: 10px; }
+  .translation-history-item .translation-tag { padding-inline: 4px; font-size: .625rem; }
 }
 .app-content:has(.language-page) { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
 .language-page.page-push-navigation-workspace {
@@ -129,7 +129,7 @@
 .learning-conversation-context a { color: var(--app-primary); overflow-wrap: anywhere; }
 .learning-conversation-controls { display: flex; align-items: center; gap: 12px; }
 .learning-conversation-controls > .ui-field { min-width: 0; margin-inline-start: auto; }
-.learning-conversation-controls .ui-field-label { font-size: 12px; }
+.learning-conversation-controls .ui-field-label { font-size: var(--font-size-xs); }
 .learning-conversation-messages { min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 16px; }
 .learning-conversation-footer { border-top: 1px solid var(--app-border); padding-top: 8px; }
 .learning-conversation-footer .assistant-composer { position: static; margin: 0; width: 100%; padding: 0; }
@@ -158,7 +158,7 @@
 .translation-input-footer { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .translation-versions { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .translation-versions .ui-field { min-width: 0; }
-.translation-versions .ui-select-trigger { height: 32px; min-height: 32px; padding: 5px 8px; font-size: 12px; }
+.translation-versions .ui-select-trigger { height: 32px; min-height: 32px; padding: 5px 8px; font-size: var(--font-size-xs); }
 .translation-version-value { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .translation-version-value svg { width: 16px; height: 16px; flex-shrink: 0; }
 
@@ -171,7 +171,7 @@
 .translation-comparison-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
 .translation-comparison-item:first-child { border-top: 0; padding-top: 0; }
 .translation-comparison-item h4 { margin: 0; }
-.translation-comparison-item .translation-language-tag { justify-self: start; padding: 3px 9px; border: 1px solid var(--app-primary); border-radius: 8px; color: var(--app-primary); font-size: 12px; line-height: 1.6; }
+.translation-comparison-item .translation-language-tag { justify-self: start; padding: 3px 9px; border: 1px solid var(--app-primary); border-radius: 8px; color: var(--app-primary); font-size: var(--font-size-xs); line-height: 1.6; }
 .translation-parameter-row { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
 .translation-parameter-row[hidden] { display: none; }
 .translation-parameter-row > :first-child { flex: 1; min-width: 0; }
@@ -190,10 +190,10 @@
 .translation-source-card > svg { flex-shrink: 0; color: var(--app-text-muted); }
 .translation-source-card-text { display: grid; flex: 1; gap: 3px; min-width: 0; }
 .translation-source-card-text > strong, .translation-source-card-text > small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.translation-source-card-text > strong { font-size: 12px; }
-.translation-source-card-text > small { color: var(--app-text-muted); font-size: 11px; }
+.translation-source-card-text > strong { font-size: var(--font-size-xs); }
+.translation-source-card-text > small { color: var(--app-text-muted); font-size: .6875rem; }
 .translation-comparison-item p { white-space: pre-wrap; overflow-wrap: anywhere; }
-.translation-comparison-grammar { color: var(--app-text-muted, #b8b0a7); font-size: 13px; }
+.translation-comparison-grammar { color: var(--app-text-muted, #b8b0a7); font-size: var(--font-size-sm); }
 
 .language-page .ui-input.ui-select-trigger, .translation-workspace .ui-input.ui-select-trigger, .translation-drawer .ui-input.ui-select-trigger { background: transparent; }
 .language-page .ui-tag-select-tag { background: transparent; border: 1px solid var(--app-border); }
@@ -201,7 +201,7 @@
 .translation-result-heading > .translation-actions { flex-wrap: nowrap; gap: 2px; }
 .translation-result-heading > .translation-actions > .ui-button--icon { width: 32px; min-width: 32px; min-height: 32px; }
 .translation-input-footer > .ui-field { flex: 0 0 auto; }
-.translation-input-footer > .ui-field .ui-select-trigger { height: 32px; min-height: 32px; padding: 5px 8px; font-size: 12px; }
+.translation-input-footer > .ui-field .ui-select-trigger { height: 32px; min-height: 32px; padding: 5px 8px; font-size: var(--font-size-xs); }
 .translation-input-footer > .ui-field .ui-select-option-content { width: auto; }
 .translation-input-footer .translation-versions { flex: 0 1 auto; }
 

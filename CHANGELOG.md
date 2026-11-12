@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.20 - Unreleased
+
+- Use compact controls, field spacing, and editor typography across the main and Mini windows.
+- Add a persistent text size setting for the application.
+
 ## 1.0.19 - Unreleased
 
 - Open saved web notes in a formatted reading view with their source and date, and return to reading after editing.

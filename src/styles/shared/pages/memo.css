@@ -1420,7 +1420,7 @@
 
 .daily-memo-rich-text-content .daily-memo-empty-line {
   position: relative;
-  min-height: 1.7em;
+  min-height: calc(1em * var(--body-leading));
   box-shadow: inset 0 -1px color-mix(in srgb, var(--app-border) 65%, transparent);
 }
 
@@ -1536,7 +1536,8 @@
   overflow: visible;
   outline: 0;
   color: var(--app-text);
-  line-height: 1.7;
+  font-size: var(--font-size-md);
+  line-height: var(--body-leading);
 }
 
 .daily-memo-rich-text-content > :first-child {
@@ -1549,7 +1550,7 @@
 
 .daily-memo-info-block {
   position: relative;
-  margin: 1rem 0;
+  margin: var(--field-spacing) 0;
   border-top: 1px solid color-mix(in srgb, var(--daily-memo-context-color) 48%, var(--app-border));
   border-bottom: 1px solid color-mix(in srgb, var(--daily-memo-context-color) 48%, var(--app-border));
   background: color-mix(in srgb, var(--daily-memo-context-color) 3%, transparent);
@@ -1562,7 +1563,7 @@
 
 .daily-memo-info-block-header {
   display: flex;
-  min-height: 2.35rem;
+  min-height: var(--control-height);
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
@@ -1955,7 +1956,7 @@
 
 .daily-memo-rich-text-content p {
   margin: var(--space-2) 0;
-  min-height: 1.7em;
+  min-height: calc(1em * var(--body-leading));
 }
 
 .daily-memo-rich-text-content h1,
@@ -2123,7 +2124,7 @@
 .daily-memo-rich-text-content ul[data-type="taskList"] > li > label,
 .daily-memo-item-markdown-content ul[data-type="taskList"] > li > label {
   display: inline-flex;
-  min-height: 1.7em;
+  min-height: calc(1em * var(--body-leading));
   flex: 0 0 auto;
   align-items: center;
   -webkit-user-select: none;
@@ -2140,8 +2141,9 @@
   > li
   > label
   > input {
-  width: 1rem;
-  height: 1rem;
+  width: 1em;
+  height: 1em;
+  font: inherit;
   margin: 0;
   accent-color: var(--app-primary);
 }
@@ -2159,7 +2161,7 @@
 .daily-memo-item-markdown-content ul[data-type="taskList"] > li > div {
   width: 100%;
   min-width: 0;
-  min-height: 1.7em;
+  min-height: calc(1em * var(--body-leading));
   flex: 1 1 auto;
 }
 
@@ -2169,7 +2171,7 @@
 
 .daily-memo-rich-text-content ul[data-type="taskList"] > li > div > p,
 .daily-memo-item-markdown-content ul[data-type="taskList"] > li > div > p {
-  min-height: 1.7em;
+  min-height: calc(1em * var(--body-leading));
   margin: 0;
 }
 
