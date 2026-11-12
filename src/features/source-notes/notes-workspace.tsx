@@ -1,3 +1,4 @@
+import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
   onSelect: (id: string | null) => void;
   active: boolean;
 }) {
+  const finishSelection = useSidebarSelection();
   const [notes, setNotes] = useState<CloudNote[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,21 +43,25 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
   }), [active, load]);
 
   return <section className="notes-workspace">
-    <aside className="notes-list custom-scrollbar">
+    <div className="workspace-toolbar">
+      <Button variant="secondary" onClick={() => onSelect(null)}><Plus size={16} />{getText("client.newNote")}</Button>
+    </div>
+    <SidebarHistory tab="notes">
+      <h2>{getText("client.notes")}</h2>
       <div className="workspace-toolbar">
-        <Button variant="secondary" onClick={() => onSelect(null)}><Plus size={16} />{getText("client.newNote")}</Button>
+        <Button variant="secondary" onClick={() => { onSelect(null); finishSelection?.(); }}><Plus size={16} />{getText("client.newNote")}</Button>
         <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} disabled={loading} onClick={() => void load()}><RefreshCw size={17} /></Button>
       </div>
       <RequestError code={error} />
       {!notes.length && !loading && !error && <p>{getText("client.noNotes")}</p>}
-      {notes.map(note => <button className="note-list-item" key={note.record.id} type="button"
-        aria-pressed={selectedId === note.record.id} onClick={() => onSelect(note.record.id)}>
+      {notes.map(note => <button className="history-item" key={note.record.id} type="button"
+        aria-current={selectedId === note.record.id || undefined} onClick={() => { onSelect(note.record.id); finishSelection?.(); }}>
         <strong>{note.resource.customTitle || note.resource.pageTitle || note.resource.url}</strong>
         <time dateTime={note.record.dateKey}>{note.record.dateKey}</time>
         <span>{note.record.content.slice(0, 120)}</span>
       </button>)}
       {cursor && <Button variant="secondary" disabled={loading} onClick={() => void load(cursor)}>{getText("client.more")}</Button>}
-    </aside>
+    </SidebarHistory>
     <NoteEditor key={selectedId ?? "new"} id={selectedId} onSaved={id => {
       onSelect(id); void load();
     }} onDeleted={() => { onSelect(null); void load(); }} />

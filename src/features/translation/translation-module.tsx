@@ -1,3 +1,4 @@
+import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ export function TranslationModule({ accountId, active, onChange }: {
   active: boolean;
   onChange: (change: TranslationChange) => void;
 }) {
+  const finishSelection = useSidebarSelection();
   const [history, setHistory] = useState<LocalTranslation[]>([]);
   const [selected, setSelected] = useState<LocalTranslation>();
   const [instance, setInstance] = useState(0);
@@ -41,15 +43,15 @@ export function TranslationModule({ accountId, active, onChange }: {
     <TranslationWorkspace key={`${selected?.id ?? "new"}:${instance}`}
       client={websiteTranslationClient} initialRecord={selected} active={active} accountId={accountId}
       onChange={change => { onChange(change); void load(); }} />
-    <section className="translation-local-history">
+    <SidebarHistory tab="translation">
       <div className="workspace-toolbar">
-        <strong>{getText("client.localHistory")}</strong>
+        <h2>{getText("client.localHistory")}</h2>
         <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} disabled={loading} onClick={() => void load()}><RefreshCw size={16} /></Button>
       </div>
       <RequestError code={error} />
       {!history.length && !loading && <p>{getText("client.noHistory")}</p>}
       {history.map(record => <div className="translation-history-row" key={record.id}>
-        <button type="button" className="translation-history-select" onClick={() => { setSelected(record); setInstance(value => value + 1); }}>
+        <button type="button" className="history-item" aria-current={selected?.id === record.id || undefined} onClick={() => { setSelected(record); setInstance(value => value + 1); finishSelection?.(); }}>
           <strong>{record.text.slice(0, 100)}</strong><span>{record.translatedText.slice(0, 160)}</span>
         </button>
         <Button variant="ghost" size="icon" aria-label={getText("client.delete")} onClick={() => setDeleteTarget(record)}><Trash2 size={16} /></Button>
@@ -58,17 +60,17 @@ export function TranslationModule({ accountId, active, onChange }: {
         const last = history[history.length - 1];
         void load({ createdAt: last.createdAt, id: last.id });
       }}>{getText("client.more")}</Button>}
-    </section>
-    <ConfirmDialog open={Boolean(deleteTarget)} busy={loading}
-      title={getText("translation.deleteLocalTitle")} description={getText("translation.deleteLocalDescription")}
-      closeLabel={getText("common.close")} cancelLabel={getText("common.cancel")} confirmLabel={getText("client.delete")}
-      onCancel={() => setDeleteTarget(null)} onConfirm={() => {
-        if (!deleteTarget) return;
-        void websiteTranslationClient.remove(deleteTarget.id).then(() => {
-          onChange({ kind: "remove", record: deleteTarget });
-          setDeleteTarget(null);
-          return load();
-        }).catch(() => setError("storage_failed"));
-      }} />
+      <ConfirmDialog open={Boolean(deleteTarget)} busy={loading}
+        title={getText("translation.deleteLocalTitle")} description={getText("translation.deleteLocalDescription")}
+        closeLabel={getText("common.close")} cancelLabel={getText("common.cancel")} confirmLabel={getText("client.delete")}
+        onCancel={() => setDeleteTarget(null)} onConfirm={() => {
+          if (!deleteTarget) return;
+          void websiteTranslationClient.remove(deleteTarget.id).then(() => {
+            onChange({ kind: "remove", record: deleteTarget });
+            setDeleteTarget(null);
+            return load();
+          }).catch(() => setError("storage_failed"));
+        }} />
+    </SidebarHistory>
   </section>;
 }

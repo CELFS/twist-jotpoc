@@ -61,7 +61,8 @@ export function Tabs<Value extends string>({
         <button
           aria-controls={`${id}-panel-${item.value}`}
           aria-selected={value === item.value}
-          title={labelOnSelection && value !== item.value ? item.label : undefined}
+          aria-label={labelOnSelection ? item.label : undefined}
+          title={labelOnSelection ? item.label : undefined}
           className="ui-tab"
           data-selected={value === item.value}
           id={`${id}-tab-${item.value}`}

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Globe, Languages, NotebookPen, Settings, Star, UserRound, X } from "lucide-react";
+import { Globe, Languages, NotebookPen, PanelLeft, Star } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Drawer } from "@/components/ui/drawer";
+import { SidebarContext, WorkspaceSidebar } from "@/features/shell/workspace-sidebar";
 import { SettingsPage } from "@/features/shell/settings-page";
 import { FloatingEntry } from "@/features/shell/floating-entry";
 import { WindowControls } from "@/features/shell/window-controls";
@@ -19,7 +18,9 @@ export function App() {
   const [windowState, setState] = useState<WindowState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [accountOpen, setAccountOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarTarget, setSidebarTarget] = useState<HTMLDivElement | null>(null);
+  const sidebarToggle = useRef<HTMLButtonElement>(null);
   const [tab, setTab] = useState<WorkspaceTab>("memos");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [autoHide, setAutoHide] = useState(() => localStorage.getItem("jotpoc.floating.autoHide") !== "false");
@@ -38,7 +39,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (!credential) { setTab("memos"); setAccountOpen(false); return; }
+    if (!credential) { setTab("memos"); return; }
     let timer: number;
     const scheduleExpiration = () => {
       const remaining = credential.expiresAt - Date.now();
@@ -64,7 +65,14 @@ export function App() {
   };
 
   const changePin = (pinned: boolean) => void updateWindow(() => setWindowPinned(pinned));
-  const drawerTitle = getText("client.account");
+  const finishSelection = () => {
+    if (windowState?.mode === "mini" || window.matchMedia("(max-width: 680px)").matches) {
+      setSidebarOpen(false);
+      sidebarToggle.current?.focus();
+    }
+  };
+  const openManagement = () => { setSidebarOpen(false); setSettingsOpen(true); };
+  const platform = windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other";
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
     <div className="expanded-shell" hidden={collapsed}>
@@ -74,50 +82,47 @@ export function App() {
             onModeChange={mode => void updateWindow(() => setWindowMode(mode))}
             onPinChange={changePin} />}
         </div>
-        <div className="header-pages">
+        <div className="header-pages" data-tauri-drag-region>
           {credential && <Tabs<WorkspaceTab> labelOnSelection className="workspace-tabs" id="workspace"
             ariaLabel={getText("client.tabs")} value={settingsOpen ? null : tab}
-            onValueChange={next => { setTab(next); setSettingsOpen(false); }}
+            onValueChange={next => { setTab(next); setSettingsOpen(false); if (next === "collections") finishSelection(); }}
             items={[
               { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
               { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
               { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
               { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
             ]} />}
-          <div className="header-utilities workspace-tabs">
-            {credential && <Button variant="ghost" size="icon" aria-label={getText("client.account")} title={getText("client.account")} onClick={() => setAccountOpen(true)}><UserRound size={18} /></Button>}
-            <button type="button" className="ui-tab settings-tab" data-selected={settingsOpen}
-              aria-label={getText("settings.shortLabel")} title={getText("settings.shortLabel")}
-              aria-pressed={settingsOpen} onClick={() => setSettingsOpen(open => !open)}>
-              <Settings size={17} aria-hidden="true" />{settingsOpen && getText("settings.shortLabel")}
-            </button>
-          </div>
+          <button type="button" className="sidebar-toggle" ref={sidebarToggle}
+            title={getText("client.sidebar")} aria-label={getText("client.sidebar")}
+            aria-expanded={sidebarOpen} aria-controls="workspace-sidebar"
+            onClick={() => setSidebarOpen(open => !open)}><PanelLeft size={17} aria-hidden="true" /></button>
         </div>
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
-      <main hidden={settingsOpen} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>
-        {credential ? <Workspace tab={tab} setTab={setTab} key={credential.accountId} accountId={credential.accountId} /> : <AccountPanel platform={windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other"} />}
-      </main>
-      {settingsOpen && <SettingsPage language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
-        onAutoHideChange={value => {
-          localStorage.setItem("jotpoc.floating.autoHide", String(value));
-          setAutoHide(value);
-        }} onBack={() => setSettingsOpen(false)} />}
+      <div className="shell-body" data-sidebar-open={sidebarOpen}>
+        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={openManagement}
+          collections={Boolean(credential && tab === "collections")} onCollections={() => { setSettingsOpen(false); setSidebarOpen(false); }} />
+        <div className="shell-page">
+          <SidebarContext.Provider value={{ target: sidebarOpen && !settingsOpen ? sidebarTarget : null, tab, onSelect: finishSelection }}>
+            <main hidden={settingsOpen} className={credential ? "workspace-host" : "app-content custom-scrollbar"} data-connection={!credential || undefined}>
+              {credential ? <Workspace tab={tab} setTab={setTab} key={credential.accountId} accountId={credential.accountId} /> : <AccountPanel platform={platform} />}
+            </main>
+          </SidebarContext.Provider>
+          {settingsOpen && <SettingsPage platform={platform} language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
+            onAutoHideChange={value => {
+              localStorage.setItem("jotpoc.floating.autoHide", String(value));
+              setAutoHide(value);
+            }} onBack={() => setSettingsOpen(false)} />}
+        </div>
+      </div>
     </div>
     {collapsed && <FloatingEntry autoHide={autoHide} busy={busy} pinned={windowState.pinned} onPinChange={changePin}
       onSettings={() => void updateWindow(async () => {
         const restored = await setWindowMode(windowState.resume_mode);
-        setAccountOpen(false);
-        setSettingsOpen(true);
+        openManagement();
         return restored;
       })} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
     {collapsed && error && <span className="visually-hidden" role="alert">{error}</span>}
-    {accountOpen && credential && !collapsed && <Drawer ariaLabel={drawerTitle}
-      className="client-drawer" contentClassName="custom-scrollbar" onClose={() => setAccountOpen(false)}
-      header={<div className="client-drawer-heading"><h2>{drawerTitle}</h2>
-        <Button variant="ghost" size="icon" aria-label={getText("common.close")} onClick={() => setAccountOpen(false)}><X size={18} /></Button></div>}>
-      <AccountPanel />
-    </Drawer>}
   </div>;
 }

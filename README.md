@@ -12,7 +12,8 @@ Version **1.0.1** connects the native shell to the existing TwistBalance service
 
 - Connect through TwistBalance device authorization, inspect and revoke sessions, and store access credentials through the native secure-keystore plugin.
 - Edit daily memos with the main site's Tiptap editor, custom task lists, source blocks, linked source-note cards, formatting toolbar, undo/redo, and preview mode.
-- Select dates and browse recent memo history using the existing calendar and field components.
+- Use the calendar to select a date or browse memos, notes, and local translation history in the sidebar. Wide windows keep the list beside the editor. Narrow windows and Mini return to the editor after a selection.
+- Open settings and account management from the sidebar, including before connecting a device.
 - Preserve account-specific memo drafts locally, autosave permitted edits, retry exact operations after lost acknowledgements, and resolve cloud conflicts explicitly.
 - Browse, create, edit, classify, and delete URL-based notes, retaining local drafts when saving fails.
 - Translate with the existing model selection, streaming responses, dictionary lookup, analysis, comparison, local version history, and cloud collections.
@@ -143,6 +144,6 @@ The desktop icon paths are configured in `src-tauri/tauri.conf.json`.
 
 ## Versioning
 
-The initial shell version is **1.0.0**. The current integration version is **1.0.9**. Subsequent versions increment the final number. Keep the application version aligned across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Cargo updates the workspace package entry in `src-tauri/Cargo.lock` when the Rust package version changes.
+The initial shell version is **1.0.0**. The current integration version is **1.0.10**. Subsequent versions increment the final number. Keep the application version aligned across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Cargo updates the workspace package entry in `src-tauri/Cargo.lock` when the Rust package version changes.
 
 Record changes in [CHANGELOG.md](CHANGELOG.md).

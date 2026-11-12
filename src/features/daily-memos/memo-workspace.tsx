@@ -1,8 +1,8 @@
+import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw, Undo2, Redo2, Type, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateSelection } from "@/components/date-selection";
-import { SelectField } from "@/components/ui/select-field";
 import { cloudApi } from "@/data/cloud-api";
 import type { MemoSourcePreset } from "@/data/models";
 import { subscribeToDataChanges } from "@/data/change-bus";
@@ -17,6 +17,7 @@ import { DailyMemoRichTextEditor, type DailyMemoRichTextEditorHandle, type Daily
 const noop = () => undefined;
 
 export function MemoWorkspace({ accountId }: { accountId: string }) {
+  const finishSelection = useSidebarSelection();
   const [dateKey, setDateKey] = useState(todayKey);
   const controller = useMemo(() => memoController(accountId, dateKey), [accountId, dateKey]);
   const state = useMemoController(controller);
@@ -62,10 +63,17 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
       <Button variant="ghost" onClick={() => setDateKey(todayKey())}>{getText("client.today")}</Button>
       <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} onClick={() => { void refresh(); void controller.refresh(); }}><RefreshCw size={17} /></Button>
     </div>
-    <SelectField label={getText("client.history")} value={dateKey} onChange={event => setDateKey(event.target.value)}>
-      {!history.some(item => item.dateKey === dateKey) && <option value={dateKey}>{dateKey}</option>}
-      {history.map(item => <option key={item.dateKey} value={item.dateKey}>{item.dateKey}{item.title ? ` · ${item.title}` : ""}</option>)}
-    </SelectField>
+    <SidebarHistory tab="memos">
+      <h2>{getText("client.history")}</h2>
+      <RequestError code={error} />
+      {history.length === 0 && !error && <p>{getText("client.noMemoHistory")}</p>}
+      {history.map(item => <button type="button" className="history-item" key={item.dateKey}
+        aria-current={item.dateKey === dateKey || undefined}
+        onClick={() => { setDateKey(item.dateKey); finishSelection?.(); }}>
+        <strong>{item.title || item.dateKey}</strong>
+        {item.title && <time dateTime={item.dateKey}>{item.dateKey}</time>}
+      </button>)}
+    </SidebarHistory>
     <RequestError code={state.error ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
     {!state.ready ? <p role="status">{getText("client.load")}</p> : <>
       {!state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}

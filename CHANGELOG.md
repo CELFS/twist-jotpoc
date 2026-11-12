@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.10 - Unreleased
+
+- Browse memo, note, and translation history in a responsive workspace sidebar.
+- Access settings and account management from the sidebar.
+
 ## 1.0.9 - Unreleased
 
 - Use compact workspace tabs joined to the content panel in the main and mini windows.

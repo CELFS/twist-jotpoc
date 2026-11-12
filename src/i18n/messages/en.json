@@ -472,7 +472,10 @@
     "credentialStoreHint": "Check access to your device’s credential store, then try again.",
     "retryRead": "Retry reading credential",
     "reauthorize": "Account authorization has expired or is no longer valid.",
-    "reconnect": "Reconnect to TwistBalance"
+    "reconnect": "Reconnect to TwistBalance",
+    "sidebar": "Sidebar",
+    "management": "Settings and account",
+    "noMemoHistory": "No memo history yet"
   },
   "settings": {
     "shortLabel": "Settings"

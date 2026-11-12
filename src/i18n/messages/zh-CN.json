@@ -472,7 +472,10 @@
     "credentialStoreHint": "请检查系统凭证存储的访问权限，然后重试。",
     "retryRead": "重新读取",
     "reauthorize": "账户授权已过期或失效，需要重新授权。",
-    "reconnect": "重新连接 TwistBalance"
+    "reconnect": "重新连接 TwistBalance",
+    "sidebar": "侧栏",
+    "management": "设置与账户",
+    "noMemoHistory": "暂无历史备忘"
   },
   "settings": {
     "shortLabel": "设置"
