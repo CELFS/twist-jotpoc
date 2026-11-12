@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Globe, Languages, NotebookPen, PanelRight, Star } from "lucide-react";
+import { Globe, Languages, NotebookPen, PanelRight } from "lucide-react";
+import { MarksIcon } from "@/components/ui/marks-icon";
 import { Tabs } from "@/components/ui/tabs";
 import { SidebarContext, WorkspaceSidebar } from "@/features/shell/workspace-sidebar";
 import { SettingsPage, type ManagementTab } from "@/features/shell/settings-page";
@@ -71,7 +72,7 @@ export function App() {
     { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
     { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
     { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
-    { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
+    { value: "collections", label: getText("client.collections"), icon: <MarksIcon size={17} aria-hidden="true" /> },
   ] as const;
   const sidebarTitle = getText(({
     memos: "client.history", notes: "client.notes",

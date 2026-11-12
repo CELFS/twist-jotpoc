@@ -1,4 +1,5 @@
 import { ErrorNotice } from "@/features/shell/notification-center";
+import { BeeIcon } from "@/components/ui/bee-icon";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export function CollectionEntry({ item, onManage }: {
   }
   return (
     <li className="collection-entry">
-      <span className="collection-kind">{getText(`collections.${item.kind}`)}</span>
+      <span className="collection-kind mark-kind" title={getText("collections.excerpt")}><BeeIcon size={13} aria-hidden="true" />{getText(`collections.${item.kind}`)}</span>
       <div className="collection-entry-copy">
         <p className="collection-text collection-copy-target" role="button" tabIndex={0} title={getText("collections.copy")}
           onClick={() => void copy()} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); void copy(); } }}>

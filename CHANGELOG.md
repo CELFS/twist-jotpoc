@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.23 - Unreleased
+
+- Browse and filter webpage underlines and excerpts in Marks. Navigate by source from the sidebar.
+
 ## 1.0.22 - Unreleased
 
 - Open translation history records in the main workspace with loading feedback, and place Translation before Collections in the tab bar.

@@ -1,3 +1,4 @@
+import { InkEntry } from "./ink-entry";
 import { ExternalLink, NotebookPen, ChevronDown, ChevronUp } from "lucide-react";
 import { ResilientLink as Link } from "@/components/resilient-link";
 import { useEffect, useState } from "react";
@@ -50,7 +51,9 @@ export function CollectionCard({ group, onManage }: { group: CollectionSourceGro
         </button>}
       </header>
       <ul className="collection-entries">
-        {(collapsed ? group.items.slice(0, previewLimit) : group.items).map((item) => <CollectionEntry key={item.id} item={item} onManage={onManage} />)}
+        {(collapsed ? group.items.slice(0, previewLimit) : group.items).map((item) => item.kind === "ink"
+          ? <InkEntry key={`ink-${item.id}`} item={item} />
+          : <CollectionEntry key={item.id} item={item} onManage={onManage} />)}
       </ul>
     </article>
   );

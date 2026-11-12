@@ -1,4 +1,5 @@
-import { CircleAlert, LockKeyhole, RefreshCw, Star } from "lucide-react";
+import { MarksIcon } from "@/components/ui/marks-icon";
+import { CircleAlert, LockKeyhole, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -12,7 +13,7 @@ export function CollectionStatus({ status, empty, onRetry }: {
   if (status === "loading") return <LoadingState label={getText("collections.loading")} rows={empty ? 3 : 1} />;
   if (status === "ready" && !empty) return null;
   const state = status === "ready" ? "empty" : status;
-  const Icon = state === "error" ? CircleAlert : state === "signedOut" ? LockKeyhole : Star;
+  const Icon = state === "error" ? CircleAlert : state === "signedOut" ? LockKeyhole : MarksIcon;
   return (
     <div className="collection-status" data-state={state} role={state === "error" ? "alert" : "status"}>
       <EmptyState
