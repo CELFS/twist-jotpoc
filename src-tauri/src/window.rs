@@ -40,6 +40,8 @@ struct Geometry {
 
 #[derive(Default)]
 struct Controller {
+    #[cfg(target_os = "macos")]
+    expanded_frame: Option<(objc2_app_kit::NSWindowStyleMask, bool)>,
     #[cfg(desktop)]
     reveal_position: Option<tauri::PhysicalPosition<i32>>,
     state: WindowState,
@@ -60,11 +62,69 @@ pub fn read_window_state(controller: State<'_, WindowController>) -> Result<Wind
     Ok(controller.state.clone())
 }
 
+#[cfg(target_os = "macos")]
+pub fn update_inactive_controls(native: &objc2_app_kit::NSWindow) {
+    use objc2_app_kit::{NSColor, NSWindowButton, NSWindowStyleMask};
+    use objc2_foundation::NSString;
+    use objc2_quartz_core::CALayer;
+
+    let Some(view) = native.contentView() else { return };
+    view.setWantsLayer(true);
+    let Some(layer) = view.layer() else { return };
+    let name = NSString::from_str("JotPocInactiveWindowControl");
+    // Read the sublayer snapshot on the main thread and remove only our own markers.
+    if let Some(children) = unsafe { layer.sublayers() } {
+        for index in (0..children.count()).rev() {
+            let child = children.objectAtIndex(index);
+            if child.name().as_deref() == Some(&*name) {
+                child.removeFromSuperlayer();
+            }
+        }
+    }
+    let style = native.styleMask();
+    if native.isKeyWindow() || !style.contains(NSWindowStyleMask::Titled) || style.contains(NSWindowStyleMask::FullScreen) {
+        return;
+    }
+    let color = NSColor::lightGrayColor().CGColor();
+    for kind in [NSWindowButton::CloseButton, NSWindowButton::MiniaturizeButton, NSWindowButton::ZoomButton] {
+        let Some(button) = native.standardWindowButton(kind) else { continue };
+        let mut frame = view.convertRect_fromView(button.bounds(), Some(&button));
+        let diameter = 12.0_f64.min(frame.size.width).min(frame.size.height);
+        frame.origin.x += (frame.size.width - diameter) / 2.0;
+        frame.origin.y += (frame.size.height - diameter) / 2.0;
+        frame.size.width = diameter;
+        frame.size.height = diameter;
+        let dot = CALayer::layer();
+        dot.setName(Some(&name));
+        dot.setFrame(frame);
+        dot.setCornerRadius(diameter / 2.0);
+        dot.setBackgroundColor(Some(&color));
+        dot.setZPosition(1.0);
+        layer.addSublayer(&dot);
+    }
+}
+
 #[cfg(desktop)]
-fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode) -> tauri::Result<()> {
+fn apply_mode(window: &WebviewWindow, controller: &mut Controller, mode: WindowMode) -> tauri::Result<()> {
     // Clear minimum dimensions before shrinking into the floating entry.
     window.set_min_size(None::<tauri::LogicalSize<f64>>)?;
     window.set_max_size(None::<tauri::LogicalSize<f64>>)?;
+    #[cfg(target_os = "macos")]
+    {
+        use objc2_app_kit::{NSWindow, NSWindowStyleMask};
+        // This synchronous command runs on the main thread. Change the actual frame
+        // before restoring geometry; a titled frame clips even a square content layer.
+        let handle = window.ns_window()?;
+        let native = unsafe { &*handle.cast::<NSWindow>() };
+        if mode == WindowMode::Collapsed {
+            controller.expanded_frame.get_or_insert_with(|| (native.styleMask(), native.hasShadow()));
+            native.setStyleMask(NSWindowStyleMask::Borderless);
+            native.setHasShadow(false);
+        } else if let Some((mask, shadow)) = controller.expanded_frame {
+            native.setStyleMask(mask);
+            native.setHasShadow(shadow);
+        }
+    }
     match mode {
         WindowMode::Full => {
             #[cfg(not(target_os = "macos"))]
@@ -98,7 +158,7 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
                 window.set_decorations(false)?;
                 window.set_resizable(false)?;
             }
-            let size = tauri::LogicalSize::new(ORB, ORB);
+            let size = tauri::LogicalSize::new(ENTRY_WIDTH, ENTRY_HEIGHT);
             window.set_size(size)?;
             window.set_max_size(Some(size))?;
             window.set_min_size(Some(size))?;
@@ -127,13 +187,16 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
             view.setWantsLayer(true);
             if let Some(layer) = view.layer() {
                 let collapsed = mode == WindowMode::Collapsed;
-                layer.setCornerRadius(if collapsed { ORB / 2.0 } else { 0.0 });
+                layer.setMaskedCorners(objc2_quartz_core::CACornerMask::all());
+                layer.setCornerRadius(if collapsed { TOOLBAR_RADIUS } else { 0.0 });
                 layer.setMasksToBounds(collapsed);
                 native.setOpaque(!collapsed);
+                native.setAlphaValue(if collapsed { 0.92 } else { 1.0 });
                 let background = if collapsed { NSColor::clearColor() } else { NSColor::windowBackgroundColor() };
                 native.setBackgroundColor(Some(&background));
                 native.invalidateShadow();
             }
+            update_inactive_controls(native);
         })?;
     }
     window.set_always_on_top(mode == WindowMode::Collapsed || controller.state.pinned)?;
@@ -163,9 +226,9 @@ pub fn set_window_mode(
             WindowMode::Mini => controller.mini = Some(geometry),
             WindowMode::Collapsed => controller.collapsed = Some(geometry),
         }
-        if let Err(error) = apply_mode(&window, &controller, mode) {
+        if let Err(error) = apply_mode(&window, &mut controller, mode) {
             // Restore the prior geometry if a window-manager operation failed.
-            apply_mode(&window, &controller, previous).map_err(|restore_error| {
+            apply_mode(&window, &mut controller, previous).map_err(|restore_error| {
                 format!("{error}; window restore failed: {restore_error}")
             })?;
             return Err(error.to_string());
@@ -174,6 +237,10 @@ pub fn set_window_mode(
             controller.state.resume_mode = previous;
         }
         controller.reveal_position = None;
+        #[cfg(target_os = "macos")]
+        if mode != WindowMode::Collapsed {
+            controller.expanded_frame = None;
+        }
         controller.state.mode = mode;
         return Ok(controller.state.clone());
     }
@@ -205,12 +272,16 @@ pub fn set_window_pinned(
     }
 }
 
+#[cfg(target_os = "macos")]
+const TOOLBAR_RADIUS: f64 = 8.0;
 #[cfg(desktop)]
-const ORB: f64 = 56.0;
+const ENTRY_WIDTH: f64 = 112.0;
+#[cfg(desktop)]
+const ENTRY_HEIGHT: f64 = 40.0;
 #[cfg(desktop)]
 const HANDLE: f64 = 12.0;
 #[cfg(desktop)]
-const HANDLE_LENGTH: f64 = 30.0;
+const HANDLE_LENGTH: f64 = ENTRY_HEIGHT;
 
 #[cfg(desktop)]
 fn fix_entry_size(window: &WebviewWindow, width: f64, height: f64) -> tauri::Result<()> {
@@ -234,26 +305,25 @@ pub fn position_floating_entry(window: WebviewWindow, controller: State<'_, Wind
             .map_err(|e| e.to_string())?.or(window.primary_monitor().map_err(|e| e.to_string())?)
             .ok_or("Display unavailable")?;
         let scale = monitor.scale_factor();
-        let size = (ORB * scale).round() as i32;
         let area = monitor.work_area();
         let left = area.position.x;
         let top = area.position.y;
-        let right = (left + area.size.width as i32 - size).max(left);
-        let bottom = (top + area.size.height as i32 - size).max(top);
+        let right = (left + area.size.width as i32 - (ENTRY_WIDTH * scale).round() as i32).max(left);
+        let bottom = (top + area.size.height as i32 - (ENTRY_HEIGHT * scale).round() as i32).max(top);
         let mut point = window.outer_position().map_err(|e| e.to_string())?;
         if let Some(saved) = state.reveal_position {
             point = saved;
         }
         if moving {
-            point.x = (cursor.x - x.clamp(0.0, ORB) * scale).round() as i32;
-            point.y = (cursor.y - y.clamp(0.0, ORB) * scale).round() as i32;
+            point.x = (cursor.x - x.clamp(0.0, ENTRY_WIDTH) * scale).round() as i32;
+            point.y = (cursor.y - y.clamp(0.0, ENTRY_HEIGHT) * scale).round() as i32;
         }
         point.x = point.x.clamp(left, right);
         point.y = point.y.clamp(top, bottom);
         let mut edge = "";
         let progress = if action == "dock" { x.clamp(0.0, 1.0) } else { 0.0 };
-        let mut width = ORB;
-        let mut height = ORB;
+        let mut width = ENTRY_WIDTH;
+        let mut height = ENTRY_HEIGHT;
         if progress > 0.0 {
             let (name, distance) = [("left", point.x-left), ("right", right-point.x),
                 ("top", point.y-top), ("bottom", bottom-point.y)].into_iter().min_by_key(|item| item.1).unwrap();
@@ -261,11 +331,11 @@ pub fn position_floating_entry(window: WebviewWindow, controller: State<'_, Wind
             edge = name;
             state.reveal_position = Some(point);
             let vertical = edge == "left" || edge == "right";
-            let depth = ORB + (HANDLE - ORB) * progress;
-            let length = ORB + (HANDLE_LENGTH - ORB) * progress;
-            (width, height) = if vertical { (depth, length) } else { (length, depth) };
-            let dx = ((ORB - width) * scale).round() as i32;
-            let dy = ((ORB - height) * scale).round() as i32;
+            let (target_width, target_height) = if vertical { (HANDLE, HANDLE_LENGTH) } else { (HANDLE_LENGTH, HANDLE) };
+            width += (target_width - ENTRY_WIDTH) * progress;
+            height += (target_height - ENTRY_HEIGHT) * progress;
+            let dx = ((ENTRY_WIDTH - width) * scale).round() as i32;
+            let dy = ((ENTRY_HEIGHT - height) * scale).round() as i32;
             if vertical {
                 point.x = if edge == "left" { left } else { right + dx };
                 point.y += dy / 2;
@@ -279,11 +349,27 @@ pub fn position_floating_entry(window: WebviewWindow, controller: State<'_, Wind
             #[cfg(target_os = "macos")]
             {
                 let handle = window.ns_window().map_err(|e| e.to_string())?;
-                // Match the native mask to the animation; a fixed orb radius rounds the docked edge twice.
+                // Synchronous command on the main thread; the window owns the AppKit handle.
                 let native = unsafe { &*handle.cast::<objc2_app_kit::NSWindow>() };
-                if let Some(layer) = native.contentView().and_then(|view| view.layer()) {
-                    layer.setCornerRadius(ORB * 0.5 * (1.0 - progress));
+                if let Some(view) = native.contentView() {
+                    if let Some(layer) = view.layer() {
+                        use objc2_quartz_core::CACornerMask as Corners;
+                        let low_y = Corners::LayerMinXMinYCorner | Corners::LayerMaxXMinYCorner;
+                        let high_y = Corners::LayerMinXMaxYCorner | Corners::LayerMaxXMaxYCorner;
+                        let corners = match edge {
+                            "left" => Corners::LayerMaxXMinYCorner | Corners::LayerMaxXMaxYCorner,
+                            "right" => Corners::LayerMinXMinYCorner | Corners::LayerMinXMaxYCorner,
+                            "top" if view.isFlipped() => high_y,
+                            "bottom" if view.isFlipped() => low_y,
+                            "top" => low_y,
+                            "bottom" => high_y,
+                            _ => Corners::all(),
+                        };
+                        layer.setMaskedCorners(corners);
+                        layer.setCornerRadius(width.min(height) * TOOLBAR_RADIUS / ENTRY_HEIGHT);
+                    }
                 }
+                native.setAlphaValue(0.92 + 0.08 * progress);
             }
         }
         if progress == 0.0 { state.reveal_position = None; }

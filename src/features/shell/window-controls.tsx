@@ -1,4 +1,5 @@
-import { Maximize2, Minimize2, Minus, Pin, PinOff } from "lucide-react";
+import { Maximize2, Minimize2, Minus } from "lucide-react";
+import { PinButton } from "./pin-button";
 import { getText } from "@/i18n/get-text";
 import type { WindowMode, WindowState } from "@/platform/window";
 
@@ -17,16 +18,7 @@ export function WindowControls({
 
   return (
     <div className="window-controls">
-      <button
-        aria-label={getText(state.pinned ? "app.unpin" : "app.pin")}
-        aria-pressed={state.pinned}
-        disabled={busy}
-        title={getText(state.pinned ? "app.unpin" : "app.pin")}
-        type="button"
-        onClick={() => onPinChange(!state.pinned)}
-      >
-        {state.pinned ? <PinOff size={18} /> : <Pin size={18} />}
-      </button>
+      <PinButton busy={busy} pinned={state.pinned} onPinChange={onPinChange} />
       <button
         aria-label={getText(state.mode === "full" ? "app.miniWindow" : "app.fullWindow")}
         disabled={busy}

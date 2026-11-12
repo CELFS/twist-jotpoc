@@ -101,25 +101,43 @@
 
 body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .floating-button {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  --toolbar-alpha: calc(.94 + .06 * var(--dock-progress, 0));
+  border-radius: 20vmin;
+  color: #242629;
+  background: linear-gradient(145deg, rgb(187 168 228 / var(--toolbar-alpha)), rgb(131 185 231 / var(--toolbar-alpha)) 50%, rgb(116 85 161 / var(--toolbar-alpha)));
+}
+.floating-button[data-edge="left"] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.floating-button[data-edge="right"] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.floating-button[data-edge="top"] { border-top-left-radius: 0; border-top-right-radius: 0; }
+.floating-button[data-edge="bottom"] { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.floating-actions {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  gap: 4px;
+  opacity: calc(1 - var(--dock-progress, 0));
+}
+.floating-actions button {
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  flex: none;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  overflow: hidden;
-  background: linear-gradient(145deg, #bba8e4, #83b9e7 50%, #7455a1) border-box;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
 }
-.floating-button img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: var(--app-background);
-  border-radius: inherit;
-  pointer-events: none;
-}
+.floating-actions button:hover { background: rgb(36 38 41 / 10%); }
+.floating-actions button:active { background: rgb(36 38 41 / 18%); }
+.floating-actions button:focus-visible { outline-offset: -2px; }
+.floating-actions img { display: block; border-radius: 6px; mix-blend-mode: multiply; pointer-events: none; }
 
 .account-panel {
   width: min(100%, 400px);
@@ -144,11 +162,5 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .connection-identity .connection-dot { background: var(--app-income); }
 .connection-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 
-.floating-button[data-edge] {
-  width: 100vw;
-  height: 100vh;
-  border-radius: calc(28px * (1 - var(--dock-progress, 0)));
-}
-.floating-button[data-edge] img { opacity: calc(1 - var(--dock-progress, 0)); }
 body:has(.floating-button) { overflow: hidden; }
 .floating-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }

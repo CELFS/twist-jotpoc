@@ -66,7 +66,9 @@ export function App() {
     } finally { changing.current = false; setBusy(false); }
   };
 
+  const changePin = (pinned: boolean) => void updateWindow(() => setWindowPinned(pinned));
   const drawerTitle = getText(drawer === "settings" ? "settings.shortLabel" : drawer === "account" ? "client.account" : "client.collections");
+  const openMainSite = () => void openUrl("https://twist-balance.pages.dev/").catch(() => setError(getText("app.mainSiteError")));
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
     <div className="expanded-shell" hidden={collapsed}>
@@ -80,10 +82,10 @@ export function App() {
             <Button variant="ghost" size="icon" aria-label={getText("client.account")} title={getText("client.account")} onClick={() => setDrawer("account")}><UserRound size={18} /></Button>
           </>}
           <Button variant="ghost" size="icon" aria-label={getText("app.openMainSite")} title={getText("app.openMainSite")}
-            onClick={() => void openUrl("https://twist-balance.pages.dev/").catch(() => setError(getText("app.mainSiteError")))}><ExternalLink size={17} /></Button>
+            onClick={openMainSite}><ExternalLink size={17} /></Button>
           {windowState && <WindowControls busy={busy} state={windowState}
             onModeChange={mode => void updateWindow(() => setWindowMode(mode))}
-            onPinChange={pinned => void updateWindow(() => setWindowPinned(pinned))} />}
+            onPinChange={changePin} />}
         </div>
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
@@ -92,7 +94,12 @@ export function App() {
         {credential ? <Workspace key={credential.accountId} accountId={credential.accountId} onTranslationChange={setTranslationChange} /> : <AccountPanel />}
       </main>
     </div>
-    {collapsed && <FloatingEntry autoHide={autoHide} busy={busy} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
+    {collapsed && <FloatingEntry autoHide={autoHide} busy={busy} pinned={windowState.pinned} onPinChange={changePin}
+      onSettings={() => void updateWindow(async () => {
+        const restored = await setWindowMode(windowState.resume_mode);
+        setDrawer("settings");
+        return restored;
+      })} onExpand={() => void updateWindow(() => setWindowMode(windowState.resume_mode))} onError={() => setError(getText("app.windowError"))} />}
     {collapsed && error && <span className="visually-hidden" role="alert">{error}</span>}
     {drawer && (drawer === "settings" || credential) && !collapsed && <Drawer ariaLabel={drawerTitle}
       className="client-drawer" contentClassName="custom-scrollbar" onClose={() => setDrawer(null)}

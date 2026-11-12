@@ -7,7 +7,17 @@ fn log_auth_failure(stage: String, code: String, status: u16) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(target_os = "macos")]
+    let builder = builder.on_window_event(|window, event| {
+        if matches!(event, tauri::WindowEvent::Focused(_) | tauri::WindowEvent::Resized(_)) {
+            let Ok(handle) = window.ns_window() else { return };
+            // Native window events are delivered on the AppKit main thread.
+            let native = unsafe { &*handle.cast::<objc2_app_kit::NSWindow>() };
+            window::update_inactive_controls(native);
+        }
+    });
+    builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_secure_keystore::init())

@@ -1,3 +1,5 @@
+import { PinButton } from "./pin-button";
+import { Settings2 } from "lucide-react";
 import appIcon from "../../../src-tauri/icons/128x128.png";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -6,12 +8,18 @@ import { getText } from "@/i18n/get-text";
 export function FloatingEntry({
   autoHide,
   busy,
+  pinned,
+  onPinChange,
   onExpand,
+  onSettings,
   onError,
 }: {
   autoHide: boolean;
   busy: boolean;
+  pinned: boolean;
+  onPinChange: (pinned: boolean) => void;
   onExpand: () => void;
+  onSettings: () => void;
   onError: () => void;
 }) {
   const origin = useRef<{ x: number; y: number } | null>(null);
@@ -63,22 +71,21 @@ export function FloatingEntry({
     scheduleHide();
     return () => { stopTimer(); cancelMotion(); };
   }, [autoHide]);
-  return <button
+  return <div
+    role="group"
     data-edge={edge}
     style={{ "--dock-progress": amount } as CSSProperties}
     onPointerEnter={() => { stopTimer(); animate(0); }}
     onPointerLeave={scheduleHide}
     onFocus={() => { stopTimer(); animate(0); }}
     className="floating-button"
-    disabled={busy}
     aria-label={getText("app.expand")}
-    title={getText("app.expand")}
-    type="button"
     onPointerDown={event => {
       if (event.button !== 0) return;
       stopTimer();
       cancelMotion();
-      event.currentTarget.setPointerCapture(event.pointerId);
+      const target = (event.target as Element).closest("button") ?? event.currentTarget;
+      target.setPointerCapture(event.pointerId);
       dragging.current = false;
       origin.current = { x: event.clientX, y: event.clientY };
     }}
@@ -96,11 +103,21 @@ export function FloatingEntry({
     }}
     onPointerUp={() => { origin.current = null; if (dragging.current) scheduleHide(); }}
     onPointerCancel={() => { origin.current = null; }}
-    onClick={() => {
-      if (!dragging.current) onExpand();
-      dragging.current = false;
+    onClickCapture={event => {
+      if (dragging.current) {
+        event.stopPropagation();
+        dragging.current = false;
+      }
     }}
   >
-    <img src={appIcon} alt="" width={56} height={56} draggable={false} />
-  </button>;
+    <div className="floating-actions">
+      <button type="button" disabled={busy} title={getText("app.expand")} aria-label={getText("app.expand")} onClick={onExpand}>
+        <img src={appIcon} alt="" width={24} height={24} draggable={false} />
+      </button>
+      <button type="button" disabled={busy} title={getText("settings.shortLabel")} aria-label={getText("settings.shortLabel")} onClick={onSettings}>
+        <Settings2 size={17} />
+      </button>
+      <PinButton busy={busy} pinned={pinned} onPinChange={onPinChange} />
+    </div>
+  </div>;
 }
