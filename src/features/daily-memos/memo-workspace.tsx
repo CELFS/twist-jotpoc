@@ -2,7 +2,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { HistoryGroups, historyDate } from "@/features/shell/history-groups";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, RefreshCw, Undo2, Redo2, Type, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateSelection } from "@/components/date-selection";
 import { cloudApi } from "@/data/cloud-api";
@@ -10,7 +10,7 @@ import type { MemoSourcePreset } from "@/data/models";
 import { subscribeToDataChanges } from "@/data/change-bus";
 import { getText } from "@/i18n/get-text";
 import { todayKey } from "@/lib/date";
-import { useTranslationPreference } from "@/features/translation/use-translation-preference";
+import { EditorActions, useFormattingPreference } from "./editor-actions";
 import { useDailyMemoPreviewPreference } from "./use-daily-memo-preview-preference";
 import { RequestError } from "@/features/shell/request-error";
 import { memoController, useMemoController } from "./memo-controller";
@@ -27,9 +27,9 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
   const [history, setHistory] = useState<Awaited<ReturnType<typeof cloudApi.memo.history>>["memos"]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const historyRevision = useRef(0);
-  const toolbarPreference = useTranslationPreference("dailyMemo.syntaxToolbarExpanded", false);
-  const toolbar = toolbarPreference.value;
+  const toolbarPreference = useFormattingPreference();
   const { preview, setPreview } = useDailyMemoPreviewPreference();
+  const readOnly = preview || !state.editable;
   const [historyState, setHistoryState] = useState<DailyMemoEditorHistoryState>({ canRedo: false, canUndo: false });
   const [error, setError] = useState<string | null>(null);
   const editor = useRef<DailyMemoRichTextEditorHandle>(null);
@@ -70,7 +70,6 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
       <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} onClick={() => { void refresh(); void controller.refresh(); }}><RefreshCw size={17} /></Button>
     </div>
     <SidebarHistory tab="memos">
-      <h2>{getText("client.history")}</h2>
       <RequestError code={error} />
       {historyLoading && <LoadingState compact rows={history.length ? 1 : 3} label={getText("client.load")} />}
       {error && <Button variant="ghost" onClick={() => void refresh()}>{getText("client.refresh")}</Button>}
@@ -88,22 +87,23 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
       {state.permissionKnown && !state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}
       <label className="ui-field">
         <span className="ui-field-label">{getText("client.title")}</span>
-        <input className="ui-input" value={state.title} maxLength={120} readOnly={!state.editable}
+        <input className="ui-input" value={state.title} maxLength={120} readOnly={readOnly}
           onCompositionStart={() => controller.setComposing(true)} onCompositionEnd={() => controller.setComposing(false)}
           onChange={event => controller.update({ title: event.target.value })} />
       </label>
       <div className="workspace-toolbar">
-        <Button variant="ghost" size="icon" aria-label={getText("client.undo")} disabled={!historyState.canUndo || !state.editable} onClick={() => editor.current?.undo()}><Undo2 size={17} /></Button>
-        <Button variant="ghost" size="icon" aria-label={getText("client.redo")} disabled={!historyState.canRedo || !state.editable} onClick={() => editor.current?.redo()}><Redo2 size={17} /></Button>
-        <Button variant="ghost" size="icon" aria-label={getText("client.toolbar")} aria-pressed={toolbar} disabled={!toolbarPreference.ready || toolbarPreference.saving} onClick={() => void toolbarPreference.toggle()}><Type size={17} /></Button>
-        <Button variant="ghost" size="icon" aria-label={getText("client.preview")} aria-pressed={preview} onClick={() => setPreview(!preview)}><BookOpen size={17} /></Button>
+        <EditorActions readOnly={readOnly} history={historyState} preference={toolbarPreference}
+          onUndo={() => editor.current?.undo()} onRedo={() => editor.current?.redo()} />
+        <Button variant="ghost" size="icon" aria-label={getText(preview ? "dailyMemo.exitPreview" : "dailyMemo.enterPreview")}
+          aria-pressed={preview} disabled={!state.editable} onClick={() => setPreview(!preview)}><BookOpen size={17} /></Button>
+        {preview && <span className="client-notice" role="status">{getText("dailyMemo.previewing")}</span>}
         <span className="save-status" role="status">{getText(state.saving ? "client.saving" : state.dirty ? "client.unsaved" : "client.saved")}</span>
-        <Button disabled={!state.editable || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>{getText("client.save")}</Button>
+        <Button disabled={readOnly || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>{getText("client.save")}</Button>
       </div>
       <DailyMemoRichTextEditor
         key={dateKey} ref={editor} content={state.content} label={getText("client.memoContent")}
-        preview={preview || !state.editable} placeholder={getText("client.memoPlaceholder")}
-        sourcePresets={sources} toolbarExpanded={toolbar} onChange={content => controller.update({ content })}
+        preview={readOnly} placeholder={getText("client.memoPlaceholder")}
+        sourcePresets={sources} toolbarExpanded={!readOnly && toolbarPreference.value} onChange={content => controller.update({ content })}
         onCompositionChange={controller.setComposing} onHistoryStateChange={setHistoryState}
         onCursorNearFloatingControlsChange={noop} onScrollActivity={noop} onScrollGestureEnd={noop} onScrollGestureStart={noop}
       />

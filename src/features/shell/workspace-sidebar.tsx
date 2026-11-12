@@ -31,8 +31,10 @@ export function WorkspaceSidebar({ open, setTarget, onManage, current, children 
 }) {
   return <aside id="workspace-sidebar" inert={!open} aria-hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
     {children}
-    <div className="sidebar-scroll custom-scrollbar">
-      <div ref={setTarget} />
+    <div className="sidebar-viewport">
+      <div className="sidebar-scroll custom-scrollbar">
+        <div ref={setTarget} />
+      </div>
     </div>
     <footer className="sidebar-management">
       <button type="button" aria-label={getText("settings.shortLabel")} title={getText("settings.shortLabel")}

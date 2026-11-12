@@ -5,7 +5,8 @@ import { DateSelection } from "@/components/date-selection";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { DailyMemoRichTextEditor } from "@/features/daily-memos/daily-memo-rich-text-editor";
+import { EditorActions, useFormattingPreference } from "@/features/daily-memos/editor-actions";
+import { DailyMemoRichTextEditor, type DailyMemoRichTextEditorHandle, type DailyMemoEditorHistoryState } from "@/features/daily-memos/daily-memo-rich-text-editor";
 import { RequestError } from "@/features/shell/request-error";
 import { getDatabase, type NoteDraft } from "@/data/database";
 import { cloudApi } from "@/data/cloud-api";
@@ -42,6 +43,9 @@ export function NoteEditor({ id, onSaved, onDeleted }: {
   const [error, setError] = useState<string | null>(null);
   const [conflict, setConflict] = useState<{ note: CloudNote | null } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const editor = useRef<DailyMemoRichTextEditorHandle>(null);
+  const [history, setHistory] = useState<DailyMemoEditorHistoryState>({ canUndo: false, canRedo: false });
+  const preference = useFormattingPreference();
   const composing = useRef(false);
 
   const assign = (value: NoteDraft) => { current.current = value; setDraft(value); };
@@ -226,7 +230,7 @@ export function NoteEditor({ id, onSaved, onDeleted }: {
     <Button variant="secondary" onClick={() => setReload(value => value + 1)}>{getText("client.refresh")}</Button>
   </section>;
   return <section className="note-editor">
-    <RequestError code={error} />
+    <RequestError code={error ?? (preference.failed ? "storage_failed" : null)} />
     <label className="ui-field"><span>{getText("client.url")}</span>
       <input className="ui-input" type="url" value={draft.url} readOnly={Boolean(id) || busy || Boolean(draft.pending)}
         onChange={event => update({ url: event.target.value })} />
@@ -241,10 +245,14 @@ export function NoteEditor({ id, onSaved, onDeleted }: {
       <option value="">{getText("client.noSource")}</option>
       {sources.map(source => <option key={source.id} value={source.id}>{source.name}</option>)}
     </SelectField>
-    <DailyMemoRichTextEditor content={draft.content} label={getText("client.noteContent")} preview={busy}
-      memoInfoEnabled={false} sourcePresets={sources} toolbarExpanded placeholder={getText("client.notePlaceholder")}
+    <div className="workspace-toolbar">
+      <EditorActions readOnly={busy} history={history} preference={preference}
+        onUndo={() => editor.current?.undo()} onRedo={() => editor.current?.redo()} />
+    </div>
+    <DailyMemoRichTextEditor ref={editor} content={draft.content} label={getText("client.noteContent")} preview={busy}
+      memoInfoEnabled={false} sourcePresets={sources} toolbarExpanded={!busy && preference.value} placeholder={getText("client.notePlaceholder")}
       onChange={content => update({ content })} onCompositionChange={value => { composing.current = value; }}
-      onHistoryStateChange={noop} onCursorNearFloatingControlsChange={noop}
+      onHistoryStateChange={setHistory} onCursorNearFloatingControlsChange={noop}
       onScrollActivity={noop} onScrollGestureStart={noop} onScrollGestureEnd={noop}
     />
     <div className="client-actions">

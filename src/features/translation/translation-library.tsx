@@ -59,7 +59,7 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
   }
 
   return <section className="translation-library">
-    <header><h2>{getText("translation.library")}</h2><Button size="icon" variant="ghost" disabled={loading || busy}
+    <header><Button size="icon" variant="ghost" disabled={loading || busy}
       aria-label={getText("translation.refresh")} onClick={() => void load()}><RefreshCw size={16} /></Button></header>
     <p className="client-notice">{getText("translation.libraryHint")}</p>
     {offline && <ErrorNotice text={getText("translation.cloudUnavailable")} />}

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.18 - Unreleased
+
+- Make memo previews read-only and share undo, redo, and formatting controls with the note editor.
+- Extend the sidebar to the bottom of the window and group account and settings actions in the lower corner.
+
 ## 1.0.17 - Unreleased
 
 - Compact all four workspace sidebars and adapt the main and Mini panels to the available width.

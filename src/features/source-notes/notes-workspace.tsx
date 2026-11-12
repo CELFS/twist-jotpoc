@@ -55,7 +55,6 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
     </div>
     <SidebarHistory tab="notes">
       <div className="sidebar-history-heading">
-        <h2>{getText("client.notes")}</h2>
         <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} disabled={loading} onClick={() => void load()}><RefreshCw size={17} /></Button>
       </div>
       <RequestError code={error} />

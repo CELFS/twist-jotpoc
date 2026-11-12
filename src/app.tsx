@@ -73,6 +73,10 @@ export function App() {
     { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
     { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
   ] as const;
+  const sidebarTitle = getText(({
+    memos: "client.history", notes: "client.notes",
+    collections: "collections.title", translation: "translation.library",
+  } as const)[tab]);
   const platform = windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other";
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
@@ -88,6 +92,7 @@ export function App() {
             ariaLabel={getText("client.tabs")} value={managementTab ? null : tab}
             onValueChange={openPage} items={items} />}
         </div>
+        {credential && sidebarOpen && <h2 className="header-sidebar-title" title={sidebarTitle} data-tauri-drag-region>{sidebarTitle}</h2>}
         <button type="button" className="sidebar-toggle"
             title={getText("client.sidebar")} aria-label={getText("client.sidebar")}
             aria-expanded={sidebarOpen} aria-controls="workspace-sidebar"
