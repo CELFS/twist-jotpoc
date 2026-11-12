@@ -20,7 +20,7 @@ export function Workspace({ accountId, tab, setTab }: {
   accountId: string;
 }) {
 
-  const [noteId, setNoteId] = useState<string | null>(null);
+  const [noteView, setNoteView] = useState<{ id: string | null; editing: boolean }>({ id: null, editing: false });
   const [visited, setVisited] = useState({ translation: false, notes: false, collections: false });
   useEffect(() => {
     if (tab !== "memos") setVisited(previous => previous[tab] ? previous : { ...previous, [tab]: true });
@@ -28,7 +28,7 @@ export function Workspace({ accountId, tab, setTab }: {
   useEffect(() => {
     const navigate = (event: Event) => {
       const id: unknown = (event as CustomEvent).detail;
-      if (typeof id === "string") { setNoteId(id); setTab("notes"); }
+      if (typeof id === "string") { setNoteView({ id, editing: false }); setTab("notes"); }
     };
     window.addEventListener("jotpoc:open-note", navigate);
     return () => { window.removeEventListener("jotpoc:open-note", navigate); stopMemoControllers(); };
@@ -90,7 +90,7 @@ export function Workspace({ accountId, tab, setTab }: {
       <MemoWorkspace accountId={accountId} />
     </div>
     <div id="workspace-panel-notes" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-notes" hidden={tab !== "notes"}>
-      {visited.notes && <Suspense fallback={<LoadingState label={getText("client.load")} />}><NotesWorkspace selectedId={noteId} onSelect={setNoteId} active={tab === "notes"} /></Suspense>}
+      {visited.notes && <Suspense fallback={<LoadingState label={getText("client.load")} />}><NotesWorkspace view={noteView} setView={setNoteView} active={tab === "notes"} /></Suspense>}
     </div>
   </div>;
 }

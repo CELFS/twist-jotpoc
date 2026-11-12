@@ -1,6 +1,6 @@
 import { LoadingState } from "@/components/ui/loading-state";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cloudApi } from "@/data/cloud-api";
@@ -10,11 +10,19 @@ import { getText } from "@/i18n/get-text";
 import { RequestError } from "@/features/shell/request-error";
 import { NoteEditor } from "./note-editor";
 
-export function NotesWorkspace({ selectedId, onSelect, active }: {
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
+import { NoteReader } from "./note-reader";
+
+type NoteView = { id: string | null; editing: boolean };
+
+export function NotesWorkspace({ view, setView, active }: {
+  view: NoteView;
+  setView: Dispatch<SetStateAction<NoteView>>;
   active: boolean;
 }) {
+  const selectedId = view.id;
+  const finishEditing = (id: string | null) => {
+    setView(current => current === view ? { id, editing: false } : current);
+  };
   const finishSelection = useSidebarSelection();
   const [notes, setNotes] = useState<Awaited<ReturnType<typeof cloudApi.note.summaries>>["notes"]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -51,7 +59,7 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
 
   return <section className="notes-workspace">
     <div className="workspace-toolbar">
-      <Button variant="secondary" onClick={() => onSelect(null)}><Plus size={16} />{getText("client.newNote")}</Button>
+      <Button variant="secondary" onClick={() => setView({ id: null, editing: true })}><Plus size={16} />{getText("client.newNote")}</Button>
     </div>
     <SidebarHistory tab="notes">
       <div className="sidebar-history-heading">
@@ -62,15 +70,18 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
       {loading && <LoadingState compact rows={notes.length ? 1 : 3} label={getText("client.load")} />}
       <HistoryGroups items={notes} groupKey={note => note.dateKey}>{note =>
         <button className="history-item" key={note.id} type="button" aria-current={selectedId === note.id || undefined}
-          onClick={() => { onSelect(note.id); finishSelection?.(); }}>
+          onClick={() => { setView({ id: note.id, editing: false }); finishSelection?.(); }}>
           <strong>{note.pageTitle || getText("dailyMemo.sourceNote.untitledPage")}</strong>
           <span>{note.url}</span>
           {note.summary.trim() && <span>{note.summary.replace(/\s+/g, " ").trim().slice(0, 96)}</span>}
         </button>}</HistoryGroups>
       {cursor && <Button variant="secondary" disabled={loading} onClick={() => void load(cursor)}>{getText("client.more")}</Button>}
     </SidebarHistory>
-    <NoteEditor key={selectedId ?? "new"} id={selectedId} onSaved={id => {
-      onSelect(id); void load();
-    }} onDeleted={() => { onSelect(null); void load(); }} />
+    {view.editing ? (
+      <NoteEditor key={selectedId ?? "new"} id={selectedId} onSaved={finishEditing}
+        onClose={() => finishEditing(selectedId)} onDeleted={() => finishEditing(null)} />
+    ) : selectedId ? (
+      <NoteReader key={selectedId} id={selectedId} onEdit={() => setView({ id: selectedId, editing: true })} />
+    ) : <p className="client-notice">{getText("sourceNotes.selectPrompt")}</p>}
   </section>;
 }

@@ -24,10 +24,11 @@ function newDraft(): NoteDraft {
     sourcePresetId: null, content: "", expectedNoteVersion: 0, expectedResourceVersion: 0, updatedAt: Date.now() };
 }
 
-export function NoteEditor({ id, onSaved, onDeleted }: {
+export function NoteEditor({ id, onSaved, onDeleted, onClose }: {
   id: string | null;
   onSaved: (id: string) => void;
   onDeleted: () => void;
+  onClose: () => void;
 }) {
   const database = useRef(getDatabase()).current;
   const [draft, setDraft] = useState<NoteDraft>(newDraft);
@@ -112,6 +113,16 @@ export function NoteEditor({ id, onSaved, onDeleted }: {
     setError(null);
     void persist(next).catch(() => setError("storage_failed"));
   };
+
+  async function closeEditor() {
+    if (writing.current || composing.current) return;
+    try {
+      if (dirty) await writes.current;
+      onClose();
+    } catch {
+      setError("storage_failed");
+    }
+  }
 
   const validateUrl = (value: string) => {
     try {
@@ -227,9 +238,11 @@ export function NoteEditor({ id, onSaved, onDeleted }: {
   if (!ready) return <LoadingState label={getText("client.load")} />;
   if (!loaded) return <section className="note-editor">
     <RequestError code={error} />
+    <Button variant="ghost" onClick={onClose}>{getText("common.back")}</Button>
     <Button variant="secondary" onClick={() => setReload(value => value + 1)}>{getText("client.refresh")}</Button>
   </section>;
   return <section className="note-editor">
+    <Button variant="ghost" disabled={busy} onClick={() => void closeEditor()}>{getText("common.back")}</Button>
     <RequestError code={error ?? (preference.failed ? "storage_failed" : null)} />
     <label className="ui-field"><span>{getText("client.url")}</span>
       <input className="ui-input" type="url" value={draft.url} readOnly={Boolean(id) || busy || Boolean(draft.pending)}

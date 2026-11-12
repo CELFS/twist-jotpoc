@@ -309,6 +309,12 @@
   .collection-entry-actions { --tap-target: 28px; }
 }
 .note-editor { min-width: 0; }
+.note-reader { display: grid; min-width: 0; gap: var(--space-2); overflow-wrap: anywhere; }
+.note-reader h2 { margin: 0; font-size: var(--font-size-md); }
+.note-reader time, .note-reader > a { font-size: var(--font-size-sm); }
+.note-reader time { color: var(--app-text-muted); }
+.note-reader > a { color: var(--app-primary); }
+.note-reader .daily-memo-rich-text-editor { height: auto; min-height: 0; }
 .sidebar-management button, .sidebar-toggle {
   align-self: center;
   display: grid; place-items: center; height: var(--header-button-size); width: var(--header-button-size);
