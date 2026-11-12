@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.21 - Unreleased
+
+- Apply Twill’s orange palette in both themes and distinguish saved translations with a solid yellow star.
+- Fill the available workspace height when editing memos and notes.
+
 ## 1.0.20 - Unreleased
 
 - Use compact controls, field spacing, and editor typography across the main and Mini windows.

@@ -72,8 +72,9 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
         {!row.savedBy && <span className="translation-tag">{getText("translation.local")}</span>}
         <Button size="icon" variant="ghost" disabled={busy || offline} aria-label={getText("translation.delete")}
           onClick={() => row.savedBy ? setConfirm(row) : void act(row, "remove")}><Trash2 size={14} /></Button>
-        <Button size="icon" variant="ghost" disabled={busy || offline || Boolean(row.savedBy)} aria-label={getText(row.savedBy ? "translation.saved" : "translation.collect")}
-          onClick={() => void act(row, "collect")}><Star size={14} fill={row.savedBy ? "currentColor" : "none"} /></Button>
+        <Button size="icon" variant="ghost" className="translation-collect-button" data-collected={Boolean(row.savedBy) || undefined}
+          disabled={busy || offline || Boolean(row.savedBy)} title={getText(row.savedBy ? "translation.saved" : "translation.collect")} aria-label={getText(row.savedBy ? "translation.saved" : "translation.collect")}
+          onClick={() => void act(row, "collect")}><Star size={14} aria-hidden="true" /></Button>
       </div>
     </article>)}
     {loading && <LoadingState compact rows={items.length ? 1 : 3} label={getText("translation.loading")} />}

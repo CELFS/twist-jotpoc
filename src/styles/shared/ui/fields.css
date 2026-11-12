@@ -68,7 +68,7 @@
   background: linear-gradient(
     145deg,
     color-mix(in srgb, var(--robin-sky) 72%, var(--app-control-thumb)),
-    color-mix(in srgb, var(--robin-lilac) 78%, var(--app-control-thumb)) 68%
+    color-mix(in srgb, var(--app-primary) 78%, var(--app-control-thumb)) 68%
   );
   box-shadow:
     inset -0.08rem -0.08rem 0 rgb(67 35 116 / 10%),
@@ -118,7 +118,7 @@
   width: 0.34rem;
   height: 0.11rem;
   border-radius: var(--radius-pill);
-  background: var(--robin-violet-strong);
+  background: var(--app-primary-strong);
   transition:
     height var(--motion-fast) var(--motion-ease),
     width var(--motion-fast) var(--motion-ease);
@@ -133,7 +133,7 @@
   border-radius: 90% 14% 72% 28%;
   background: var(--app-control-thumb);
   box-shadow: inset -0.1rem -0.05rem 0
-    color-mix(in srgb, var(--robin-lilac) 48%, transparent);
+    color-mix(in srgb, var(--app-primary) 48%, transparent);
   transform: rotate(-8deg);
   transform-origin: 90% 55%;
   transition: transform 220ms var(--motion-ease);
@@ -158,7 +158,7 @@
     linear-gradient(
       125deg,
       color-mix(in srgb, var(--robin-sky) 82%, var(--app-primary)),
-      color-mix(in srgb, var(--robin-lilac) 78%, var(--app-primary))
+      color-mix(in srgb, var(--app-primary) 78%, var(--app-primary))
     );
   box-shadow: inset 0 0.0625rem 0 rgb(255 255 255 / 34%);
 }

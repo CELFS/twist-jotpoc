@@ -44,7 +44,7 @@
   background: linear-gradient(
     145deg,
     var(--robin-sky),
-    color-mix(in srgb, var(--robin-lilac) 75%, var(--robin-sky))
+    color-mix(in srgb, var(--app-primary) 75%, var(--robin-sky))
   );
   box-shadow: 0 0.4rem 1rem rgb(67 35 116 / 14%);
   color: var(--app-on-color);

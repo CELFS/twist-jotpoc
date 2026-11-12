@@ -66,7 +66,7 @@
 
 .daily-memo-item-markdown-content blockquote {
   padding-left: var(--space-2);
-  border-left: 0.15rem solid var(--robin-lilac);
+  border-left: 0.15rem solid var(--app-primary);
 }
 
 .daily-memo-item-markdown-content pre,
@@ -96,17 +96,17 @@
   --daily-memo-context-gradient: linear-gradient(
     90deg,
     var(--robin-sky),
-    var(--robin-lilac)
+    var(--app-primary)
   );
   --daily-memo-context-gradient-reversed: linear-gradient(
     270deg,
     var(--robin-sky),
-    var(--robin-lilac)
+    var(--app-primary)
   );
   --daily-memo-context-bookmark-gradient: var(
     --daily-memo-context-gradient
   );
-  --daily-memo-context-shadow-color: var(--robin-lilac);
+  --daily-memo-context-shadow-color: var(--app-primary);
   --daily-memo-floating-surface: color-mix(
     in srgb,
     var(--app-surface) 90%,
@@ -345,12 +345,12 @@
     linear-gradient(
       115deg,
       color-mix(in srgb, var(--robin-sky) 28%, var(--app-surface)),
-      color-mix(in srgb, var(--robin-lilac) 36%, var(--app-surface))
+      color-mix(in srgb, var(--app-primary) 36%, var(--app-surface))
     ) padding-box,
-    linear-gradient(115deg, var(--robin-sky), var(--robin-lilac)) border-box;
+    linear-gradient(115deg, var(--robin-sky), var(--app-primary)) border-box;
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--app-surface) 75%, transparent),
-    0 3px 12px color-mix(in srgb, var(--robin-lilac) 22%, transparent);
+    0 3px 12px color-mix(in srgb, var(--app-primary) 22%, transparent);
 }
 
 .daily-memo-preview-status {
@@ -814,7 +814,7 @@
   background: linear-gradient(
     115deg,
     color-mix(in srgb, var(--robin-sky) 28%, var(--app-surface)),
-    color-mix(in srgb, var(--robin-lilac) 36%, var(--app-surface))
+    color-mix(in srgb, var(--app-primary) 36%, var(--app-surface))
   );
   box-shadow: none;
   pointer-events: none;
@@ -960,7 +960,7 @@
 .daily-memo-list-item[data-selected="true"] {
   border-color: color-mix(
     in srgb,
-    var(--robin-lilac) 62%,
+    var(--app-primary) 62%,
     var(--app-border)
   );
   background: color-mix(
@@ -980,7 +980,7 @@
   border-radius: var(--radius-pill);
   background: color-mix(
     in srgb,
-    var(--robin-lilac) 18%,
+    var(--app-primary) 18%,
     var(--app-surface)
   );
   color: var(--app-primary);
@@ -2037,7 +2037,7 @@
 .daily-memo-rich-text-content blockquote {
   margin: var(--space-3) 0;
   padding-left: var(--space-3);
-  border-left: 0.2rem solid var(--robin-lilac);
+  border-left: 0.2rem solid var(--app-primary);
   color: var(--app-text-muted);
 }
 
@@ -2226,7 +2226,7 @@
     linear-gradient(
       135deg,
       var(--app-surface),
-      color-mix(in srgb, var(--robin-lilac) 10%, var(--app-surface))
+      color-mix(in srgb, var(--app-primary) 10%, var(--app-surface))
     );
   box-shadow: var(--app-shadow-soft);
   color: var(--app-text);
@@ -2257,7 +2257,7 @@
 }
 
 .user-feature-entry > a:hover {
-  border-color: var(--robin-lilac);
+  border-color: var(--app-primary);
 }
 
 .user-feature-entry-icon {
@@ -2268,7 +2268,7 @@
   border-radius: var(--radius-pill);
   background: color-mix(
     in srgb,
-    var(--robin-lilac) 20%,
+    var(--app-primary) 20%,
     var(--app-surface)
   );
   color: var(--app-primary);
@@ -2298,7 +2298,7 @@
   border-radius: var(--radius-pill);
   background: color-mix(
     in srgb,
-    var(--robin-lilac) 28%,
+    var(--app-primary) 28%,
     transparent
   );
   content: "";

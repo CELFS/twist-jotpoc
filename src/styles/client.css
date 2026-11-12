@@ -166,9 +166,18 @@
 .workspace-toolbar { flex-wrap: wrap; margin-bottom: var(--space-3); }
 .workspace-toolbar time { font-variant-numeric: tabular-nums; }
 .memo-workspace > .ui-field, .note-editor > .ui-field { margin: var(--field-spacing) 0; }
+.memo-workspace, .notes-workspace:has(> .note-editor), .note-editor {
+  display: flex;
+  flex-direction: column;
+}
+.memo-workspace, .notes-workspace:has(> .note-editor) { height: 100%; }
+.memo-workspace > *, .notes-workspace > .workspace-toolbar, .note-editor > * { flex-shrink: 0; }
+.notes-workspace > .note-editor { flex: 1 0 auto; }
+.note-editor > .ui-button { align-self: flex-start; }
 .memo-workspace .daily-memo-rich-text-editor, .note-editor .daily-memo-rich-text-editor {
-  height: clamp(12rem, 52dvh, 36rem);
-  min-height: min(16rem, 50dvh);
+  flex: 1 0 8rem;
+  height: auto;
+  min-height: 8rem;
   border: 1px solid var(--app-border);
   border-radius: 12px;
   background: var(--app-surface);
