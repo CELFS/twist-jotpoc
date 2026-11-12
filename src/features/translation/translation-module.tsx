@@ -1,24 +1,46 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { Button } from "@/components/ui/button";
-import { SidebarHistory } from "@/features/shell/workspace-sidebar";
+import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { getText } from "@/i18n/get-text";
+import type { LocalTranslation } from "@/translation/contracts";
+import { historyDetail, type HistoryRow } from "./history-library-client";
 import type { TranslationChange } from "./translation-change";
 import { TranslationLibrary } from "./translation-library";
 import { websiteTranslationClient } from "./translation-client";
 import { TranslationWorkspace } from "./translation-workspace";
 
 export function TranslationModule({ accountId, active }: { accountId: string; active: boolean }) {
-  const [instance, setInstance] = useState(0);
+  const revision = useRef(0);
+  const [workspace, setWorkspace] = useState<{ key: number; record?: LocalTranslation }>({ key: 0 });
+  const [loadingRecord, setLoadingRecord] = useState(false);
+  const finishSelection = useSidebarSelection();
+
+  async function openHistory(row: HistoryRow) {
+    const key = ++revision.current;
+    finishSelection?.();
+    setLoadingRecord(true);
+    try {
+      const record = await historyDetail(accountId, row);
+      if (key === revision.current) setWorkspace({ key, record });
+    } finally {
+      if (key === revision.current) setLoadingRecord(false);
+    }
+  }
+
   const [change, setChange] = useState<TranslationChange>();
   return <section className="translation-module">
     <div className="workspace-toolbar">
-      <Button variant="secondary" onClick={() => setInstance(value => value + 1)}>
+      <Button variant="secondary" onClick={() => { setLoadingRecord(false); setWorkspace({ key: ++revision.current }); }}>
         <Plus size={16} />{getText("client.newTranslation")}
       </Button>
     </div>
-    <TranslationWorkspace key={instance} client={websiteTranslationClient} active={active} accountId={accountId}
-      change={change} onChange={setChange} />
-    <SidebarHistory tab="translation"><TranslationLibrary accountId={accountId} change={change} onChange={setChange} /></SidebarHistory>
+    {loadingRecord && <LoadingState label={getText("translation.loading")} />}
+    <div hidden={loadingRecord}>
+      <TranslationWorkspace key={workspace.key} initialRecord={workspace.record} client={websiteTranslationClient} active={active} accountId={accountId}
+        change={change} onChange={setChange} />
+    </div>
+    <SidebarHistory tab="translation"><TranslationLibrary onSelect={openHistory} accountId={accountId} change={change} onChange={setChange} /></SidebarHistory>
   </section>;
 }

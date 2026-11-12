@@ -5,22 +5,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getText, type MessageKey } from "@/i18n/get-text";
-import type { LocalTranslation } from "@/translation/contracts";
 import { historyDetail, historyPage, removeHistoryRow, type Cursor, type HistoryRow } from "./history-library-client";
 import { websiteTranslationClient } from "./translation-client";
 import type { TranslationChange } from "./translation-change";
-import { TranslationPreviewDrawer } from "./translation-preview-drawer";
-import { TranslationWorkspace } from "./translation-workspace";
 import { TranslationDeleteConfirmation } from "./translation-delete-confirmation";
 
-export function TranslationLibrary({ accountId, change, onChange }: { accountId: string; change?: TranslationChange; onChange: (change: TranslationChange) => void }) {
+export function TranslationLibrary({ accountId, change, onChange, onSelect }: { accountId: string; onSelect: (row: HistoryRow) => Promise<void>; change?: TranslationChange; onChange: (change: TranslationChange) => void }) {
   const [items, setItems] = useState<HistoryRow[]>([]);
   const [more, setMore] = useState(false);
   const [offline, setOffline] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<MessageKey | "">("");
-  const [preview, setPreview] = useState<LocalTranslation | null>(null);
   const [confirm, setConfirm] = useState<HistoryRow | null>(null);
   const request = useRef(0);
   const load = useCallback(async (cursor?: Cursor) => {
@@ -49,9 +45,10 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
         const record = await removeHistoryRow(accountId, row);
         setConfirm(null);
         onChange({ kind: row.savedBy ? "uncollect" : "remove", record });
+      } else if (action === "preview") {
+        await onSelect(row);
       } else {
         const record = await historyDetail(accountId, row);
-        if (action === "preview") { setPreview(record); return; }
         const saved = await websiteTranslationClient.collect(record);
         onChange({ kind: "collect", record: saved });
       }
@@ -82,9 +79,6 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
     {more && items.length > 0 && <Button variant="secondary" disabled={busy || loading} onClick={() => {
       const { id, createdAt } = items[items.length - 1]; void load({ id, createdAt });
     }}>{getText("translation.more")}</Button>}
-    {preview && <TranslationPreviewDrawer title={getText("translation.preview")} onClose={() => setPreview(null)}>
-      <TranslationWorkspace key={preview.id} initialRecord={preview} accountId={accountId} active client={websiteTranslationClient} change={change} onChange={onChange} />
-    </TranslationPreviewDrawer>}
     {confirm && <TranslationDeleteConfirmation source="cloud" busy={busy} feedback={error ? getText(error) : undefined}
       onCancel={() => setConfirm(null)} onConfirm={() => void act(confirm, "remove")} />}
   </section>;

@@ -70,8 +70,8 @@ export function App() {
   const items = [
     { value: "memos", label: getText("client.memos"), icon: <NotebookPen size={17} aria-hidden="true" /> },
     { value: "notes", label: getText("client.notes"), icon: <Globe size={17} aria-hidden="true" /> },
-    { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
     { value: "translation", label: getText("client.translation"), icon: <Languages size={17} aria-hidden="true" /> },
+    { value: "collections", label: getText("client.collections"), icon: <Star size={17} aria-hidden="true" /> },
   ] as const;
   const sidebarTitle = getText(({
     memos: "client.history", notes: "client.notes",
