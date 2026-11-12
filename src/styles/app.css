@@ -25,7 +25,13 @@ button {
   cursor: pointer;
 }
 
-button, [role="button"], [role="tab"] {
+input, textarea, [contenteditable="true"], .ProseMirror, .translation-result-body,
+.note-reader > h2, .note-reader > a, .collection-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+body, button, [role="button"], [role="tab"], [data-memo-info-block-ui] {
   -webkit-user-select: none;
   user-select: none;
 }

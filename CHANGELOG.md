@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.22 - Unreleased
+
+- Distinguish memo information blocks in both themes and allow copying and folding them in preview.
+- Limit text selection to fields and readable content across the main and Mini windows.
+
 ## 1.0.21 - Unreleased
 
 - Apply Twill’s orange palette in both themes and distinguish saved translations with a solid yellow star.

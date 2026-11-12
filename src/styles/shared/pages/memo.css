@@ -1551,9 +1551,8 @@
 .daily-memo-info-block {
   position: relative;
   margin: var(--field-spacing) 0;
-  border-top: 1px solid color-mix(in srgb, var(--daily-memo-context-color) 48%, var(--app-border));
-  border-bottom: 1px solid color-mix(in srgb, var(--daily-memo-context-color) 48%, var(--app-border));
-  background: color-mix(in srgb, var(--daily-memo-context-color) 3%, transparent);
+  border-block: 1px solid var(--memo-info-border);
+  background: var(--memo-info-background);
 }
 
 .daily-memo-rich-text-content
@@ -1567,7 +1566,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.4rem 0 0.35rem;
+  padding: 0.4rem 0.75rem 0.35rem;
   color: var(--app-text);
   font-size: var(--font-size-sm);
 }
@@ -1763,18 +1762,8 @@
 
 .daily-memo-info-block-body {
   display: block;
-  border-top: 1px solid
-    color-mix(
-      in srgb,
-      color-mix(
-          in srgb,
-          var(--daily-memo-context-color) 18%,
-          var(--app-border)
-        )
-        30%,
-      transparent
-    );
-  padding: 0.35rem 0 0.75rem;
+  border-top: 1px solid var(--memo-info-divider);
+  padding: 0.35rem 0.75rem 0.75rem;
 }
 
 .daily-memo-info-block-body[data-hidden="true"] {

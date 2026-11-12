@@ -1,5 +1,9 @@
 :root {
   --robin-pearl: #faf8f4;
+  --daily-memo-context-color: var(--robin-sky);
+  --memo-info-border: #bae6fd;
+  --memo-info-divider: rgb(186 230 253 / 55%);
+  --memo-info-background: rgb(240 249 255 / 52%);
   --robin-sky: #83b9e7;
   --robin-sky-soft: #e7f2fb;
   --robin-orange: #f28a2a;
@@ -83,6 +87,9 @@
 
 :root[data-theme="dark"] {
   --robin-pearl: #17141d;
+  --memo-info-border: #31576a;
+  --memo-info-divider: var(--memo-info-border);
+  --memo-info-background: rgb(23 45 56 / 72%);
   --robin-sky: #78acd0;
   --robin-sky-soft: #253746;
   --robin-orange: #f0a15b;
