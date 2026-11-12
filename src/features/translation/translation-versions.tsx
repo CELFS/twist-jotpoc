@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,7 @@ export function TranslationVersions({ record, client, disabled, onSelect }: { re
     <SelectField listboxClassName="translation-version-options" labelHidden triggerContent={<span className="translation-version-value"><span>{getText('translation.version')} {record.version ?? 1}</span><AssistantModelIcon model={record.model} /></span>} optionVisuals={Object.fromEntries(choices.map(item => [item.id, <AssistantModelIcon key={item.id} model={item.model} />]))} label={getText('translation.versions')} value={record.id} disabled={disabled || loading} onChange={event => { const item = choices.find(item => item.id === event.target.value); if (item) onSelect(item); }}>
       {choices.map(item => <option key={item.id} value={item.id}>{getText('translation.version')} {item.version ?? 1} · {translationModels[item.model]}</option>)}
     </SelectField>
-    {failed && <p className="translation-error" role="alert">{getText('translation.readFailed')}</p>}
+    {failed && <ErrorNotice text={getText('translation.readFailed')} />}
     {(more || failed) && <Button variant="ghost" disabled={disabled || loading} onClick={() => void load(failed ? undefined : items.at(-1)?.version)}>{getText(failed ? 'translation.refresh' : 'translation.more')}</Button>}
   </div>;
 }

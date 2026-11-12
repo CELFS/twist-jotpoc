@@ -393,3 +393,19 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .settings-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
 .floating-setting .ui-switch { flex-shrink: 0; }
 .floating-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
+
+
+.notification-center {
+  position: fixed; inset: calc(env(safe-area-inset-top, 0px) + 48px) 12px auto auto;
+  width: min(330px, calc(100vw - 24px)); max-height: calc(100dvh - 60px);
+  margin: 0; padding: 0; border: 0; background: transparent; color: var(--app-text);
+  overflow: auto; pointer-events: none; z-index: 20;
+}
+.notification-card {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: var(--space-2);
+  margin-bottom: 4px; padding: var(--space-3); border: 1px solid var(--app-border); border-radius: var(--radius-md);
+  background: var(--app-surface); font-size: var(--font-size-sm); overflow-wrap: anywhere; pointer-events: auto;
+}
+.notification-card > svg { color: var(--app-danger); }
+.notification-card button { display: grid; place-items: center; background: transparent; color: inherit; border: 0; padding: 2px; }
+.notification-center::backdrop { background: transparent; pointer-events: none; }

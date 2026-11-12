@@ -38,6 +38,7 @@ export function Workspace({ accountId, tab, setTab }: {
     let active = true;
     let running = false;
     let checkpoint: string | null = null;
+    let refreshOnResume = false;
     const poll = async () => {
       if (!active || running || document.visibilityState === "hidden") return;
       running = true;
@@ -48,7 +49,8 @@ export function Workspace({ accountId, tab, setTab }: {
         }));
         if (!active) return;
         const next = JSON.stringify(state);
-        if (checkpoint !== null && checkpoint !== next) {
+        if (checkpoint !== next || refreshOnResume) {
+          refreshOnResume = false;
           publishDataChange({ entity: "dailyMemos", id: "*" });
           publishDataChange({ entity: "sourceNotes", id: "*" });
           publishDataChange({ entity: "webResources", id: "*" });
@@ -59,15 +61,20 @@ export function Workspace({ accountId, tab, setTab }: {
     };
     void poll();
     const timer = window.setInterval(() => void poll(), 30_000);
-    const resume = () => { if (document.visibilityState === "visible") void poll(); };
+    const resume = () => {
+      if (document.visibilityState !== "visible") return;
+      refreshOnResume = true;
+      void poll();
+    };
     const online = () => {
       void poll();
       publishDataChange({ entity: "dailyMemos", id: "*" });
       publishDataChange({ entity: "sourceNotes", id: "*" });
     };
+    window.addEventListener("focus", resume);
     window.addEventListener("online", online);
     document.addEventListener("visibilitychange", resume);
-    return () => { active = false; clearInterval(timer); window.removeEventListener("online", online); document.removeEventListener("visibilitychange", resume); };
+    return () => { active = false; clearInterval(timer); window.removeEventListener("focus", resume); window.removeEventListener("online", online); document.removeEventListener("visibilitychange", resume); };
   }, [accountId]);
 
   return <div className="workspace">

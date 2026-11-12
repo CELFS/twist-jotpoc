@@ -6,6 +6,7 @@ import { SettingsPage, type ManagementTab } from "@/features/shell/settings-page
 import { SidebarResizer } from "@/features/shell/sidebar-resizer";
 import { FloatingEntry } from "@/features/shell/floating-entry";
 import { WindowControls } from "@/features/shell/window-controls";
+import { ErrorNotice, NotificationCenter } from "@/features/shell/notification-center";
 import { RequestError } from "@/features/shell/request-error";
 import { Workspace, type WorkspaceTab } from "@/features/shell/workspace";
 import { AccountPanel } from "@/features/auth/account-panel";
@@ -92,7 +93,8 @@ export function App() {
             aria-expanded={sidebarOpen} aria-controls="workspace-sidebar"
             onClick={() => setSidebarOpen(open => !open)}><PanelRight size={17} aria-hidden="true" /></button>
       </header>
-      {error && <p className="client-error" role="alert">{error}</p>}
+      <NotificationCenter />
+      <ErrorNotice text={error} />
       {credential && <RequestError code={session.error} />}
       <div className="shell-body">
         <div className="shell-page">

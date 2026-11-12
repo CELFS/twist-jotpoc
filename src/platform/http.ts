@@ -57,6 +57,7 @@ export async function authenticatedFetch(path: string, init: RequestInit = {}): 
     dispose();
     throw new DOMException("Account changed", "AbortError");
   }
+  if (response.ok) window.dispatchEvent(new Event("jotpoc:authenticated-response"));
   if (response.status === 401) {
     window.dispatchEvent(new Event("jotpoc:authorization-required"));
   }

@@ -1,3 +1,4 @@
+import { ErrorNotice } from "./notification-center";
 import { getText, type MessageKey } from "@/i18n/get-text";
 
 const keys: Record<string, MessageKey> = {
@@ -15,5 +16,5 @@ export function requestErrorText(code: string) {
 }
 
 export function RequestError({ code }: { code: string | null }) {
-  return code ? <p className="client-error" role="alert">{requestErrorText(code)}</p> : null;
+  return code ? <ErrorNotice text={requestErrorText(code)} /> : null;
 }

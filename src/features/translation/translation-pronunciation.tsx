@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 
 import { Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,6 @@ export function TranslationPronunciation({ text, dictionary, active = true, spee
       <strong lang="en">{entry.word}</strong>{entry.phonetics.map(phonetic => <span key={phonetic} lang="en">{phonetic}</span>)}
       {!entry.phonetics.length && <span>{getText("translation.phoneticsUnavailable")}</span>}
     </div>)}
-    {speech.failed && <p role="alert" className="translation-error">{getText("translation.speechFailed")}</p>}
+    {speech.failed && <ErrorNotice text={getText("translation.speechFailed")} />}
   </section>;
 }

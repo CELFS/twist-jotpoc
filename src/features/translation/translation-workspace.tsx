@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 
 import { generationErrorCode } from '@/translation/generation-error';
 import { ArrowLeftRight, Copy, Languages, MessageCircle, RefreshCw, SlidersHorizontal, Square, Star, X } from "lucide-react";
@@ -273,8 +274,8 @@ export function TranslationWorkspace({ client, initial, initialRecord, autoTrans
         </Button>
         </div>
       </div>
-      {modelPreferenceFailed && <p role="alert" className="translation-error">{getText("translation.saveFailed")}</p>}
-      {error && <p role="alert" className="translation-error">{error}{translationFailed && <Button variant="ghost" size="icon" disabled={working || saving} aria-label={getText("translation.retry")} title={getText("translation.retry")} onClick={() => void generate(true)}><RefreshCw size={15} /></Button>}</p>}
+      {modelPreferenceFailed && <ErrorNotice text={getText("translation.saveFailed")} />}
+      {error && <><ErrorNotice text={error} />{translationFailed && <Button variant="ghost" size="icon" disabled={working || saving} aria-label={getText("translation.retry")} title={getText("translation.retry")} onClick={() => void generate(true)}><RefreshCw size={15} /></Button>}</>}
       {!!(record || streamText || working || pendingAnalysis || earlyDictionary?.status === "available") && <TranslationResultToggle
         onExpandedChange={setResultExpanded}
         status={record && !record.localSaveFailed && <span className="translation-tag">{getText(collected ? "translation.saved" : "translation.local")}</span>}

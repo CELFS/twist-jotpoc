@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 import { LoadingState } from "@/components/ui/loading-state";
 
 import { type ReactNode } from "react";
@@ -30,7 +31,7 @@ export function TranslationLearningContent({ children, record, sourceText = "", 
       {onAnalyze && <div className="translation-analysis-controls">
         <Button variant="secondary" disabled={analysisWorking ? !onStopAnalysis : !record || busy} onClick={analysisWorking ? onStopAnalysis : onAnalyze}>{analysisWorking && <Square size={14} />}{getText(analysisWorking ? "translation.stopAction" : analysisError || analysis?.status === "unavailable" ? "translation.retry" : analysis?.status === "available" ? "translation.regenerateAnalysis" : "translation.analyzeAction")}</Button>
       </div>}
-      {analysisError && <p role="alert" className="translation-error">{analysisError}{onAnalyze && <Button variant="ghost" size="icon" disabled={!record || busy || analysisWorking} aria-label={getText("translation.retry")} title={getText("translation.retry")} onClick={onAnalyze}><RefreshCw size={15} /></Button>}</p>}
+      {analysisError && <><ErrorNotice text={analysisError} />{onAnalyze && <Button variant="ghost" size="icon" disabled={!record || busy || analysisWorking} aria-label={getText("translation.retry")} title={getText("translation.retry")} onClick={onAnalyze}><RefreshCw size={15} /></Button>}</>}
       {!analysisWorking && analysisText && analysis?.status !== "available" && <GenerationState working={false} label={getText("translation.partialResponse")} text={analysisText} lang="zh-CN" />}
       {analysisWorking ? <TranslationAnalysisProgress text={analysisText} /> : analysis?.status === "available" ? <>
         <TranslationVocabulary items={analysis.content.vocabulary} />

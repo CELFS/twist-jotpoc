@@ -85,7 +85,7 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
     </SidebarHistory>
     <RequestError code={state.error ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
     {!state.ready ? <LoadingState label={getText("client.load")} /> : <>
-      {!state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}
+      {state.permissionKnown && !state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}
       <label className="ui-field">
         <span className="ui-field-label">{getText("client.title")}</span>
         <input className="ui-input" value={state.title} maxLength={120} readOnly={!state.editable}

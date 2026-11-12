@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw, Star, Trash2 } from "lucide-react";
@@ -61,8 +62,8 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
     <header><h2>{getText("translation.library")}</h2><Button size="icon" variant="ghost" disabled={loading || busy}
       aria-label={getText("translation.refresh")} onClick={() => void load()}><RefreshCw size={16} /></Button></header>
     <p className="client-notice">{getText("translation.libraryHint")}</p>
-    {offline && <p role="alert">{getText("translation.cloudUnavailable")}</p>}
-    {error && <p className="client-error" role="alert">{getText(error)}</p>}
+    {offline && <ErrorNotice text={getText("translation.cloudUnavailable")} />}
+    {error && <ErrorNotice text={getText(error)} />}
     {items.map(row => <article className="sidebar-translation-row" key={row.id}>
       <button className="history-item" type="button" disabled={busy} onClick={() => void act(row, "preview")}>
         <strong lang={row.sourceLanguage}>{row.text}</strong><span lang={row.targetLanguage}>{row.translatedText}</span>

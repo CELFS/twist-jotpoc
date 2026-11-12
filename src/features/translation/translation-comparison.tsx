@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 
 import { generationErrorCode } from '@/translation/generation-error';
 import { ChevronDown, ChevronUp, RefreshCw, Square } from 'lucide-react';
@@ -23,7 +24,7 @@ export function TranslationComparison({ input, paused = false, stopKey = 0 }: { 
       {enabled.value && <Button variant="ghost" size="icon" aria-label={getText(generation.working ? 'translation.stopAction' : 'translation.comparisonGenerate')} title={getText(generation.working ? 'translation.stopAction' : 'translation.comparisonGenerate')} onClick={() => generation.working ? generation.stop() : generation.start(true)}>{generation.working ? <Square size={15} /> : <RefreshCw size={15} />}</Button>}
       <Button variant="ghost" size="icon" aria-label={getText('translation.comparisonTitle')} aria-expanded={expanded.value} aria-controls={bodyId} disabled={!expanded.ready || expanded.saving} onClick={() => void expanded.toggle()}>{expanded.value ? <ChevronUp size={17} /> : <ChevronDown size={17} />}</Button>
     </header>
-    {(enabled.failed || expanded.failed || languages.failed) && <p role="alert" className="translation-error">{getText('translation.saveFailed')}</p>}
+    {(enabled.failed || expanded.failed || languages.failed) && <ErrorNotice text={getText('translation.saveFailed')} />}
     <div id={bodyId} hidden={!enabled.value || !expanded.value}>
       <div className="translation-comparison-list">
         {languages.value.map(language => {
@@ -35,7 +36,7 @@ export function TranslationComparison({ input, paused = false, stopKey = 0 }: { 
             {card?.working ? <GenerationState label={getText('translation.comparisonGenerating')} text={card.text} /> : card?.result ? <>
               <p lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>{card.result.translatedText}</p>
               <p className="translation-comparison-grammar" lang="zh-CN" dir="ltr">{card.result.grammar}</p>
-            </> : <p className={card?.error ? 'translation-error' : undefined} role={card?.error ? 'alert' : undefined}>{getText(card?.error ? errorKey : 'translation.comparisonReady')}{card?.error && <Button variant="ghost" size="icon" aria-label={`${getText('translation.retry')}: ${getText(languageKeys[language])}`} title={getText('translation.retry')} onClick={() => generation.retry(language)}><RefreshCw size={15} /></Button>}</p>}
+            </> : <div>{card?.error ? <ErrorNotice text={getText(errorKey)} /> : <p>{getText('translation.comparisonReady')}</p>}{card?.error && <Button variant="ghost" size="icon" aria-label={`${getText('translation.retry')}: ${getText(languageKeys[language])}`} title={getText('translation.retry')} onClick={() => generation.retry(language)}><RefreshCw size={15} /></Button>}</div>}
           </article>;
         })}
       </div>

@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 
 import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
@@ -26,6 +27,6 @@ export function TranslationSettings({ id, hidden, model, onModel, modelDisabled,
       <TagMultiSelect label={getText('translation.comparisonLanguages')} expandLabel={getText('translation.expandLanguages')} collapseLabel={getText('translation.collapseLanguages')} removeLabel={label => `${getText('translation.removeLanguage')}: ${label}`} options={comparisonLanguages.map(value => ({ value, label: getText(languageKeys[value]) }))} value={languages.value} minSelected={1} disabled={!languages.ready || languages.saving} onChange={value => void languages.change(value)} />
     </>}
     {speech.voices.length ? <SelectField label={getText('translation.voice')} value={speech.voiceId} onChange={event => speech.setVoiceId(event.target.value)}>{speech.voices.map(voice => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} · {voice.lang}{voice.localService ? ` · ${getText('translation.localVoice')}` : ''}</option>)}</SelectField> : <p className="translation-hint">{getText('translation.speechUnavailable')}</p>}
-    {(comparison.failed || languages.failed) && <p role="alert" className="translation-error">{getText('translation.saveFailed')}</p>}
+    {(comparison.failed || languages.failed) && <ErrorNotice text={getText('translation.saveFailed')} />}
   </section>;
 }

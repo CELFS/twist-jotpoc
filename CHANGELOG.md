@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.16 - Unreleased
+
+- Show request errors in a shared notification center, clear recovered connection errors, and refresh memo permissions when returning to the app.
+
 ## 1.0.15 - Unreleased
 
 - Resize the sidebar by dragging the divider and remember its width separately for the main and Mini windows.

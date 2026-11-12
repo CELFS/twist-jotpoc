@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ export function CollectionEntry({ item, onManage }: {
           {copied && <Check className="collection-copied" size={15} aria-label={getText("collections.copied")} />}
         </p>
         {item.note && <p className="collection-note">{item.note}</p>}
-        {error && <p role="alert" className="collection-action-error">{error}</p>}
+        {error && <ErrorNotice text={error} />}
       </div>
       <div className="collection-entry-actions">
         <Button size="icon" variant="ghost" disabled={busy} aria-label={getText("collections.edit")} title={getText("collections.edit")} onClick={() => setEditing(item)}><Pencil size={15} /></Button>

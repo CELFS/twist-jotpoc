@@ -1,3 +1,4 @@
+import { ErrorNotice } from "@/features/shell/notification-center";
 import { useState } from "react";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ export function CollectionEditDrawer({ item, onClose, onSave }: {
         <TextareaField label={getText("collections.copyText")} value={text} maxLength={10000} rows={4} disabled={saving} onChange={(event) => setText(event.target.value)} />
         <TextareaField label={getText("collections.note")} value={note} maxLength={10000} rows={4} disabled={saving} onChange={(event) => setNote(event.target.value)} />
         <details><summary>{getText("collections.original")}</summary><p className="collection-text">{item.anchor.exact}</p></details>
-        {error && <p className="collection-action-error" role="alert">{error}</p>}
+        {error && <ErrorNotice text={error} />}
       </div>
     </Drawer>
   );

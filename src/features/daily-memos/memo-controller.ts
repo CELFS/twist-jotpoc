@@ -15,6 +15,7 @@ type MemoState = {
   dirty: boolean;
   saving: boolean;
   editable: boolean;
+  permissionKnown: boolean;
   error: string | null;
   conflict: { memo: VersionedMemo | null } | null;
   pending?: MemoSaveInput;
@@ -23,7 +24,7 @@ type MemoState = {
 export class MemoController {
   private state: MemoState = {
     ready: false, title: "", content: "", baseVersion: 0, dirty: false,
-    saving: false, editable: false, error: null, conflict: null,
+    saving: false, editable: false, permissionKnown: false, error: null, conflict: null,
   };
   private listeners = new Set<() => void>();
   private database = getDatabase();
@@ -82,13 +83,13 @@ export class MemoController {
           const editedAfterSubmission = draft.pending &&
             (draft.title !== draft.pending.title || draft.content !== draft.pending.content);
           this.publish({
-            ready: true, editable: result.dailyMemoEditable,
+            ready: true, permissionKnown: true, editable: result.dailyMemoEditable,
             ...(acknowledged ? { baseVersion: version, pending: undefined, dirty: Boolean(editedAfterSubmission) } : {}),
             conflict: !acknowledged && version !== draft.baseVersion ? { memo: remote } : null,
             error: !acknowledged && version !== draft.baseVersion ? "conflict" : null,
           });
         } else {
-          this.publish({ ready: true, editable: result.dailyMemoEditable,
+          this.publish({ ready: true, permissionKnown: true, editable: result.dailyMemoEditable,
             title: remote?.record.title ?? "", content: remote?.record.content ?? "",
             baseVersion: version, dirty: false, pending: undefined, error: null });
         }
@@ -159,23 +160,24 @@ export class MemoController {
       if (code === "conflict") {
         try {
           const result = await cloudApi.memo.read(this.dateKey);
-          this.publish({ conflict: { memo: result.memo }, editable: result.dailyMemoEditable });
+          this.publish({ conflict: { memo: result.memo }, permissionKnown: true, editable: result.dailyMemoEditable });
         } catch { /* Keep the local draft until the cloud version can be read. */ }
       }
-      if (error instanceof ApiError && error.status === 403) this.publish({ editable: false });
+      if (error instanceof ApiError && error.status === 403) this.publish({ permissionKnown: true, editable: false });
     } finally {
       this.publish({ saving: false });
     }
   };
 
   refresh = async () => {
+    if (this.initialization) await this.initialization;
     if (this.state.saving) return;
     try {
       this.assertAccount();
       const result = await cloudApi.memo.read(this.dateKey);
       const remote = result.memo;
       const version = remote?.version ?? 0;
-      this.publish({ editable: result.dailyMemoEditable });
+      this.publish({ permissionKnown: true, editable: result.dailyMemoEditable });
       if (this.state.dirty) {
         const pending = this.state.pending;
         const acknowledged = pending && remote &&

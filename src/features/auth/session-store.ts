@@ -49,6 +49,7 @@ let state: SessionState = {
 const listeners = new Set<() => void>();
 let revision = 0;
 let authorization: AbortController | null = null;
+const offlineRestorations = new WeakSet<Credential>();
 let restoration: Promise<void> | null = null;
 
 function reportFailure(stage: string, error: unknown) {
@@ -138,6 +139,7 @@ export function restoreSession(): Promise<void> {
       if (current !== revision) return;
       reportFailure("restore-session", error);
       if (cached && error instanceof ApiError && error.code === "network_error") {
+        offlineRestorations.add(cached);
         setActiveCredential(cached);
         publish({ phase: "connected", credential: cached, error: error.code });
         return;
@@ -273,6 +275,12 @@ window.addEventListener("jotpoc:authorization-required", () => {
   setActiveCredential(null);
   publish({ phase: "reauthorize", credential: null, pending: null, error: null, busy: false });
   void removeStoredCredential().catch(() => publish({ error: "storage_failed" }));
+});
+
+window.addEventListener("jotpoc:authenticated-response", () => {
+  const credential = getActiveCredential();
+  if (!credential || !offlineRestorations.delete(credential)) return;
+  if (state.error === "network_error") publish({ error: null });
 });
 
 export function useSession() {
