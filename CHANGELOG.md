@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8 - Unreleased
+
+- Follow the system appearance by default or choose a light or dark theme for the main window, mini panel, floating toolbar, and docked handle.
+
 ## 1.0.7 - Unreleased
 
 - Added an in-window settings page accessible from the header and floating toolbar.

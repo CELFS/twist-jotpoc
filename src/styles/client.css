@@ -11,11 +11,33 @@
 
 [hidden] { display: none !important; }
 
+:root {
+  --frame-tint: 224 223 229;
+  --frame-start: 226 232 232;
+  --frame-middle: 217 226 225;
+  --frame-end: 199 215 225;
+  --frame-shade: 124 143 158;
+  --frame-interaction: 28 42 53;
+  --frame-text: #243340;
+  --frame-focus: #325f83;
+}
+
+:root[data-theme="dark"] {
+  --frame-tint: 46 41 54;
+  --frame-start: 39 47 50;
+  --frame-middle: 44 56 59;
+  --frame-end: 57 68 81;
+  --frame-shade: 18 23 31;
+  --frame-interaction: 255 255 255;
+  --frame-text: #f2f4f6;
+  --frame-focus: #e3edf7;
+}
+
 .expanded-shell, .floating-button {
   background:
-    radial-gradient(ellipse at 0% 12%, rgb(46 41 54 / var(--toolbar-alpha, 1)), transparent 64%),
-    linear-gradient(to bottom, transparent 40%, rgb(18 23 31 / 20%)),
-    linear-gradient(to right, rgb(39 47 50 / var(--toolbar-alpha, 1)), rgb(44 56 59 / var(--toolbar-alpha, 1)) 50%, rgb(57 68 81 / var(--toolbar-alpha, 1)));
+    radial-gradient(ellipse at 0% 12%, rgb(var(--frame-tint) / var(--toolbar-alpha, 1)), transparent 64%),
+    linear-gradient(to bottom, transparent 40%, rgb(var(--frame-shade) / 20%)),
+    linear-gradient(to right, rgb(var(--frame-start) / var(--toolbar-alpha, 1)), rgb(var(--frame-middle) / var(--toolbar-alpha, 1)) 50%, rgb(var(--frame-end) / var(--toolbar-alpha, 1)));
 }
 .expanded-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .app-identity, .app-header-actions, .workspace-toolbar, .client-actions, .client-drawer-heading {
@@ -24,7 +46,7 @@
 .app-identity { flex-shrink: 0; }
 .app-identity img { border-radius: 8px; }
 .app-header-actions { gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
-.app-header { --app-primary-soft: rgb(255 255 255 / 12%); --app-focus: #e3edf7; color: #f2f4f6; background: transparent; padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
+.app-header { --app-primary-soft: rgb(var(--frame-interaction) / 12%); --app-focus: var(--frame-focus); color: var(--frame-text); background: transparent; padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
 .app-header .ui-button--ghost { color: inherit; }
 .app-header[data-macos] {
   box-sizing: border-box;
@@ -114,8 +136,8 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
   overflow: hidden;
   --toolbar-alpha: calc(.94 + .06 * var(--dock-progress, 0));
   border-radius: max(6px, 20vmin);
-  color: #f2f4f6;
-  --app-focus: #e3edf7;
+  color: var(--frame-text);
+  --app-focus: var(--frame-focus);
 }
 .floating-button[data-edge="left"] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .floating-button[data-edge="right"] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
@@ -188,8 +210,8 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
   border: 0;
   border-radius: 8px;
 }
-.floating-actions button:hover { background: rgb(255 255 255 / 12%); }
-.floating-actions button:active { background: rgb(255 255 255 / 18%); }
+.floating-actions button:hover { background: rgb(var(--frame-interaction) / 12%); }
+.floating-actions button:active { background: rgb(var(--frame-interaction) / 18%); }
 .floating-actions button:focus-visible { outline-offset: -2px; }
 .floating-actions img { display: block; border-radius: 6px; pointer-events: none; }
 
@@ -218,6 +240,7 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 
 body:has(.floating-button) { overflow: hidden; }
 .settings-page { min-width: 0; }
+.settings-page .ui-field + .ui-field { margin-top: 16px; }
 .settings-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
 .settings-heading h2 { margin: 0; font-size: 18px; }
 .floating-setting .ui-switch { flex-shrink: 0; }

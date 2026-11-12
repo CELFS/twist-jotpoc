@@ -461,7 +461,11 @@
     "connectionStatus": "Status",
     "waitingApproval": "Waiting for approval",
     "readyToConnect": "Ready to connect",
-    "floatingAutoHide": "Auto-hide the floating toolbar at screen edges"
+    "floatingAutoHide": "Auto-hide the floating toolbar at screen edges",
+    "theme": "Theme",
+    "themeSystem": "Follow system",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "settings": {
     "shortLabel": "Settings"

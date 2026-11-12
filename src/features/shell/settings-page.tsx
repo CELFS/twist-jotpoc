@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+import { getThemePreference, setThemePreference, subscribeThemePreference } from "@/platform/theme";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
@@ -12,6 +14,7 @@ export function SettingsPage({ language, desktop, autoHide, onAutoHideChange, on
   onAutoHideChange: (value: boolean) => void;
   onBack: () => void;
 }) {
+  const theme = useSyncExternalStore(subscribeThemePreference, getThemePreference);
   return (
     <main className="app-content settings-page custom-scrollbar" aria-labelledby="settings-title">
       <div className="settings-heading">
@@ -25,6 +28,12 @@ export function SettingsPage({ language, desktop, autoHide, onAutoHideChange, on
         <option value="zh">{getText("client.languageZh")}</option>
         <option value="en">{getText("client.languageEn")}</option>
         <option value="system">{getText("client.languageSystem")}</option>
+      </SelectField>
+      <SelectField label={getText("client.theme")} value={theme}
+        onChange={event => setThemePreference(event.target.value)}>
+        <option value="system">{getText("client.themeSystem")}</option>
+        <option value="light">{getText("client.themeLight")}</option>
+        <option value="dark">{getText("client.themeDark")}</option>
       </SelectField>
       {desktop && <div className="floating-setting">
         <span>{getText("client.floatingAutoHide")}</span>

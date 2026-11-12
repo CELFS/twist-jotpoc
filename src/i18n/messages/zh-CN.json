@@ -461,7 +461,11 @@
     "connectionStatus": "状态",
     "waitingApproval": "等待授权",
     "readyToConnect": "等待连接",
-    "floatingAutoHide": "悬浮横条贴边自动收起"
+    "floatingAutoHide": "悬浮横条贴边自动收起",
+    "theme": "主题",
+    "themeSystem": "跟随系统",
+    "themeLight": "浅色",
+    "themeDark": "深色"
   },
   "settings": {
     "shortLabel": "设置"
