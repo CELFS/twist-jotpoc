@@ -37,13 +37,11 @@ button:focus-visible {
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   padding: max(16px, env(safe-area-inset-top)) 20px 16px;
   background: var(--app-surface-muted);
 }
-
-.app-header strong { font-size: 18px; }
 
 .window-controls { display: flex; align-items: center; gap: 4px; }
 

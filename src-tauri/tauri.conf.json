@@ -16,7 +16,7 @@
         "title": "JotPoc",
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "trafficLightPosition": { "x": 10, "y": 16 },
+        "trafficLightPosition": { "x": 10, "y": 20 },
         "width": 520,
         "height": 380,
         "minWidth": 320,

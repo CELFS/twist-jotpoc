@@ -14,7 +14,6 @@ import { getText } from "@/i18n/get-text";
 import { getStoredAppLanguage, setAppLanguagePreference, subscribeAppLanguagePreference } from "@/i18n/app-language";
 import { readWindowState, setWindowMode, setWindowPinned, type WindowState } from "@/platform/window";
 import type { TranslationChange } from "@/features/translation/translation-change";
-import appIcon from "../src-tauri/icons/128x128.png";
 
 const CollectionsPanel = lazy(() => import("@/features/shell/collections-panel").then(module => ({ default: module.CollectionsPanel })));
 
@@ -73,7 +72,6 @@ export function App() {
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
     <div className="expanded-shell" hidden={collapsed}>
       <header className="app-header" data-macos={windowState?.macos || undefined} data-tauri-drag-region>
-        <div className="app-identity"><img src={appIcon} alt="" width={32} height={32} /><strong>{getText("app.name")}</strong></div>
         <div className="app-header-actions">
           {credential && <>
             <Button variant="ghost" size="icon" aria-label={getText("client.collections")} title={getText("client.collections")} onClick={() => setDrawer("collections")}><Star size={18} /></Button>
