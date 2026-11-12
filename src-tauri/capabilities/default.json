@@ -12,13 +12,10 @@
       "identifier": "opener:allow-open-url",
       "allow": [
         {
-          "url": "https://twist-balance.pages.dev/"
+          "url": "http://*"
         },
         {
-          "url": "https://twist-balance.pages.dev/extension/authorize/*"
-        },
-        {
-          "url": "https://twist-balance.pages.dev/extension/devices/"
+          "url": "https://*"
         }
       ]
     },

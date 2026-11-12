@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.0.1 - Unreleased
+## 1.0.2 - Unreleased
+
+- Enabled system-browser opening for HTTP and HTTPS source links in collections and dictionary entries.
+
+## 1.0.1 - 2026-11-12
 
 ### Added
 
