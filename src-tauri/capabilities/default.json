@@ -1,0 +1,37 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "JotPoc main application window",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://twist-balance.pages.dev/"
+        },
+        {
+          "url": "https://twist-balance.pages.dev/extension/authorize/*"
+        },
+        {
+          "url": "https://twist-balance.pages.dev/extension/devices/"
+        }
+      ]
+    },
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://twist-balance.pages.dev/api/extension/**"
+        }
+      ]
+    },
+    "secure-keystore:allow-get-item",
+    "secure-keystore:allow-set-item",
+    "secure-keystore:allow-delete-item"
+  ]
+}

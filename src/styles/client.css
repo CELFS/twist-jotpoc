@@ -1,0 +1,80 @@
+@import "./shared/ui/date-picker.css";
+
+@import "./shared/ui/buttons.css";
+@import "./shared/ui/fields.css";
+@import "./shared/ui/overlays.css";
+@import "./shared/ui/states.css";
+@import "./shared/ui/navigation.css";
+@import "./shared/pages/memo.css";
+@import "./shared/pages/translation.css";
+@import "./shared/pages/collections.css";
+
+[hidden] { display: none !important; }
+
+.expanded-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.app-identity, .app-header-actions, .workspace-toolbar, .client-actions, .client-drawer-heading {
+  display: flex; align-items: center; gap: 8px;
+}
+.app-identity { flex-shrink: 0; }
+.app-identity img { border-radius: 8px; }
+.app-header-actions { gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
+.app-header { padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
+.app-content { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.workspace { max-width: 1080px; margin: 0 auto; }
+.workspace-panel { padding-top: 16px; min-width: 0; }
+.workspace-toolbar { flex-wrap: wrap; margin-bottom: 12px; }
+.workspace-toolbar time { font-variant-numeric: tabular-nums; }
+.workspace .ui-tabs { width: 100%; }
+.workspace .ui-tab { flex: 1; }
+.memo-workspace > .ui-field, .note-editor > .ui-field { margin: 12px 0; }
+.memo-workspace .daily-memo-rich-text-editor, .note-editor .daily-memo-rich-text-editor {
+  height: max(320px, calc(100dvh - 390px));
+  min-height: 320px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+}
+.save-status { margin-left: auto; font-size: 12px; color: var(--app-text-muted); }
+.client-error { color: var(--app-danger); font-size: 14px; }
+.client-notice { color: var(--app-text-muted); font-size: 14px; }
+.client-conflict, .client-confirmation {
+  padding: 16px; margin-top: 16px; border: 1px solid var(--app-border);
+  border-radius: 12px; background: var(--app-surface-muted);
+}
+.client-conflict textarea { min-height: 140px; }
+.account-panel { display: grid; gap: 16px; max-width: 640px; margin: 20px auto; }
+.authorization-code { display: grid; gap: 8px; }
+.authorization-code strong { font-size: 24px; letter-spacing: 0.1em; }
+.client-drawer .ui-drawer { width: min(840px, 100vw); }
+.client-drawer-heading { justify-content: space-between; padding: 0 16px; }
+.client-drawer-heading h2 { font-size: 18px; }
+.collections-panel, .client-drawer .account-panel { padding: 16px; }
+.notes-workspace { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); gap: 20px; }
+.notes-list { min-width: 0; }
+.note-list-item, .translation-history-select {
+  display: grid; width: 100%; gap: 6px; border: 0; border-radius: 10px; padding: 12px;
+  background: transparent; text-align: left; overflow-wrap: anywhere;
+}
+.note-list-item:hover, .note-list-item[aria-pressed="true"] { background: var(--app-primary-soft); }
+.note-list-item time, .note-list-item span { color: var(--app-text-muted); font-size: 12px; }
+.note-list-item span { max-height: 3.2em; overflow: hidden; }
+.note-editor { min-width: 0; }
+.translation-history-row { display: flex; align-items: flex-start; border-bottom: 1px solid var(--app-border); }
+.translation-history-select { flex: 1; min-width: 0; }
+.translation-history-select span { color: var(--app-text-muted); font-size: 13px; }
+.translation-local-history { margin-top: 24px; }
+.floating-button { touch-action: none; }
+
+@media (max-width: 620px) {
+  .app-header { padding-inline: 10px; }
+  .app-header .app-identity strong { font-size: 15px; }
+  .app-header .app-identity img { width: 26px; height: 26px; }
+  .app-content { padding: 12px; }
+  .window-controls { gap: 0; }
+  .window-controls button { width: 30px; height: 32px; }
+  .notes-workspace { grid-template-columns: minmax(0, 1fr); }
+  .notes-list { max-height: 240px; overflow: auto; }
+}
+
+.floating-button { display: grid; place-items: center; background: var(--app-background); }
+.floating-button img { pointer-events: none; }

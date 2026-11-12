@@ -1,0 +1,95 @@
+.page-push-navigation-workspace {
+  --page-push-navigation-width: 66.6667vw;
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--app-background);
+}
+
+.page-push-navigation-workspace[data-navigation-state="fullscreen"] {
+  --page-push-navigation-width: 100vw;
+}
+
+.page-push-navigation-track {
+  position: relative;
+  display: flex;
+  width: max-content;
+  height: 100%;
+  min-height: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform var(--motion-normal) var(--motion-ease);
+  will-change: transform;
+}
+
+.page-push-navigation-workspace[data-navigation-state="open"]
+  .page-push-navigation-track,
+.page-push-navigation-workspace[data-navigation-state="fullscreen"]
+  .page-push-navigation-track {
+  transform: translate3d(
+    calc(0px - var(--page-push-navigation-width)),
+    0,
+    0
+  );
+}
+
+.page-push-navigation-main {
+  position: relative;
+  width: 100vw;
+  height: 100%;
+  min-height: 0;
+  flex: 0 0 100vw;
+  background: var(--app-background);
+}
+
+.page-push-navigation-dismiss {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: color-mix(
+    in srgb,
+    var(--app-overlay) 72%,
+    transparent
+  );
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.page-push-navigation-panel {
+  position: relative;
+  display: grid;
+  width: var(--page-push-navigation-width);
+  height: 100%;
+  min-height: 0;
+  flex: 0 0 var(--page-push-navigation-width);
+  border-left: 1px solid var(--app-border);
+  background: var(--app-background);
+  box-shadow: -0.75rem 0 2rem rgb(49 37 75 / 8%);
+  grid-template-rows: auto minmax(0, 1fr);
+  outline: none;
+  transition:
+    width var(--motion-normal) var(--motion-ease),
+    flex-basis var(--motion-normal) var(--motion-ease),
+    box-shadow var(--motion-normal) var(--motion-ease);
+}
+
+.page-push-navigation-trigger {
+  position: absolute;
+  z-index: 4;
+  right: max(
+    calc(var(--space-4) + var(--space-4)),
+    calc(
+      (100% - 46rem) / 2 + var(--space-4) + var(--space-4)
+    )
+  );
+  bottom: calc(
+    var(--space-4) + var(--space-3) + var(--app-safe-bottom)
+  );
+}
