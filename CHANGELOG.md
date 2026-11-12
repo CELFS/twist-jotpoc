@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.17 - Unreleased
+
+- Compact all four workspace sidebars and adapt the main and Mini panels to the available width.
+- Refine collection counts, group folding, and content panel corners.
+
 ## 1.0.16 - Unreleased
 
 - Show request errors in a shared notification center, clear recovered connection errors, and refresh memo permissions when returning to the app.

@@ -23,12 +23,16 @@ export function CollectionCard({ group, onManage }: { group: CollectionSourceGro
     })().catch(() => undefined).finally(() => { if (active) setReady(true); });
     return () => { active = false; };
   }, [group.urlKey]);
+  const previewLimit = 2;
+  const canCollapse = group.items.length > previewLimit;
+  const collapsed = canCollapse && !expanded;
+
   async function toggle() {
     const next = !expanded; setExpanded(next);
     try { if (key) await createRepositories().settings.set(key, next); } catch { setExpanded(!next); }
   }
   return (
-    <article className="collection-card" data-collapsed={!expanded || undefined}>
+    <article className="collection-card" data-collapsed={collapsed || undefined}>
       <header className="collection-source">
         <a href={group.source.url} target="_blank" rel="noopener noreferrer">
           <ExternalLink aria-hidden="true" size={14} />
@@ -40,13 +44,13 @@ export function CollectionCard({ group, onManage }: { group: CollectionSourceGro
             {getText("collections.webNote")}
           </Link>
         )}
-        <button className="collection-collapse" disabled={!ready} aria-expanded={expanded} aria-label={getText(expanded ? "collections.collapse" : "collections.expand")} title={getText(expanded ? "collections.collapse" : "collections.expand")} onClick={() => void toggle()}>
-          <span className="collection-source-count">{group.source.sourceCount ?? group.items.length}</span>
+        <span className="collection-source-count">{group.source.sourceCount ?? group.items.length}</span>
+        {canCollapse && <button type="button" className="collection-collapse" disabled={!ready} aria-expanded={expanded} aria-label={getText(expanded ? "collections.collapse" : "collections.expand")} title={getText(expanded ? "collections.collapse" : "collections.expand")} onClick={() => void toggle()}>
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
+        </button>}
       </header>
       <ul className="collection-entries">
-        {(expanded ? group.items : group.items.slice(0, 2)).map((item) => <CollectionEntry key={item.id} item={item} onManage={onManage} />)}
+        {(collapsed ? group.items.slice(0, previewLimit) : group.items).map((item) => <CollectionEntry key={item.id} item={item} onManage={onManage} />)}
       </ul>
     </article>
   );
