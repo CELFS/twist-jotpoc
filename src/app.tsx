@@ -83,7 +83,7 @@ export function App() {
       </header>
       {error && <p className="client-error" role="alert">{error}</p>}
       {credential && <RequestError code={session.error} />}
-      <main className="app-content custom-scrollbar">
+      <main className="app-content custom-scrollbar" data-connection={!credential || undefined}>
         {credential ? <Workspace key={credential.accountId} accountId={credential.accountId} onTranslationChange={setTranslationChange} /> : <AccountPanel />}
       </main>
     </div>

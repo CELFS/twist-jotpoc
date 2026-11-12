@@ -11,7 +11,7 @@
 
 [hidden] { display: none !important; }
 
-.expanded-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.expanded-shell { background: var(--app-surface-muted); display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .app-identity, .app-header-actions, .workspace-toolbar, .client-actions, .client-drawer-heading {
   display: flex; align-items: center; gap: 8px;
 }
@@ -19,8 +19,23 @@
 .app-identity img { border-radius: 8px; }
 .app-header-actions { gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
 .app-header { padding: max(12px, env(safe-area-inset-top)) 16px 12px; gap: 8px; }
-.app-header[data-macos] { padding-left: 84px; min-height: 44px; }
-.app-content { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.app-header[data-macos] {
+  box-sizing: border-box;
+  flex: 0 0 44px;
+  height: 44px;
+  padding: 0 10px 0 74px;
+}
+.app-header[data-macos] .app-header-actions { flex-wrap: nowrap; }
+.app-header[data-macos] .app-header-actions button {
+  width: 30px;
+  min-width: 30px;
+  height: 32px;
+  min-height: 32px;
+}
+@media (max-width: 370px) {
+  .app-header[data-macos] .app-identity strong { display: none; }
+}
+.app-content { background: var(--app-background); border-radius: 12px 12px 0 0; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 .workspace { max-width: 1080px; margin: 0 auto; }
 .workspace-panel { padding-top: 16px; min-width: 0; }
 .workspace-toolbar { flex-wrap: wrap; margin-bottom: 12px; }
@@ -44,6 +59,13 @@
 }
 .client-conflict textarea { min-height: 140px; }
 .account-panel { display: grid; gap: 16px; max-width: 640px; margin: 20px auto; }
+.app-content[data-connection] { display: flex; flex-direction: column; }
+.app-content[data-connection] > .account-panel {
+  margin: auto;
+  max-width: 100%;
+  text-align: center;
+}
+.app-content[data-connection] .client-actions { justify-content: center; flex-wrap: wrap; }
 .authorization-code { display: grid; gap: 8px; }
 .authorization-code strong { font-size: 24px; letter-spacing: 0.1em; }
 .client-drawer .ui-drawer { width: min(840px, 100vw); }

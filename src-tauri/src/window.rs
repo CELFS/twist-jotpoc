@@ -68,7 +68,7 @@ fn apply_mode(window: &WebviewWindow, controller: &Controller, mode: WindowMode)
                 window.set_size(geometry.size)?;
                 window.set_position(geometry.position)?;
             }
-            window.set_min_size(Some(tauri::LogicalSize::new(320.0, 480.0)))?;
+            window.set_min_size(Some(tauri::LogicalSize::new(320.0, 360.0)))?;
         }
         WindowMode::Mini => {
             window.set_decorations(true)?;

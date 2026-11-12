@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - Unreleased
+
+- Reduced the initial desktop window to 520 × 380 and aligned the macOS title bar controls with the application toolbar.
+- Distinguished the toolbar and workspace with background colors, centered the connection controls, and disabled text selection on buttons.
+
 ## 1.0.3 - Unreleased
 
 - Integrated macOS window controls into the application header.
