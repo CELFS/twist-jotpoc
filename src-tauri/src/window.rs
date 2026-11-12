@@ -14,6 +14,7 @@ pub enum WindowMode {
 #[derive(Clone, Serialize)]
 pub struct WindowState {
     desktop: bool,
+    macos: bool,
     mode: WindowMode,
     pinned: bool,
 }
@@ -22,6 +23,7 @@ impl Default for WindowState {
     fn default() -> Self {
         Self {
             desktop: cfg!(desktop),
+            macos: cfg!(target_os = "macos"),
             mode: WindowMode::Full,
             pinned: false,
         }

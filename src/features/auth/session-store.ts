@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { z } from "zod";
 import { nanoid } from "nanoid";
+import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import packageInfo from "../../../package.json";
 import { getActiveCredential, setActiveCredential, type Credential } from "@/platform/credential";
@@ -49,6 +50,13 @@ const listeners = new Set<() => void>();
 let revision = 0;
 let authorization: AbortController | null = null;
 let restoration: Promise<void> | null = null;
+
+function reportFailure(stage: string, error: unknown) {
+  const code = error instanceof ApiError && /^[a-z_]{1,48}$/.test(error.code)
+    ? error.code : error instanceof z.ZodError ? "invalid_response" : "operation_failed";
+  const status = error instanceof ApiError ? error.status : 0;
+  void invoke("log_auth_failure", { stage, code, status }).catch(() => console.warn("[JotPoc auth]", stage, status, code));
+}
 
 function publish(patch: Partial<SessionState>) {
   state = { ...state, ...patch };
@@ -119,6 +127,7 @@ export function restoreSession(): Promise<void> {
       publish({ phase: "connected", credential, error: null });
     } catch (error) {
       if (current !== revision) return;
+      reportFailure(cached ? "restore-session" : "read-credential", error);
       if (cached && error instanceof ApiError && error.code === "network_error") {
         setActiveCredential(cached);
         publish({ phase: "connected", credential: cached, error: error.code });
@@ -145,20 +154,24 @@ export async function connectAccount() {
   let pending: Pending | null = null;
   let issuedToken: string | null = null;
   let connected = false;
+  let stage = "device/start";
   try {
     pending = pendingSchema.parse(await post("device/start", {
       installationId: installationId(), clientName: "JotPoc", clientVersion: packageInfo.version,
     }, controller.signal));
     if (current !== revision) return;
+    stage = "validate-authorization-url";
     const verification = new URL(pending.verificationUriComplete);
     if (verification.origin !== TWIST_BALANCE_ORIGIN || verification.pathname !== "/extension/authorize/") {
       throw new ApiError("invalid_request");
     }
     publish({ phase: "authorizing", pending, busy: false });
+    stage = "open-browser";
     await openUrl(verification.href);
     while (!controller.signal.aborted && current === revision) {
       if (Date.now() >= pending.expiresAt) throw new ApiError("authorization_expired");
       await wait(pending.interval * 1000, controller.signal);
+      stage = "device/token";
       let token: z.infer<typeof tokenSchema>;
       try {
         token = tokenSchema.parse(await post("device/token", { deviceCode: pending.deviceCode }, controller.signal));
@@ -167,6 +180,7 @@ export async function connectAccount() {
         throw error;
       }
       issuedToken = token.accessToken;
+      stage = "session";
       const session = await inspect(token.accessToken, controller.signal);
       if (current !== revision) return;
       const credential: Credential = {
@@ -174,6 +188,7 @@ export async function connectAccount() {
         expiresAt: session.expiresAt, scopes: session.scopes,
       };
       try {
+        stage = "store-credential";
         await storeCredential(credential);
       } catch {
         await publicFetch("/api/extension/session/revoke", {
@@ -192,6 +207,7 @@ export async function connectAccount() {
     }
   } catch (error) {
     if (current !== revision || controller.signal.aborted) return;
+    reportFailure(stage, error);
     publish({ phase: "disconnected", pending: null, error: error instanceof ApiError ? error.code : "unavailable" });
   } finally {
     if (!connected && issuedToken) {

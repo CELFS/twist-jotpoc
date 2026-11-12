@@ -67,7 +67,7 @@ export function App() {
   const collapsed = windowState?.mode === "collapsed";
   return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
     <div className="expanded-shell" hidden={collapsed}>
-      <header className="app-header">
+      <header className="app-header" data-macos={windowState?.macos || undefined} data-tauri-drag-region>
         <div className="app-identity"><img src={appIcon} alt="" width={32} height={32} /><strong>{getText("app.name")}</strong></div>
         <div className="app-header-actions">
           {credential && <>

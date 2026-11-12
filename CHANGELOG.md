@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 - Unreleased
+
+- Integrated macOS window controls into the application header.
+- Added terminal diagnostics for failed account connections and session restoration.
+
 ## 1.0.2 - Unreleased
 
 - Enabled system-browser opening for HTTP and HTTPS source links in collections and dictionary entries.
