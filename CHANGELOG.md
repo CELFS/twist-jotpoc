@@ -2,6 +2,7 @@
 
 ## 1.0.22 - Unreleased
 
+- Use neutral gray surfaces for workspaces, fields, and sidebar selections while keeping orange interaction accents.
 - Distinguish memo information blocks in both themes and allow copying and folding them in preview.
 - Limit text selection to fields and readable content across the main and Mini windows.
 

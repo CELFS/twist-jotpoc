@@ -1,4 +1,5 @@
 import { ErrorNotice } from "@/features/shell/notification-center";
+import { InfoHint } from "@/components/ui/info-hint";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw, Star, Trash2 } from "lucide-react";
@@ -59,9 +60,8 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
   }
 
   return <section className="translation-library">
-    <header><Button size="icon" variant="ghost" disabled={loading || busy}
+    <header><InfoHint text={getText("translation.libraryHint")} /><Button size="icon" variant="ghost" disabled={loading || busy}
       aria-label={getText("translation.refresh")} onClick={() => void load()}><RefreshCw size={16} /></Button></header>
-    <p className="client-notice">{getText("translation.libraryHint")}</p>
     {offline && <ErrorNotice text={getText("translation.cloudUnavailable")} />}
     {error && <ErrorNotice text={getText(error)} />}
     {items.map(row => <article className="sidebar-translation-row" key={row.id}>

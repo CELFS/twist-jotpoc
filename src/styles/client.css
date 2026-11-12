@@ -258,7 +258,7 @@
   height: 100%; overflow: auto; padding: var(--sidebar-gutter);
   padding-bottom: calc(var(--cut-height) + var(--sidebar-gutter));
   scroll-padding-bottom: var(--cut-height);
-  color: var(--app-text); background: var(--app-surface);
+  color: var(--app-text); background: var(--app-background);
 }
 .sidebar-management {
   position: absolute; right: var(--content-inset); bottom: var(--content-inset);
@@ -287,7 +287,7 @@
 .history-groups .history-item { margin-bottom: var(--space-1); border: 1px solid var(--app-border); }
 .history-groups .history-item[aria-current="true"] { border-color: var(--app-primary); }
 .sidebar-scroll :is(.translation-library, .collections-page, .collections-list, .collection-entries) { gap: var(--sidebar-gap); }
-.sidebar-scroll .translation-library { padding: 0; border: 0; }
+.sidebar-scroll .translation-library { padding: 0; border: 0; background: transparent; }
 .sidebar-scroll .translation-library header, .sidebar-row-actions { display: flex; align-items: center; }
 .sidebar-scroll .client-notice { margin: 0; font-size: var(--sidebar-detail); }
 .sidebar-translation-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; border-bottom: 1px solid var(--app-border); }
