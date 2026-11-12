@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 import { HistoryGroups, historyDate } from "@/features/shell/history-groups";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -71,7 +72,7 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
     <SidebarHistory tab="memos">
       <h2>{getText("client.history")}</h2>
       <RequestError code={error} />
-      {historyLoading && <p role="status">{getText("client.load")}</p>}
+      {historyLoading && <LoadingState compact rows={history.length ? 1 : 3} label={getText("client.load")} />}
       {error && <Button variant="ghost" onClick={() => void refresh()}>{getText("client.refresh")}</Button>}
       {!historyLoading && history.length === 0 && !error && <p>{getText("client.noMemoHistory")}</p>}
       <HistoryGroups items={history} groupKey={item => item.dateKey.slice(0, 7)}>{item => <button type="button" className="history-item" key={item.dateKey}
@@ -83,7 +84,7 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
       </button>}</HistoryGroups>
     </SidebarHistory>
     <RequestError code={state.error ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
-    {!state.ready ? <p role="status">{getText("client.load")}</p> : <>
+    {!state.ready ? <LoadingState label={getText("client.load")} /> : <>
       {!state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}
       <label className="ui-field">
         <span className="ui-field-label">{getText("client.title")}</span>

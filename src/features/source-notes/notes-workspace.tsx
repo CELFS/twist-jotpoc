@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
@@ -53,13 +54,13 @@ export function NotesWorkspace({ selectedId, onSelect, active }: {
       <Button variant="secondary" onClick={() => onSelect(null)}><Plus size={16} />{getText("client.newNote")}</Button>
     </div>
     <SidebarHistory tab="notes">
-      <h2>{getText("client.notes")}</h2>
-      <div className="workspace-toolbar">
+      <div className="sidebar-history-heading">
+        <h2>{getText("client.notes")}</h2>
         <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} disabled={loading} onClick={() => void load()}><RefreshCw size={17} /></Button>
       </div>
       <RequestError code={error} />
       {!notes.length && !loading && !error && <p>{getText("client.noNotes")}</p>}
-      {loading && <p role="status">{getText("client.load")}</p>}
+      {loading && <LoadingState compact rows={notes.length ? 1 : 3} label={getText("client.load")} />}
       <HistoryGroups items={notes} groupKey={note => note.dateKey}>{note =>
         <button className="history-item" key={note.id} type="button" aria-current={selectedId === note.id || undefined}
           onClick={() => { onSelect(note.id); finishSelection?.(); }}>

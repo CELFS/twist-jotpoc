@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.13 - Unreleased
+
+- Use shared loading skeletons in workspace pages and compact sidebar histories.
+
 ## 1.0.12 - Unreleased
 
 - Slide the sidebar in from the right and open settings or account directly from its footer.

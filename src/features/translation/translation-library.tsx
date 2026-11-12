@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,7 @@ export function TranslationLibrary({ accountId, change, onChange }: { accountId:
           onClick={() => void act(row, "collect")}><Star size={14} fill={row.savedBy ? "currentColor" : "none"} /></Button>
       </div>
     </article>)}
-    {loading && <p role="status">{getText("translation.loading")}</p>}
+    {loading && <LoadingState compact rows={items.length ? 1 : 3} label={getText("translation.loading")} />}
     {!items.length && !loading && !error && <p>{getText("translation.emptyHistory")}</p>}
     {more && items.length > 0 && <Button variant="secondary" disabled={busy || loading} onClick={() => {
       const { id, createdAt } = items[items.length - 1]; void load({ id, createdAt });

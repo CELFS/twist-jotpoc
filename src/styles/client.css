@@ -192,6 +192,8 @@
   display: flex; justify-content: flex-end; align-items: center; gap: 2px;
   padding-top: var(--content-inset); color: var(--frame-text);
 }
+.sidebar-history-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-1); }
+.sidebar-scroll .sidebar-history-heading h2 { margin: 0; }
 .sidebar-scroll h2 {
   margin: 0 0 var(--space-2); font-size: var(--font-size-sm);
 }

@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 
 import { type ReactNode } from "react";
 import { GenerationState } from "@/components/ui/generation-state";
@@ -44,7 +45,7 @@ export function TranslationLearningContent({ children, record, sourceText = "", 
     </TranslationResultToggle>}
     {children}
     {(dictionary || dictionaryLoading) && <TranslationResultToggle className="translation-learning-section translation-dictionary" title={getText("translation.dictionary")} defaultExpanded={false} persistExpanded={false}>
-      {dictionaryLoading && <p role="status" className="translation-hint">{getText("translation.dictionaryLoading")}</p>}
+      {dictionaryLoading && <LoadingState compact rows={1} label={getText("translation.dictionaryLoading")} />}
       {dictionary?.status === "available" ? <>
         {dictionary.entries.map((entry, index) => <div className="translation-dictionary-entry" key={`${entry.word}-${index}`}>
           <div className="translation-phonetics"><strong lang="en">{entry.word}</strong>{read(entry.word)}</div>

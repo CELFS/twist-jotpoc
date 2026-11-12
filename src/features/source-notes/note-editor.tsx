@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { DateSelection } from "@/components/date-selection";
@@ -219,7 +220,7 @@ export function NoteEditor({ id, onSaved, onDeleted }: {
     } finally { writing.current = false; setBusy(false); }
   };
 
-  if (!ready) return <p role="status">{getText("client.load")}</p>;
+  if (!ready) return <LoadingState label={getText("client.load")} />;
   if (!loaded) return <section className="note-editor">
     <RequestError code={error} />
     <Button variant="secondary" onClick={() => setReload(value => value + 1)}>{getText("client.refresh")}</Button>

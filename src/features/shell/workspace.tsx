@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { z } from "zod";
 import { getText } from "@/i18n/get-text";
@@ -71,18 +72,18 @@ export function Workspace({ accountId, tab, setTab }: {
 
   return <div className="workspace">
     <div id="workspace-panel-collections" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-collections" hidden={tab !== "collections"}>
-      {visited.collections && <Suspense fallback={<p role="status">{getText("client.load")}</p>}>
+      {visited.collections && <Suspense fallback={<LoadingState label={getText("client.load")} />}>
         <CollectionsPanel active={tab === "collections"} />
       </Suspense>}
     </div>
     <div id="workspace-panel-translation" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-translation" hidden={tab !== "translation"}>
-      {visited.translation && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><TranslationModule accountId={accountId} active={tab === "translation"} /></Suspense>}
+      {visited.translation && <Suspense fallback={<LoadingState label={getText("client.load")} />}><TranslationModule accountId={accountId} active={tab === "translation"} /></Suspense>}
     </div>
     <div id="workspace-panel-memos" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-memos" hidden={tab !== "memos"}>
       <MemoWorkspace accountId={accountId} />
     </div>
     <div id="workspace-panel-notes" className="workspace-panel app-content custom-scrollbar" role="tabpanel" aria-labelledby="workspace-tab-notes" hidden={tab !== "notes"}>
-      {visited.notes && <Suspense fallback={<p role="status">{getText("client.load")}</p>}><NotesWorkspace selectedId={noteId} onSelect={setNoteId} active={tab === "notes"} /></Suspense>}
+      {visited.notes && <Suspense fallback={<LoadingState label={getText("client.load")} />}><NotesWorkspace selectedId={noteId} onSelect={setNoteId} active={tab === "notes"} /></Suspense>}
     </div>
   </div>;
 }

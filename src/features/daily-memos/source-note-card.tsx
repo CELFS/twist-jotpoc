@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/ui/loading-state";
 
 import { ExternalLink, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -111,7 +112,7 @@ export function SourceNoteCard({
   if (snapshot.loading) {
     return (
       <div className="daily-memo-source-note-card" data-loading="true">
-        {getText("dailyMemo.sourceNote.loading")}
+        <LoadingState compact rows={1} label={getText("dailyMemo.sourceNote.loading")} />
       </div>
     );
   }
