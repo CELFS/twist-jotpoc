@@ -3,6 +3,7 @@ import { Globe, Languages, NotebookPen, PanelRight, Star } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
 import { SidebarContext, WorkspaceSidebar } from "@/features/shell/workspace-sidebar";
 import { SettingsPage, type ManagementTab } from "@/features/shell/settings-page";
+import { SidebarResizer } from "@/features/shell/sidebar-resizer";
 import { FloatingEntry } from "@/features/shell/floating-entry";
 import { WindowControls } from "@/features/shell/window-controls";
 import { RequestError } from "@/features/shell/request-error";
@@ -106,7 +107,9 @@ export function App() {
               setAutoHide(value);
             }} onBack={() => setManagementTab(null)} />}
         </div>
-        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={setManagementTab} current={managementTab} />
+        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={setManagementTab} current={managementTab}>
+          {!collapsed && <SidebarResizer key={windowState?.mode ?? "full"} mode={windowState?.mode === "mini" ? "mini" : "full"} open={sidebarOpen} />}
+        </WorkspaceSidebar>
       </div>
     </div>
     {collapsed && <FloatingEntry autoHide={autoHide} busy={busy} pinned={windowState.pinned} onPinChange={changePin}

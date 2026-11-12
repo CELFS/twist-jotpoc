@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.15 - Unreleased
+
+- Resize the sidebar by dragging the divider and remember its width separately for the main and Mini windows.
+
 ## 1.0.14 - Unreleased
 
 - Align workspace tabs with the content panel as the right sidebar opens and closes.

@@ -22,13 +22,15 @@ export function useSidebarSelection() {
   return useContext(SidebarContext)?.onSelect;
 }
 
-export function WorkspaceSidebar({ open, setTarget, onManage, current }: {
+export function WorkspaceSidebar({ open, setTarget, onManage, current, children }: {
   open: boolean;
   setTarget: (target: HTMLDivElement | null) => void;
+  children: ReactNode;
   current: ManagementTab | null;
   onManage: (tab: ManagementTab) => void;
 }) {
   return <aside id="workspace-sidebar" inert={!open} aria-hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
+    {children}
     <div className="sidebar-scroll custom-scrollbar">
       <div ref={setTarget} />
     </div>
