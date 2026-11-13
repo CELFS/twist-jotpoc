@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src-tauri/icons/128x128.png" width="96" alt="JotPoc icon">
+  <img src="docs/jotpoc-icon.png" width="96" alt="JotPoc icon">
 </p>
 
 # JotPoc
