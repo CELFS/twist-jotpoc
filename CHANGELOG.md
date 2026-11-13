@@ -2,7 +2,7 @@
 
 ## 1.0.26 - Unreleased
 
-- Build and publish Android installers independently for each architecture. Validate package sizes before upload and report separate Windows and Linux compilation and packaging times.
+- Build Android installers in parallel by architecture and sync all selected packages to TwistBalance together after successful builds. Validate package sizes before upload and report separate Windows and Linux compilation and packaging times.
 
 ## 1.0.25 - Unreleased
 

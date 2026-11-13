@@ -49,3 +49,71 @@ jobs:
       target: ${{ matrix.target }}
       rust_target: ${{ matrix.rust_target }}
     secrets: inherit
+
+  publish:
+    needs: [select, package]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: jotpoc-download-publication
+      queue: max
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: client
+          filter: blob:none
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: packages
+      - name: Verify the complete set of selected packages
+        shell: python
+        env:
+          TARGETS: ${{ needs.select.outputs.targets }}
+        run: |
+          import json
+          import os
+          from pathlib import Path
+          expected = {target["package"] for target in json.loads(os.environ["TARGETS"])}
+          actual = {path.name for path in Path("packages").iterdir() if path.is_dir()}
+          if not expected or expected != actual:
+              raise SystemExit(f"Expected {sorted(expected)}, received {sorted(actual)}")
+      - if: contains(fromJSON(needs.select.outputs.targets).*.platform, 'android')
+        run: |
+          if [[ ! -x "$ANDROID_HOME/build-tools/35.0.0/apksigner" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+          fi
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+      - uses: actions/create-github-app-token@v3
+        id: token
+        with:
+          client-id: ${{ vars.TWB_SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.TWB_SYNC_APP_PRIVATE_KEY }}
+          owner: CELFS
+          repositories: twist-balance
+          permission-contents: write
+      - uses: actions/checkout@v6
+        with:
+          repository: CELFS/twist-balance
+          ref: main
+          path: site
+          token: ${{ steps.token.outputs.token }}
+      - name: Synchronize release packages and download entries
+        env:
+          BOT: ${{ steps.token.outputs.app-slug }}[bot]
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          git -C site config user.name "$BOT"
+          git -C site config user.email "$(gh api "/users/$BOT" --jq .id)+$BOT@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git -C site fetch origin main
+            tree="$RUNNER_TEMP/site-$attempt"
+            git -C site worktree add --detach "$tree" origin/main
+            python3 "$tree/claude_jobs/scripts/sync-jotpoc-release.py" client packages
+            git -C "$tree" add -- src/extension/jotpoc-release.json public/downloads/jotpoc
+            git -C "$tree" diff --cached --quiet && exit 0
+            git -C "$tree" commit -m "chore: sync JotPoc packages for ${GITHUB_SHA:0:12}"
+            git -C "$tree" push origin HEAD:main && exit 0
+          done
+          exit 1
