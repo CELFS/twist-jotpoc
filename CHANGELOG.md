@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.24 - Unreleased
+
+- Build desktop and signed Android packages on each push to main and synchronize individual downloads to TwistBalance.
+
 ## 1.0.23 - Unreleased
 
 - Browse and filter webpage underlines and excerpts in Marks. Navigate by source from the sidebar.
