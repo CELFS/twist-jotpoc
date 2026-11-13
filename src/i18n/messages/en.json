@@ -602,5 +602,19 @@
       },
       "fullDate": "Lunar {year} {month} {day}"
     }
+  },
+  "androidUpdate": {
+    "check": "Check for updates",
+    "installed": "Installed version",
+    "latest": "Latest version",
+    "current": "Up to date",
+    "download": "Download update",
+    "downloading": "Downloading",
+    "install": "Install update",
+    "failed": "Download failed. Tap to retry.",
+    "checkFailed": "Could not check for updates",
+    "installFailed": "Could not open the installer. Try again.",
+    "ready": "Update downloaded. Tap to install.",
+    "retry": "Retry"
   }
 }

@@ -1,4 +1,6 @@
 mod window;
+#[cfg(target_os = "android")]
+mod android_update;
 
 #[tauri::command]
 fn log_auth_failure(stage: String, code: String, status: u16) {
@@ -55,6 +57,8 @@ pub fn run() {
             window::update_inactive_controls(native);
         }
     });
+    #[cfg(target_os = "android")]
+    let builder = builder.plugin(android_update::init());
     builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())

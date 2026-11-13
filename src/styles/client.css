@@ -490,3 +490,13 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .notification-card > svg { color: var(--app-danger); }
 .notification-card button { display: grid; place-items: center; background: transparent; color: inherit; border: 0; padding: 2px; }
 .notification-center::backdrop { background: transparent; pointer-events: none; }
+
+.android-update-card {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+}
+
+.android-update-card progress {
+  display: block;
+  width: 100%;
+}

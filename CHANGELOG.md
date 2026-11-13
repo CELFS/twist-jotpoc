@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.31 - Unreleased
+
+- Download Android updates in Settings and open the system installer from the card or completion notification.
+
 ## 1.0.30 - Unreleased
 
 - Refresh the app version and available device details when restoring a TwistBalance session.

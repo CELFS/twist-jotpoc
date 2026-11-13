@@ -1,0 +1,7 @@
+{
+  "identifier": "android-update",
+  "description": "Android updates in the main JotPoc settings window",
+  "platforms": ["android"],
+  "windows": ["main"],
+  "permissions": ["apk-update:allow-status", "apk-update:allow-download", "apk-update:allow-install"]
+}
