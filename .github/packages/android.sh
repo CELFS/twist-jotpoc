@@ -20,6 +20,8 @@ stage='Rust target and Android project initialization'
 trap 'record_stage "$stage (failed)"' ERR
 rustup target add "$ANDROID_RUST_TARGET"
 pnpm tauri android init --ci --skip-targets-install
+# Install the branded launcher resources into the generated Android project.
+cp -R src-tauri/icons/android/. src-tauri/gen/android/app/src/main/res/
 record_stage "$stage"
 stage='Gradle dependency resolution'
 # Enable task output caching for both the preflight and Tauri's Gradle invocation.

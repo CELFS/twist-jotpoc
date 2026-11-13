@@ -132,18 +132,18 @@ Repository documentation and source comments use English. User-facing text uses 
 
 ## Icons
 
-The current application icon uses the feather with a document badge. Its source is `assets/branding/exploration/01-feather-note-badge.png`.
+The current application icon uses the feather with a document badge. Its source is `assets/branding/jotpoc-icon.png`.
 
 Regenerate the platform icon files with the installed Tauri CLI.
 
 ```bash
-pnpm exec tauri icon assets/branding/exploration/01-feather-note-badge.png --output src-tauri/icons
+pnpm exec tauri icon assets/branding/jotpoc-icon.png --output src-tauri/icons
 ```
 
 The desktop icon paths are configured in `src-tauri/tauri.conf.json`.
 
 ## Versioning
 
-The initial shell version is **1.0.0**. The current integration version is **1.0.26**. Subsequent versions increment the final number. Keep the application version aligned across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Cargo updates the workspace package entry in `src-tauri/Cargo.lock` when the Rust package version changes.
+The initial shell version is **1.0.0**. The current integration version is **1.0.27**. Subsequent versions increment the final number. Keep the application version aligned across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Cargo updates the workspace package entry in `src-tauri/Cargo.lock` when the Rust package version changes.
 
 Record changes in [CHANGELOG.md](CHANGELOG.md).

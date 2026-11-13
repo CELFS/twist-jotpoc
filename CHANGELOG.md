@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.27 - Unreleased
+
+- Align the JotPoc app icon with Twill and include the branded launcher icon in Android installers.
+
 ## 1.0.26 - Unreleased
 
 - Build Android installers in parallel by architecture and sync all selected packages to TwistBalance together after successful builds. Validate package sizes before upload and report separate Windows and Linux compilation and packaging times.
