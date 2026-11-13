@@ -2,7 +2,9 @@
 # Sign the built APK on the release runner: bash .github/packages/android-sign.sh
 set -euo pipefail
 : "${KEYSTORE:?Configure the Android release keystore}"
-"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+if [[ ! -x "$ANDROID_HOME/build-tools/35.0.0/apksigner" ]]; then
+  "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+fi
 tools="$ANDROID_HOME/build-tools/35.0.0"
 mapfile -t apks < <(find src-tauri/gen/android/app/build/outputs/apk -name '*.apk')
 test "${#apks[@]}" = 1

@@ -13,6 +13,19 @@ on:
         required: true
         type: string
 
+      package:
+        required: true
+        type: string
+      abi:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+      rust_target:
+        required: true
+        type: string
+
 permissions:
   contents: read
 
@@ -34,7 +47,7 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
         with:
           workspaces: src-tauri
-          shared-key: jotpoc-${{ inputs.platform }}
+          shared-key: jotpoc-${{ inputs.package }}
           cache-bin: false
       - run: pnpm install --frozen-lockfile
       - if: inputs.platform == 'android'
@@ -46,10 +59,18 @@ jobs:
           cache-dependency-path: |
             pnpm-lock.yaml
             .github/packages/android.sh
-      - name: Build installer
+      - name: Install Linux build dependencies
+        if: inputs.platform == 'linux'
+        run: bash .github/packages/linux-deps.sh
+      - name: Compile Windows or Linux application
+        if: inputs.platform == 'windows' || inputs.platform == 'linux'
+        run: pnpm tauri build --no-bundle
+      - name: Package installer
         shell: bash
         env:
           PLATFORM: ${{ inputs.platform }}
+          ANDROID_TARGET: ${{ inputs.target }}
+          ANDROID_RUST_TARGET: ${{ inputs.rust_target }}
         run: bash ".github/packages/$PLATFORM.sh"
       - name: Sign Android release
         if: inputs.platform == 'android'
@@ -59,10 +80,33 @@ jobs:
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: bash .github/packages/android-sign.sh
+      - name: Validate installer size and Android architecture
+        shell: python
+        env:
+          ASSET: ${{ inputs.asset }}
+          ABI: ${{ inputs.abi }}
+        run: |
+          import os
+          from pathlib import Path
+          from zipfile import ZipFile
+          files = list(Path(".").glob(os.environ["ASSET"]))
+          if len(files) != 1:
+              raise SystemExit(f"Expected one installer, found {files}")
+          file = files[0]
+          size = file.stat().st_size
+          print(f"{file}: {size / 2**20:.2f} MiB")
+          if not 0 < size <= 25 * 2**20:
+              raise SystemExit("Installer exceeds the Pages limit or is empty")
+          if abi := os.environ["ABI"]:
+              with ZipFile(file) as apk:
+                  abis = {p.split("/")[1] for p in apk.namelist() if p.startswith("lib/") and p.endswith(".so")}
+              if abis != {abi}:
+                  raise SystemExit(f"Expected {abi}, found {abis}")
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}
+          name: ${{ inputs.package }}
           path: ${{ inputs.asset }}
+          compression-level: 0
           if-no-files-found: error
 
   publish:
@@ -76,15 +120,18 @@ jobs:
       - uses: actions/checkout@v6
         with:
           path: client
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.platform }}
-          path: packages/${{ inputs.platform }}
+          name: ${{ inputs.package }}
+          path: packages/${{ inputs.package }}
       - if: inputs.platform == 'android'
         run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+          if [[ ! -x "$ANDROID_HOME/build-tools/35.0.0/apksigner" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+          fi
           echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
       - uses: actions/create-github-app-token@v3
         id: token
@@ -114,7 +161,7 @@ jobs:
             python3 "$tree/claude_jobs/scripts/sync-jotpoc-release.py" client packages
             git -C "$tree" add -- src/extension/jotpoc-release.json public/downloads/jotpoc
             git -C "$tree" diff --cached --quiet && exit 0
-            git -C "$tree" commit -m "chore: sync JotPoc ${{ inputs.platform }} package for ${GITHUB_SHA:0:12}"
+            git -C "$tree" commit -m "chore: sync JotPoc ${{ inputs.package }} package for ${GITHUB_SHA:0:12}"
             git -C "$tree" push origin HEAD:main && exit 0
           done
           exit 1

@@ -11,9 +11,33 @@ TARGETS = {
 }
 
 
+# Tauri CLI target, Rust target and APK ABI directory for each runner.
+ANDROID = {
+    "arm64-v8a": ("aarch64", "aarch64-linux-android"),
+    "armeabi-v7a": ("armv7", "armv7-linux-androideabi"),
+    "x86": ("i686", "i686-linux-android"),
+    "x86_64": ("x86_64", "x86_64-linux-android"),
+}
+
+
+def runners(selected):
+    for platform, (os, asset) in TARGETS.items():
+        if platform == "android":
+            for abi, (target, rust_target) in ANDROID.items():
+                package = f"android-{abi}"
+                if platform in selected or package in selected:
+                    yield dict(platform=platform, os=os, asset=asset, package=package,
+                               abi=abi, target=target, rust_target=rust_target)
+        elif platform in selected:
+            yield dict(platform=platform, os=os, asset=asset, package=platform,
+                       abi="", target="", rust_target="")
+
+
 def affected(path):
     if path in {"README.md", "CHANGELOG.md"} or path.startswith("docs/"):
         return set()
+    if path == ".github/packages/linux-deps.sh":
+        return {"linux"}
     if path.startswith(("src-tauri/gen/android/", "src-tauri/icons/android/")) or path == ".github/packages/android-sign.sh":
         return {"android"}
     for platform in TARGETS:
@@ -42,5 +66,4 @@ def select(before, after, manual):
 
 if __name__ == "__main__":
     selected = select(*sys.argv[1:])
-    print(json.dumps([{"platform": p, "os": os, "asset": asset}
-                      for p, (os, asset) in TARGETS.items() if p in selected]))
+    print(json.dumps(list(runners(selected))))

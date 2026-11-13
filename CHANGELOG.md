@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.26 - Unreleased
+
+- Build and publish Android installers independently for each architecture. Validate package sizes before upload and report separate Windows and Linux compilation and packaging times.
+
 ## 1.0.25 - Unreleased
 
 - Build and publish affected platforms independently, with cached dependencies and optional single-platform rebuilds.
