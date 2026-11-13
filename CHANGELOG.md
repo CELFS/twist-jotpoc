@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.25 - Unreleased
+
+- Build and publish affected platforms independently, with cached dependencies and optional single-platform rebuilds.
+
 ## 1.0.24 - Unreleased
 
 - Build desktop and signed Android packages on each push to main and synchronize individual downloads to TwistBalance.

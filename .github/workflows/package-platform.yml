@@ -1,0 +1,120 @@
+name: Package one platform
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      os:
+        required: true
+        type: string
+      asset:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
+        with:
+          workspaces: src-tauri
+          shared-key: jotpoc-${{ inputs.platform }}
+          cache-bin: false
+      - run: pnpm install --frozen-lockfile
+      - if: inputs.platform == 'android'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            .github/packages/android.sh
+      - name: Build installer
+        shell: bash
+        env:
+          PLATFORM: ${{ inputs.platform }}
+        run: bash ".github/packages/$PLATFORM.sh"
+      - name: Sign Android release
+        if: inputs.platform == 'android'
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: bash .github/packages/android-sign.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}
+          path: ${{ inputs.asset }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: jotpoc-download-publication
+      queue: max
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: client
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.platform }}
+          path: packages/${{ inputs.platform }}
+      - if: inputs.platform == 'android'
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+      - uses: actions/create-github-app-token@v3
+        id: token
+        with:
+          client-id: ${{ vars.TWB_SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.TWB_SYNC_APP_PRIVATE_KEY }}
+          owner: CELFS
+          repositories: twist-balance
+          permission-contents: write
+      - uses: actions/checkout@v6
+        with:
+          repository: CELFS/twist-balance
+          ref: main
+          path: site
+          token: ${{ steps.token.outputs.token }}
+      - name: Synchronize installer and download entry
+        env:
+          BOT: ${{ steps.token.outputs.app-slug }}[bot]
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          git -C site config user.name "$BOT"
+          git -C site config user.email "$(gh api "/users/$BOT" --jq .id)+$BOT@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git -C site fetch origin main
+            tree="$RUNNER_TEMP/site-$attempt"
+            git -C site worktree add --detach "$tree" origin/main
+            python3 "$tree/claude_jobs/scripts/sync-jotpoc-release.py" client packages
+            git -C "$tree" add -- src/extension/jotpoc-release.json public/downloads/jotpoc
+            git -C "$tree" diff --cached --quiet && exit 0
+            git -C "$tree" commit -m "chore: sync JotPoc ${{ inputs.platform }} package for ${GITHUB_SHA:0:12}"
+            git -C "$tree" push origin HEAD:main && exit 0
+          done
+          exit 1
