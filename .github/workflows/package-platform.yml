@@ -55,10 +55,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-          cache: gradle
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            .github/packages/android.sh
+      - name: Restore Android NDK
+        if: inputs.platform == 'android'
+        uses: ./.github/actions/android-ndk
+      - name: Set up Gradle caching
+        if: inputs.platform == 'android'
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
       - name: Install Linux build dependencies
         if: inputs.platform == 'linux'
         run: bash .github/packages/linux-deps.sh

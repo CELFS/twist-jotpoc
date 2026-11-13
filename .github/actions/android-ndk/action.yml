@@ -1,0 +1,47 @@
+name: Share the Android NDK
+description: Prime or restore the same host toolchain for all Android ABIs.
+inputs:
+  prime:
+    description: Check and populate the cache before the build matrix starts.
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - id: toolchain
+      shell: bash
+      run: |
+        version=$(cat .github/packages/android-ndk-version)
+        echo "path=$ANDROID_HOME/ndk/$version" >> "$GITHUB_OUTPUT"
+        echo "key=jotpoc-ndk-$RUNNER_OS-$RUNNER_ARCH-$version" >> "$GITHUB_OUTPUT"
+        if [[ -f "$ANDROID_HOME/ndk/$version/source.properties" ]]; then
+          echo "installed=true" >> "$GITHUB_OUTPUT"
+        fi
+    - id: cache
+      if: inputs.prime == 'true' || steps.toolchain.outputs.installed != 'true'
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ steps.toolchain.outputs.path }}
+        key: ${{ steps.toolchain.outputs.key }}
+        lookup-only: ${{ inputs.prime == 'true' }}
+    - if: steps.cache.outputs.cache-hit != 'true' && steps.toolchain.outputs.installed != 'true'
+      shell: bash
+      run: |
+        version=$(cat .github/packages/android-ndk-version)
+        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$version"
+        test -f "$ANDROID_HOME/ndk/$version/source.properties"
+    - if: inputs.prime == 'true' && steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.toolchain.outputs.path }}
+        key: ${{ steps.toolchain.outputs.key }}
+    - shell: bash
+      env:
+        PRIME: ${{ inputs.prime }}
+        HIT: ${{ steps.cache.outputs.cache-hit }}
+        INSTALLED: ${{ steps.toolchain.outputs.installed }}
+      run: |
+        if [[ "$PRIME" == true && "$HIT" == true ]]; then state='already cached'
+        elif [[ "$HIT" == true ]]; then state='restored from cache'
+        elif [[ "$INSTALLED" == true ]]; then state='preinstalled on runner'
+        else state='installed on cache miss'; fi
+        echo "Android NDK: $state" >> "$GITHUB_STEP_SUMMARY"
