@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.30 - Unreleased
+
+- Refresh the app version and available device details when restoring a TwistBalance session.
+
 ## 1.0.29 - Unreleased
 
 - Show the authorization ID and last use in account settings.

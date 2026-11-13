@@ -72,9 +72,15 @@ async function post(path: string, body: unknown, signal?: AbortSignal) {
   return readJson(await publicFetch(`/api/extension/${path}`, jsonRequest(body, signal)));
 }
 
+async function currentClientDetails() {
+  const deviceInfo = await invoke<{ os?: string; name?: string }>("authorization_device_info").catch(() => undefined);
+  return { clientVersion: packageInfo.version, deviceInfo };
+}
+
 async function inspect(token: string, signal?: AbortSignal) {
   return sessionSchema.parse(await readJson(await publicFetch("/api/extension/session", {
-    headers: { Authorization: `Bearer ${token}` }, signal,
+    ...jsonRequest(await currentClientDetails(), signal),
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   })));
 }
 
@@ -173,10 +179,9 @@ export async function connectAccount() {
   let connected = false;
   let stage = "device/start";
   try {
-    const deviceInfo = await invoke<{ os?: string; name?: string }>("authorization_device_info");
     pending = pendingSchema.parse(await post("device/start", {
-      deviceInfo,
-      installationId: installationId(), clientName: "JotPoc", clientVersion: packageInfo.version,
+      ...await currentClientDetails(),
+      installationId: installationId(), clientName: "JotPoc",
     }, controller.signal));
     if (current !== revision) return;
     stage = "validate-authorization-url";
