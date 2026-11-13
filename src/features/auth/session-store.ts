@@ -9,11 +9,15 @@ import { readStoredCredential, removeStoredCredential, removeMatchingCredential,
 import { ApiError, publicFetch, readJson, jsonRequest, TWIST_BALANCE_ORIGIN } from "@/platform/http";
 
 const sessionSchema = z.object({
+  authorizationNumber: z.string().optional(),
+  lastUsedAt: z.number().int().nonnegative().optional(),
   user: z.object({ id: z.string().min(1), email: z.string().email(), emailVerified: z.literal(true) }),
   scopes: z.array(z.string()),
   expiresAt: z.number().int().positive(),
 });
 const credentialSchema = z.object({
+  authorizationNumber: z.string().optional(),
+  lastUsedAt: z.number().int().nonnegative().optional(),
   accessToken: z.string().regex(/^[A-Za-z0-9_-]{48}$/),
   accountId: z.string().min(1),
   email: z.string().email(),
@@ -130,6 +134,7 @@ export function restoreSession(): Promise<void> {
       const session = await inspect(parsed.data.accessToken);
       if (current !== revision) return;
       const credential = { ...parsed.data, accountId: session.user.id, email: session.user.email,
+        authorizationNumber: session.authorizationNumber, lastUsedAt: session.lastUsedAt,
         expiresAt: session.expiresAt, scopes: session.scopes };
       await storeCredential(credential);
       if (current !== revision) return;
@@ -199,6 +204,7 @@ export async function connectAccount() {
       if (current !== revision) return;
       const credential: Credential = {
         accessToken: token.accessToken, accountId: session.user.id, email: session.user.email,
+        authorizationNumber: session.authorizationNumber, lastUsedAt: session.lastUsedAt,
         expiresAt: session.expiresAt, scopes: session.scopes,
       };
       try {

@@ -478,7 +478,10 @@
     "reconnect": "Reconnect to TwistBalance",
     "sidebar": "Sidebar",
     "management": "Settings and account",
-    "noMemoHistory": "No memo history yet"
+    "noMemoHistory": "No memo history yet",
+    "authorizationNumber": "Authorization ID",
+    "lastUsed": "Last used",
+    "copyAuthorizationNumber": "Copy authorization ID"
   },
   "settings": {
     "shortLabel": "Settings",

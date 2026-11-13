@@ -1,9 +1,10 @@
-import { Cable, Unplug } from "lucide-react";
+import { Cable, Copy, Unplug } from "lucide-react";
 import { TWIST_BALANCE_ORIGIN } from "@/platform/http";
 import { useState } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Button } from "@/components/ui/button";
-import { getText } from "@/i18n/get-text";
+import { getIntlLocale } from "@/i18n/app-language";
+import { getText, type MessageKey } from "@/i18n/get-text";
 import { RequestError } from "@/features/shell/request-error";
 import { useSession, connectAccount, disconnectAccount, cancelAuthorization, reopenAuthorization, restoreSession } from "./session-store";
 
@@ -12,6 +13,8 @@ export function AccountPanel({ platform = "other" }: { platform?: "macos" | "win
   const [confirming, setConfirming] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
 
+  const [copyFeedback, setCopyFeedback] = useState<MessageKey | null>(null);
+  const credential = state.credential;
   const connected = state.phase === "connected";
   const pending = state.phase === "authorizing";
   const unreadable = state.phase === "credentialUnreadable";
@@ -36,6 +39,20 @@ export function AccountPanel({ platform = "other" }: { platform?: "macos" | "win
       </div>}
     </div>
     {connected ? <>
+      {credential?.authorizationNumber && <div>
+        <div className="authorization-code">
+          <span>{getText("client.authorizationNumber")}</span><code>{credential.authorizationNumber}</code>
+          <Button size="icon" variant="ghost" aria-label={getText("client.copyAuthorizationNumber")} title={getText("client.copyAuthorizationNumber")}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(credential.authorizationNumber!);
+                setCopyFeedback("translation.copied");
+              } catch { setCopyFeedback("translation.copyFailed"); }
+            }}><Copy size={15} /></Button>
+          {copyFeedback && <span role="status">{getText(copyFeedback)}</span>}
+        </div>
+        {credential.lastUsedAt && <p>{getText("client.lastUsed")} <time dateTime={new Date(credential.lastUsedAt).toISOString()}>{new Date(credential.lastUsedAt).toLocaleString(getIntlLocale(), { dateStyle: "short", timeStyle: "short" })}</time></p>}
+      </div>}
       {confirming && <section className="client-confirmation" aria-label={getText("client.confirmDisconnect")}>
         <p><Unplug size={15} aria-hidden="true" /> {getText("client.disconnectDescription")}</p>
         <div className="connection-confirm-actions">

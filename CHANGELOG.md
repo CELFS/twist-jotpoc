@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.29 - Unreleased
+
+- Show the authorization ID and last use in account settings.
+
 ## 1.0.27 - Unreleased
 
 - Align the JotPoc app icon with Twill and include the branded launcher icon in Android installers.

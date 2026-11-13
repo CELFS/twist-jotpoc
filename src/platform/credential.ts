@@ -1,6 +1,8 @@
 export type Credential = {
   accessToken: string;
   accountId: string;
+  authorizationNumber?: string;
+  lastUsedAt?: number;
   email: string;
   expiresAt: number;
   scopes: string[];

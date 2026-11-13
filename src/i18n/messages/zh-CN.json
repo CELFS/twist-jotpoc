@@ -478,7 +478,10 @@
     "reconnect": "重新连接 TwistBalance",
     "sidebar": "侧栏",
     "management": "设置与账户",
-    "noMemoHistory": "暂无历史备忘"
+    "noMemoHistory": "暂无历史备忘",
+    "authorizationNumber": "授权编号",
+    "lastUsed": "上次使用",
+    "copyAuthorizationNumber": "复制授权编号"
   },
   "settings": {
     "shortLabel": "设置",
