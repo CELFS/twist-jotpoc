@@ -72,6 +72,7 @@ jobs:
         env:
           PLATFORM: ${{ inputs.platform }}
           ANDROID_TARGET: ${{ inputs.target }}
+          ANDROID_ABI: ${{ inputs.abi }}
           ANDROID_RUST_TARGET: ${{ inputs.rust_target }}
         run: bash ".github/packages/$PLATFORM.sh"
       - name: Sign Android release

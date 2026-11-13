@@ -39,7 +39,7 @@ def affected(path):
     if path == ".github/packages/linux-deps.sh":
         return {"linux"}
     if path.startswith(("src-tauri/gen/android/", "src-tauri/icons/android/", ".github/actions/android-ndk/")) or path in {
-        ".github/packages/android-sign.sh", ".github/packages/android-ndk-version", ".github/packages/android-timings.py",
+        ".github/packages/android-gradle.sh", ".github/packages/android-sign.sh", ".github/packages/android-ndk-version", ".github/packages/android-timings.py",
     }:
         return {"android"}
     for platform in TARGETS:
