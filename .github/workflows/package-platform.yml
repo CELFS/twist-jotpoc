@@ -31,6 +31,12 @@ permissions:
 
 jobs:
   build:
+    name: build
+    # setup-gradle identifies its snapshots using this job's matrix.
+    # A reusable workflow does not inherit the calling job's matrix.
+    strategy:
+      matrix:
+        package: ["${{ inputs.package }}"]
     runs-on: ${{ inputs.os }}
     steps:
       - uses: actions/checkout@v6
@@ -61,6 +67,14 @@ jobs:
       - name: Set up Gradle caching
         if: inputs.platform == 'android'
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
+        with:
+          cache-cleanup: never
+      - name: Select the Rust library used by the installer
+        if: inputs.platform == 'android' || inputs.platform == 'windows'
+        shell: bash
+        env:
+          PLATFORM: ${{ inputs.platform }}
+        run: python .github/packages/release-library.py "$PLATFORM"
       - name: Install Linux build dependencies
         if: inputs.platform == 'linux'
         run: bash .github/packages/linux-deps.sh

@@ -38,6 +38,8 @@ def affected(path):
         return set()
     if path == ".github/packages/linux-deps.sh":
         return {"linux"}
+    if path == ".github/packages/release-library.py":
+        return {"android", "windows"}
     if path.startswith(("src-tauri/gen/android/", "src-tauri/icons/android/", ".github/actions/android-ndk/")) or path in {
         ".github/packages/android-gradle.sh", ".github/packages/android-sign.sh", ".github/packages/android-ndk-version", ".github/packages/android-timings.py",
     }:

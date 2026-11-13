@@ -24,11 +24,16 @@ def duration(seconds):
     return f"{seconds // 60}m {seconds % 60:02d}s"
 
 
-def builds(run):
-    jobs = api(f"runs/{run['id']}/jobs?per_page=100")["jobs"]
+def jobs_for(run):
+    return api(f"runs/{run['id']}/jobs?per_page=100")["jobs"]
+
+
+def builds(run, jobs):
     result = {}
     for job in jobs:
         # The reusable workflow's job name includes the Android package from the matrix.
+        if not job["name"].startswith("package (android, "):
+            continue
         package = next((field for field in job["name"].split(", ") if field.startswith("android-")), None)
         if not package:
             continue
@@ -41,7 +46,21 @@ def builds(run):
 
 def main():
     current = api(f"runs/{os.environ['GITHUB_RUN_ID']}")
-    android = builds(current)
+    jobs = jobs_for(current)
+    print("### Full package job times\n")
+    print("From runner start through post-upload cleanup. Target: 3 minutes per package.\n")
+    for job in jobs:
+        if not job["name"].startswith("package (") or not job["completed_at"]:
+            continue
+        name = job["name"].split("(", 1)[1].split(",", 1)[0]
+        if name == "android":
+            name = job["name"].split(", ")[3]
+        seconds = elapsed(job["started_at"], job["completed_at"])
+        print(f"- [{name}]({job['html_url']}): {duration(seconds)} ({job['conclusion']})")
+    print()
+    android = builds(current, jobs)
+    if not android:
+        return
     previous = {}
     # A retried job can start long after the original workflow was created.
     query = urlencode({"branch": current["head_branch"], "status": "completed", "per_page": 20})
@@ -49,7 +68,7 @@ def main():
     for run in history:
         if run["run_number"] >= current["run_number"] or run["run_attempt"] != 1:
             continue
-        for abi, (ready, _, job) in builds(run).items():
+        for abi, (ready, _, job) in builds(run, jobs_for(run)).items():
             if ready is not None and job["conclusion"] == "success":
                 previous.setdefault(abi, (ready, run["html_url"]))
         if android.keys() <= previous.keys():

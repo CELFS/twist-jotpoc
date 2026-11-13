@@ -90,6 +90,6 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
         getline; sub(/^.*<td>/, ""); sub(/<.*/, "")
         printf "| %s | %s | %s |\n", task, duration, ($0 == "" ? "Executed" : $0)
       }
-    ' "$profile" >> "$GITHUB_STEP_SUMMARY"
+    ' "$profile" | tee -a "$GITHUB_STEP_SUMMARY"
   fi
 fi
