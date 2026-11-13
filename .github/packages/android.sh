@@ -20,5 +20,17 @@ beforeSettings { settings ->
     }
 }
 GRADLE
+# Resolve the generated buildSrc classpath before compiling the native app.
+android_project=src-tauri/gen/android
+gradle=("$android_project/gradlew" --project-dir "$android_project/buildSrc" --console=plain)
+config_log="$RUNNER_TEMP/jotpoc-gradle-configuration.log"
+if ! bash "${gradle[@]}" help > "$config_log" 2>&1; then
+  cat "$config_log" >&2
+  if ! grep -Eq 'Could not (resolve|find|download|get resource|GET|HEAD)' "$config_log"; then
+    exit 1
+  fi
+  echo "Retrying Gradle dependency resolution with refreshed metadata."
+  bash "${gradle[@]}" --refresh-dependencies help
+fi
 config=$(printf '{"bundle":{"android":{"versionCode":%d}}}' "$GITHUB_RUN_NUMBER")
 pnpm tauri android build --ci --apk --split-per-abi --target "$ANDROID_TARGET" --config "$config"
