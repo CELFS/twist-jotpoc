@@ -168,7 +168,9 @@ export async function connectAccount() {
   let connected = false;
   let stage = "device/start";
   try {
+    const deviceInfo = await invoke<{ os?: string; name?: string }>("authorization_device_info");
     pending = pendingSchema.parse(await post("device/start", {
+      deviceInfo,
       installationId: installationId(), clientName: "JotPoc", clientVersion: packageInfo.version,
     }, controller.signal));
     if (current !== revision) return;

@@ -4,9 +4,16 @@ export const extensionInstallationIdSchema = z.string().regex(/^[A-Za-z0-9_-]{32
 export const extensionDeviceCodeSchema = z.string().regex(/^[A-Za-z0-9_-]{48}$/);
 export const extensionUserCodeSchema = z.string().trim().toUpperCase().regex(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/);
 
+export const extensionDeviceInfoSchema = z.object({
+  os: z.enum(["Windows", "macOS", "Linux", "Android", "iOS", "ChromeOS"]).optional(),
+  browser: z.enum(["Chrome", "Edge", "Firefox", "Opera", "Safari", "Brave"]).optional(),
+  name: z.string().trim().min(1).max(120).optional(),
+}).strict();
+
 export const extensionStartRequestSchema = z.object({
   installationId: extensionInstallationIdSchema,
   clientName: z.enum(["Twill", "JotPoc"]),
+  deviceInfo: extensionDeviceInfoSchema.optional(),
   clientVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
 }).strict();
 

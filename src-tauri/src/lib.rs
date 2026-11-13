@@ -5,6 +5,44 @@ fn log_auth_failure(stage: String, code: String, status: u16) {
     eprintln!("[JotPoc auth] stage={stage} status={status} code={code}");
 }
 
+#[derive(serde::Serialize)]
+struct AuthorizationDeviceInfo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    os: Option<&'static str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    name: Option<String>,
+}
+
+#[tauri::command]
+fn authorization_device_info() -> AuthorizationDeviceInfo {
+    let os = match std::env::consts::OS {
+        "windows" => Some("Windows"),
+        "macos" => Some("macOS"),
+        "linux" => Some("Linux"),
+        "android" => Some("Android"),
+        "ios" => Some("iOS"),
+        _ => None,
+    };
+    let name = match std::env::consts::OS {
+        "windows" => std::env::var("COMPUTERNAME").ok(),
+        "linux" => std::fs::read_to_string("/etc/hostname").ok(),
+        "macos" => system_label("/usr/sbin/scutil", &["--get", "ComputerName"]),
+        "android" => system_label("/system/bin/getprop", &["ro.product.model"]),
+        _ => None,
+    };
+    AuthorizationDeviceInfo {
+        os,
+        name: name.map(|s| s.trim().chars().take(60).collect::<String>())
+            .filter(|s| !s.is_empty()),
+    }
+}
+
+fn system_label(program: &str, args: &[&str]) -> Option<String> {
+    let output = std::process::Command::new(program).args(args).output().ok()?;
+    if !output.status.success() { return None; }
+    String::from_utf8(output.stdout).ok()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
@@ -24,6 +62,7 @@ pub fn run() {
         .manage(window::WindowController::default())
         .invoke_handler(tauri::generate_handler![
             log_auth_failure,
+            authorization_device_info,
             window::position_floating_entry,
             window::read_window_state,
             window::set_window_mode,
