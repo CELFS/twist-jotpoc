@@ -56,7 +56,7 @@ jobs:
           java-version: 17
       - if: matrix.platform == 'android'
         run: |
-          sdkmanager "ndk;27.2.12479018"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018"
           export NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
           pnpm tauri android init --ci
           config=$(printf '{"bundle":{"android":{"versionCode":%d}}}' "$GITHUB_RUN_NUMBER")
@@ -70,7 +70,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           : "${KEYSTORE:?Configure the Android release keystore}"
-          sdkmanager "build-tools;35.0.0"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
           tools="$ANDROID_HOME/build-tools/35.0.0"
           mapfile -t apks < <(find src-tauri/gen/android/app/build/outputs/apk -name '*.apk')
           test "${#apks[@]}" = 1
@@ -108,7 +108,7 @@ jobs:
           path: packages/${{ matrix.platform }}
       - if: matrix.platform == 'android'
         run: |
-          sdkmanager "build-tools;35.0.0"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
           echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
       - uses: actions/create-github-app-token@v3
         id: token
