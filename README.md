@@ -137,7 +137,7 @@ The current application icon uses the feather with a document badge. Its source 
 Regenerate the platform icon files with the installed Tauri CLI.
 
 ```bash
-pnpm exec tauri icon assets/branding/jotpoc-icon.png --output src-tauri/icons
+pnpm exec tauri icon assets/branding/icons.json --output src-tauri/icons
 ```
 
 The desktop icon paths are configured in `src-tauri/tauri.conf.json`.
