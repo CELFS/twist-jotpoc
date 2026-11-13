@@ -14,6 +14,10 @@ cat > "$init_dir/jotpoc-buildsrc.gradle" <<'GRADLE'
 beforeSettings { settings ->
     if (settings.settingsDir.name == 'buildSrc') {
         settings.pluginManagement.repositories {
+            maven {
+                url = uri("https://maven-central.storage-download.googleapis.com/maven2")
+                content { includeGroup("org.jetbrains.kotlin") }
+            }
             mavenCentral()
             gradlePluginPortal()
         }

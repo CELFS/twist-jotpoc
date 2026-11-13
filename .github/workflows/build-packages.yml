@@ -52,7 +52,9 @@ jobs:
 
   publish:
     needs: [select, package]
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      !cancelled() && github.ref == 'refs/heads/main' && needs.select.result == 'success' &&
+      (needs.package.result == 'success' || needs.package.result == 'failure')
     runs-on: ubuntu-latest
     concurrency:
       group: jotpoc-download-publication
@@ -67,25 +69,32 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: packages
-      - name: Verify the complete set of selected packages
+      - name: Check validated packages available for publication
+        id: available
         shell: python
         env:
           TARGETS: ${{ needs.select.outputs.targets }}
+          RESULT: ${{ needs.package.result }}
         run: |
           import json
           import os
           from pathlib import Path
           expected = {target["package"] for target in json.loads(os.environ["TARGETS"])}
-          actual = {path.name for path in Path("packages").iterdir() if path.is_dir()}
-          if not expected or expected != actual:
+          actual = {path.name for path in Path("packages").glob("*") if path.is_dir()}
+          if not actual <= expected or (os.environ["RESULT"] == "success" and expected != actual):
               raise SystemExit(f"Expected {sorted(expected)}, received {sorted(actual)}")
-      - if: contains(fromJSON(needs.select.outputs.targets).*.platform, 'android')
+          print(f"Available: {sorted(actual)}; missing: {sorted(expected - actual)}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print(f"publish={str(bool(actual)).lower()}", file=output)
+              print(f"android={str(any(name.startswith('android-') for name in actual)).lower()}", file=output)
+      - if: steps.available.outputs.android == 'true'
         run: |
           if [[ ! -x "$ANDROID_HOME/build-tools/35.0.0/apksigner" ]]; then
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
           fi
           echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
-      - uses: actions/create-github-app-token@v3
+      - if: steps.available.outputs.publish == 'true'
+        uses: actions/create-github-app-token@v3
         id: token
         with:
           client-id: ${{ vars.TWB_SYNC_APP_CLIENT_ID }}
@@ -93,13 +102,15 @@ jobs:
           owner: CELFS
           repositories: twist-balance
           permission-contents: write
-      - uses: actions/checkout@v6
+      - if: steps.available.outputs.publish == 'true'
+        uses: actions/checkout@v6
         with:
           repository: CELFS/twist-balance
           ref: main
           path: site
           token: ${{ steps.token.outputs.token }}
       - name: Synchronize release packages and download entries
+        if: steps.available.outputs.publish == 'true'
         env:
           BOT: ${{ steps.token.outputs.app-slug }}[bot]
           GH_TOKEN: ${{ steps.token.outputs.token }}
