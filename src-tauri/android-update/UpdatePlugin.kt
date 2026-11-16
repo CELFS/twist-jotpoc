@@ -26,6 +26,24 @@ internal class ApkDownload(val context: Context) {
         val info = context.packageManager.getPackageInfo(context.packageName, 0)
         return if (Build.VERSION.SDK_INT >= 28) info.longVersionCode else info.versionCode.toLong()
     }
+    companion object {
+        @Volatile private var cachedInstalledHash: String? = null
+    }
+
+    private fun installedHash(): String {
+        cachedInstalledHash?.let { return it }
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        java.io.File(context.applicationInfo.sourceDir).inputStream().buffered().use { input ->
+            val buffer = ByteArray(65536)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                digest.update(buffer, 0, count)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }.also { cachedInstalledHash = it }
+    }
+
     fun state(): JSObject {
         val result = JSObject()
         result.put("platform", "android-" + installedAbi())
@@ -33,10 +51,13 @@ internal class ApkDownload(val context: Context) {
         result.put("phase", "idle")
         result.put("received", 0)
         result.put("total", 0)
-        result.put("targetCode", targetCode)
+        val installed = installedHash()
+        val target = prefs.getString("hash", "")
+        result.put("installedHash", installed)
+        result.put("targetHash", target)
         result.put("targetVersion", prefs.getString("version", ""))
         if (id < 0) return result
-        if (targetCode <= installedCode) {
+        if (targetCode < installedCode || target == installed) {
             manager.remove(id)
             prefs.edit().clear().apply()
             return result
@@ -68,7 +89,7 @@ internal class ApkDownload(val context: Context) {
         val code = args.getLong("versionCode")
         val version = args.getString("version")
         val hash = args.getString("sha256")
-        require(code > installedCode && Regex("[0-9]+\\.[0-9]+\\.[0-9]+").matches(version))
+        require(code >= installedCode && hash != installedHash() && Regex("[0-9]+\\.[0-9]+\\.[0-9]+").matches(version))
         require(Regex("[a-f0-9]{64}").matches(hash))
         val file = "JotPoc-" + version + "-android-" + installedAbi() + "-" + hash.take(16) + ".apk"
         require(args.getString("url") == "/downloads/jotpoc/" + file)

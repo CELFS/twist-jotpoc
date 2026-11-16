@@ -12,7 +12,8 @@ import { publicFetch, readJson, TWIST_BALANCE_ORIGIN } from "@/platform/http";
 type DownloadState = {
   platform: string;
   installedCode: number;
-  targetCode: number;
+  installedHash: string;
+  targetHash: string;
   targetVersion: string;
   phase: "idle" | "downloading" | "ready" | "failed";
   received: number;
@@ -38,6 +39,8 @@ export function supportsUpdates(platform?: string): platform is UpdatePlatform {
 
 const desktopReleaseSchema = z.object({
   platform: z.string(),
+  sha256: z.string().regex(/^[a-f0-9]{64}$/),
+  installedSha256: z.string().regex(/^[a-f0-9]{64}$/),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
   url: z.string().regex(/^\/downloads\/jotpoc\/[\w.-]+$/),
 });
@@ -45,7 +48,7 @@ const desktopReleaseSchema = z.object({
 export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
   const [task, setTask] = useState<DownloadState | null>(null);
   const [release, setRelease] = useState<z.infer<typeof releaseSchema> | null>(null);
-  const [desktopRelease, setDesktopRelease] = useState<{ version: string; url: string } | null>(null);
+  const [desktopRelease, setDesktopRelease] = useState<z.infer<typeof desktopReleaseSchema> | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -57,7 +60,8 @@ export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
     setError(null);
     async function check() {
       if (platform !== "android") {
-        const response = await publicFetch("/api/extension/jotpoc-release?platform=" + platform, { signal: controller.signal });
+        const query = new URLSearchParams({ platform, build: import.meta.env.VITE_JOTPOC_BUILD_ID ?? "" });
+        const response = await publicFetch("/api/extension/jotpoc-release?" + query, { signal: controller.signal });
         const latest = desktopReleaseSchema.parse(await readJson(response));
         if (latest.platform !== platform || !latest.url.endsWith(desktopPackageExtensions[platform])) {
           throw new Error("platform");
@@ -118,9 +122,9 @@ export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
     finally { setBusy(false); }
   }
 
-  const available = release && task && release.versionCode > task.installedCode;
+  const available = release && task && release.sha256 !== task.installedHash && release.versionCode >= task.installedCode;
   const downloading = task?.phase === "downloading";
-  const ready = task?.phase === "ready";
+  const ready = task?.phase === "ready" && (!release || task.targetHash === release.sha256);
   return <section className="account-panel android-update-card">
     <div className="connection-heading"><h2>{getText("androidUpdate.check")}</h2>
       <Button variant="ghost" size="icon" disabled={checking || busy || downloading} aria-label={getText("androidUpdate.check")}
@@ -129,7 +133,7 @@ export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
     <div>{getText("androidUpdate.installed")} · v{packageInfo.version}</div>
     {desktopRelease && <>
       <div>{getText("androidUpdate.latest")} · v{desktopRelease.version}</div>
-      {desktopRelease.version.localeCompare(packageInfo.version, "en", { numeric: true }) > 0
+      {desktopRelease.sha256 !== desktopRelease.installedSha256
         ? <Button onClick={() => void openUrl(new URL(desktopRelease.url, TWIST_BALANCE_ORIGIN).href)
             .catch(() => setError("androidUpdate.failed"))}><Download size={16} />{getText("androidUpdate.download")}</Button>
         : <span>{getText("androidUpdate.current")}</span>}
@@ -143,7 +147,7 @@ export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
         value={task.total > 0 ? task.received : undefined} />
     </div>}
     {ready && <Button disabled={busy} onClick={() => void install()}>{getText("androidUpdate.install")} · v{task.targetVersion}</Button>}
-    {available && !downloading && (!ready || release.versionCode > task.targetCode) &&
+    {available && !downloading && !ready &&
       <Button disabled={busy} onClick={() => void download()}><Download size={16} />{getText(task.phase === "failed" ? "androidUpdate.retry" : "androidUpdate.download")}</Button>}
     {!available && !checking && !error && release && !ready && !downloading && <span>{getText("androidUpdate.current")}</span>}
     {(error || task?.phase === "failed") && <p role="alert">{getText(error ?? "androidUpdate.failed")}</p>}

@@ -144,7 +144,7 @@ jobs:
             tree="$RUNNER_TEMP/site-$attempt"
             git -C site worktree add --detach "$tree" origin/main
             python3 "$tree/claude_jobs/scripts/sync-jotpoc-release.py" client packages
-            git -C "$tree" add -- src/extension/jotpoc-release.json public/downloads/jotpoc
+            git -C "$tree" add -- src/extension/jotpoc-release.json src/extension/jotpoc-build-hashes.json public/downloads/jotpoc
             git -C "$tree" diff --cached --quiet && exit 0
             git -C "$tree" commit -m "chore: sync JotPoc packages for ${GITHUB_SHA:0:12}"
             git -C "$tree" push origin HEAD:main && exit 0

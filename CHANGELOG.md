@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2 - Unreleased
+
+- Detect updates by installer SHA-256 on all platforms, including rebuilds with the same display version.
+
 ## 1.1.1 - Unreleased
 
 - Wrap editor formatting controls across rows and use the main site's optional title field for daily memos.

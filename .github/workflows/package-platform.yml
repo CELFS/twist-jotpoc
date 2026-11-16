@@ -37,6 +37,8 @@ jobs:
     strategy:
       matrix:
         package: ["${{ inputs.package }}"]
+    env:
+      VITE_JOTPOC_BUILD_ID: ${{ github.run_number }}.${{ github.run_attempt }}
     runs-on: ${{ inputs.os }}
     steps:
       - uses: actions/checkout@v6
@@ -104,6 +106,7 @@ jobs:
           ABI: ${{ inputs.abi }}
         run: |
           import os
+          import shutil
           from pathlib import Path
           from zipfile import ZipFile
           files = list(Path(".").glob(os.environ["ASSET"]))
@@ -119,9 +122,13 @@ jobs:
                   abis = {p.split("/")[1] for p in apk.namelist() if p.startswith("lib/") and p.endswith(".so")}
               if abis != {abi}:
                   raise SystemExit(f"Expected {abi}, found {abis}")
+          public = Path("release-artifact")
+          public.mkdir()
+          shutil.copyfile(file, public / file.name)
+          (public / "build-id.txt").write_text(os.environ["VITE_JOTPOC_BUILD_ID"])
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.package }}
-          path: ${{ inputs.asset }}
+          path: release-artifact/
           compression-level: 0
           if-no-files-found: error

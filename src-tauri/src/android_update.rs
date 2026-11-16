@@ -22,7 +22,8 @@ struct DownloadState {
     phase: String,
     received: i64,
     total: i64,
-    target_code: i64,
+    installed_hash: String,
+    target_hash: String,
     target_version: String,
 }
 
