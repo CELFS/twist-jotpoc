@@ -11,6 +11,7 @@ type MemoState = {
   ready: boolean;
   title: string;
   content: string;
+  editorRevision: number;
   baseVersion: number;
   dirty: boolean;
   saving: boolean;
@@ -23,7 +24,7 @@ type MemoState = {
 
 export class MemoController {
   private state: MemoState = {
-    ready: false, title: "", content: "", baseVersion: 0, dirty: false,
+    ready: false, title: "", content: "", editorRevision: 0, baseVersion: 0, dirty: false,
     saving: false, editable: false, permissionKnown: false, error: null, conflict: null,
   };
   private listeners = new Set<() => void>();
@@ -169,12 +170,24 @@ export class MemoController {
     }
   };
 
+  private applyCloudMemo(remote: VersionedMemo | null) {
+    const content = remote?.record.content ?? "";
+    this.publish({
+      title: remote?.record.title ?? "", content, baseVersion: remote?.version ?? 0,
+      editorRevision: this.state.editorRevision + Number(content !== this.state.content),
+      dirty: false, pending: undefined, conflict: null, error: null,
+    });
+  }
+
   refresh = async () => {
     if (this.initialization) await this.initialization;
-    if (this.state.saving) return;
+    if (this.state.saving || this.composing) return;
+    const revision = this.state.editorRevision;
+    const baseVersion = this.state.baseVersion;
     try {
       this.assertAccount();
       const result = await cloudApi.memo.read(this.dateKey);
+      if (this.composing || this.state.saving || revision !== this.state.editorRevision || baseVersion !== this.state.baseVersion) return;
       const remote = result.memo;
       const version = remote?.version ?? 0;
       this.publish({ permissionKnown: true, editable: result.dailyMemoEditable });
@@ -195,8 +208,7 @@ export class MemoController {
           this.scheduleSave();
         }
       } else {
-        this.publish({ title: remote?.record.title ?? "", content: remote?.record.content ?? "",
-          baseVersion: version, pending: undefined, conflict: null, error: null });
+        this.applyCloudMemo(remote);
         await this.persist();
       }
     } catch (error) {
@@ -207,8 +219,7 @@ export class MemoController {
   useCloud = async () => {
     if (!this.state.conflict) return;
     const remote = this.state.conflict.memo;
-    this.publish({ title: remote?.record.title ?? "", content: remote?.record.content ?? "", baseVersion: remote?.version ?? 0,
-      dirty: false, pending: undefined, conflict: null, error: null });
+    this.applyCloudMemo(remote);
     await this.persist();
   };
 

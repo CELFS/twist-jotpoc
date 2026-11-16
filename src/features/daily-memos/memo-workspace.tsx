@@ -23,7 +23,8 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
   const [dateKey, setDateKey] = useState(todayKey);
   const controller = useMemo(() => memoController(accountId, dateKey), [accountId, dateKey]);
   const state = useMemoController(controller);
-  const [sources, setSources] = useState<MemoSourcePreset[]>([]);
+  const [sources, setSources] = useState<MemoSourcePreset[] | null>(null);
+  const [sourceError, setSourceError] = useState<string | null>(null);
   const [history, setHistory] = useState<Awaited<ReturnType<typeof cloudApi.memo.history>>["memos"]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const historyRevision = useRef(0);
@@ -34,17 +35,24 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
   const [error, setError] = useState<string | null>(null);
   const editor = useRef<DailyMemoRichTextEditorHandle>(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(() => {
     const revision = ++historyRevision.current;
-    setHistoryLoading(true); setError(null);
-    try {
-      const [sourceResult, memoHistory] = await Promise.all([cloudApi.sources(), cloudApi.memo.history()]);
+    setHistoryLoading(true);
+    setError(null);
+    void cloudApi.sources().then(result => {
       if (revision !== historyRevision.current) return;
-      setSources(sourceResult.sources);
-      setHistory(memoHistory.memos);
-    } catch (error) {
+      setSources(result.sources);
+      setSourceError(null);
+    }).catch(error => {
+      if (revision === historyRevision.current) setSourceError(error instanceof Error ? error.message : "unavailable");
+    });
+    void cloudApi.memo.history().then(result => {
+      if (revision === historyRevision.current) setHistory(result.memos);
+    }).catch(error => {
       if (revision === historyRevision.current) setError(error instanceof Error ? error.message : "unavailable");
-    } finally { if (revision === historyRevision.current) setHistoryLoading(false); }
+    }).finally(() => {
+      if (revision === historyRevision.current) setHistoryLoading(false);
+    });
   }, []);
 
   useEffect(() => { void controller.load(); }, [controller]);
@@ -82,8 +90,8 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
         {item.preview && <span>{item.preview}</span>}
       </button>}</HistoryGroups>
     </SidebarHistory>
-    <RequestError code={state.error ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
-    {!state.ready ? <LoadingState label={getText("client.load")} /> : <>
+    <RequestError code={state.error ?? sourceError ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
+    {!state.ready || (sources === null && !sourceError) ? <LoadingState label={getText("client.load")} /> : <>
       {state.permissionKnown && !state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}
       <label className="ui-field">
         <span className="ui-field-label">{getText("client.title")}</span>
@@ -101,9 +109,9 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
         <Button disabled={readOnly || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>{getText("client.save")}</Button>
       </div>
       <DailyMemoRichTextEditor
-        key={dateKey} ref={editor} content={state.content} label={getText("client.memoContent")}
+        key={`${dateKey}:${state.editorRevision}`} ref={editor} content={state.content} label={getText("client.memoContent")}
         preview={readOnly} placeholder={getText("client.memoPlaceholder")}
-        sourcePresets={sources} toolbarExpanded={!readOnly && toolbarPreference.value} onChange={content => controller.update({ content })}
+        sourcePresets={sources ?? []} sourceError={sourceError} toolbarExpanded={!readOnly && toolbarPreference.value} onChange={content => controller.update({ content })}
         onCompositionChange={controller.setComposing} onHistoryStateChange={setHistoryState}
         onCursorNearFloatingControlsChange={noop} onScrollActivity={noop} onScrollGestureEnd={noop} onScrollGestureStart={noop}
       />

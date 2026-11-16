@@ -1,4 +1,5 @@
 
+import { requestErrorText } from "@/features/shell/request-error";
 import { Drawer } from "@/components/ui/drawer";
 import type { MemoSourcePreset } from "@/data/models";
 import { MemoSourceVisual } from "@/features/daily-memos/memo-source-visual";
@@ -8,10 +9,12 @@ export function MemoInfoBlockSourceDrawer({
   onClose,
   onSelect,
   sourcePresets,
+  sourceError,
 }: {
   onClose: () => void;
   onSelect: (source: MemoSourcePreset) => void;
   sourcePresets: MemoSourcePreset[];
+  sourceError?: string | null;
 }) {
   const label = getText("dailyMemo.infoBlock.sourcePickerLabel");
 
@@ -49,7 +52,7 @@ export function MemoInfoBlockSourceDrawer({
         </div>
       ) : (
         <p className="daily-memo-info-block-source-empty">
-          {getText("dailyMemo.infoBlock.noSources")}
+          {sourceError ? requestErrorText(sourceError) : getText("dailyMemo.infoBlock.noSources")}
         </p>
       )}
     </Drawer>

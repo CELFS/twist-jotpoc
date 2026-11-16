@@ -344,6 +344,17 @@
 
 @media (max-width: 430px) {
   .app-header { gap: 0; }
+  .expanded-shell[data-sidebar-open="true"] .app-header:has(.header-sidebar-title) .header-pages {
+    min-width: calc(4 * 15px + 3 * var(--page-tab-gap));
+    margin-inline-end: 0;
+  }
+  .header-sidebar-title {
+    position: static;
+    align-self: flex-end;
+    flex: 0 1 calc(var(--sidebar-width) - var(--header-button-size) - var(--sidebar-gutter) - var(--content-inset) - 4px);
+    min-width: 0;
+    margin: 0 calc(var(--header-button-size) + 4px) var(--header-padding) var(--sidebar-gutter);
+  }
 }
 @media (max-width: 620px) {
   .app-content { padding: 12px; }

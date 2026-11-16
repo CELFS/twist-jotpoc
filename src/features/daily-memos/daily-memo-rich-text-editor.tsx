@@ -63,6 +63,7 @@ type DailyMemoRichTextEditorProps = {
   onScrollGestureStart: () => void;
   placeholder: string;
   sourcePresets: MemoSourcePreset[];
+  sourceError?: string | null;
   toolbarExpanded: boolean;
 };
 
@@ -83,6 +84,7 @@ export const DailyMemoRichTextEditor = forwardRef<
   onCursorNearFloatingControlsChange,
   placeholder,
   sourcePresets,
+  sourceError,
   toolbarExpanded,
 }: DailyMemoRichTextEditorProps, ref) {
   const editorRootRef = useRef<HTMLDivElement>(null);
@@ -583,6 +585,7 @@ export const DailyMemoRichTextEditor = forwardRef<
       ? createPortal(
           <MemoInfoBlockSourceDrawer
             sourcePresets={sourcePresets}
+            sourceError={sourceError}
             onClose={closeSourceDrawer}
             onSelect={insertInfoBlock}
           />,
