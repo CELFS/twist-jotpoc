@@ -337,7 +337,6 @@
 }
 
 .daily-memo-preview-status,
-.daily-memo-preview-toggle[data-active="true"]::before,
 .daily-memo-action-menu .daily-memo-action-menu-item[data-active="true"] {
   border: 1px solid transparent;
   border-radius: 999px;
@@ -802,15 +801,17 @@
 }
 
 .daily-memo-preview-toggle[data-active="true"],
+.daily-memo-title-format-toggle[data-open="true"],
 .daily-memo-action-menu-item[data-active="true"] {
   color: var(--app-primary);
 }
 
-.daily-memo-preview-toggle[data-active="true"]::before {
+.daily-memo-preview-toggle[data-active="true"]::before,
+.daily-memo-title-format-toggle[data-open="true"]::before {
   content: "";
   position: absolute;
   inset: 0;
-  border-color: color-mix(in srgb, var(--app-primary) 42%, var(--app-border));
+  border: 1px solid color-mix(in srgb, var(--app-primary) 42%, var(--app-border));
   border-radius: var(--radius-sm);
   background: linear-gradient(
     115deg,
@@ -821,7 +822,8 @@
   pointer-events: none;
 }
 
-.daily-memo-preview-toggle > svg {
+.daily-memo-preview-toggle > svg,
+.daily-memo-title-format-toggle > svg {
   position: relative;
 }
 
@@ -1120,7 +1122,7 @@
   flex: 0 0 auto;
   padding: 0;
   place-items: center;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--app-text-muted);
@@ -1133,20 +1135,6 @@
     background-color var(--motion-fast) var(--motion-ease),
     color var(--motion-fast) var(--motion-ease),
     transform var(--motion-fast) var(--motion-ease);
-}
-
-.daily-memo-title-format-toggle[data-open="true"] {
-  border-color: color-mix(
-    in srgb,
-    var(--app-primary) 42%,
-    var(--app-border)
-  );
-  background: transparent;
-  color: var(--app-primary);
-}
-
-.daily-memo-title-format-toggle[data-open="true"] > svg {
-  stroke-width: 3;
 }
 
 .daily-memo-title-format-toggle::after {
@@ -1598,6 +1586,14 @@
   font-weight: 800;
   gap: 0.25rem;
   justify-content: flex-start;
+}
+
+.daily-memo-info-block-source-field .daily-memo-info-block-source-label {
+  width: max-content;
+  max-width: 100%;
+  min-height: 2rem;
+  padding-inline: 0.55rem;
+  font-weight: 800;
 }
 
 .daily-memo-info-block-source-field

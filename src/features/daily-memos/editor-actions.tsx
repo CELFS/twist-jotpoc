@@ -27,13 +27,16 @@ export function HistoryActions({ readOnly, history, onUndo, onRedo }: HistoryAct
   </>;
 }
 
-export function FormatToggle({ readOnly, preference }: FormatToggleProps) {
-  const expanded = !readOnly && preference.value;
-  const label = getText(expanded ? "dailyMemo.syntaxToolbar.collapse" : "dailyMemo.syntaxToolbar.expand");
+export function FormatToggle({ readOnly, preference, onExitPreview }: FormatToggleProps & { onExitPreview?: () => void }) {
+  const expanded = !readOnly && !onExitPreview && preference.value;
+  const label = getText(onExitPreview ? "dailyMemo.exitPreview" : expanded ? "dailyMemo.syntaxToolbar.collapse" : "dailyMemo.syntaxToolbar.expand");
   return <button type="button" className="daily-memo-title-format-toggle" data-open={expanded || undefined}
       aria-label={label} title={label} aria-controls="daily-memo-syntax-toolbar" aria-expanded={expanded}
       disabled={readOnly || !preference.ready || preference.saving} onPointerDown={event => event.preventDefault()}
-      onClick={() => void preference.toggle()}><Type aria-hidden="true" size={18} /></button>;
+      onClick={() => {
+        onExitPreview?.();
+        if (!onExitPreview || !preference.value) void preference.toggle();
+      }}><Type aria-hidden="true" size={18} /></button>;
 }
 
 export function EditorActions({ preference, ...historyProps }: HistoryActionsProps & FormatToggleProps) {

@@ -102,6 +102,50 @@ function MemoInfoBlockView({
     }
   }, [currentSource, editable, extension.options.readOnly, sourceName, updateAttributes]);
 
+  const sourceField = (
+    <div className="daily-memo-info-block-source-field">
+      {extension.options.readOnly || !editable ? (
+        <strong className="daily-memo-info-block-source-label ui-select-option-content">
+          {currentSource && sourceVisuals[currentSource.id]}
+          <span>{currentSource?.name || sourceName || getText("dailyMemo.infoBlock.unknownSource")}</span>
+        </strong>
+      ) : (
+        <SelectField
+          className="daily-memo-info-block-source-select"
+          label={getText("dailyMemo.infoBlock.sourceLabel")}
+          optionVisuals={sourceVisuals}
+          value={String(node.attrs.sourceId || "")}
+          onChange={(event) => {
+            const nextSource = sourcePresets.find(
+              (preset) => preset.id === event.target.value,
+            );
+
+            if (!nextSource) {
+              return;
+            }
+
+            updateAttributes({
+              sourceId: nextSource.id,
+              sourceName: nextSource.name,
+            });
+          }}
+        >
+          {!currentSource ? (
+            <option value={String(node.attrs.sourceId || "")}>
+              {sourceName || getText("dailyMemo.infoBlock.unknownSource")}
+            </option>
+          ) : null}
+          {sourcePresets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.name}
+            </option>
+          ))}
+        </SelectField>
+      )}
+      <MemoInfoBlockCopyButton content={node.toJSON().content ?? []} />
+    </div>
+  );
+
   if (extension.options.readOnly) {
     return (
       <NodeViewWrapper className="daily-memo-info-block" data-read-only="true">
@@ -110,7 +154,7 @@ function MemoInfoBlockView({
           contentEditable={false}
           data-memo-info-block-ui=""
         >
-          <strong>{sourceName}</strong>
+          {sourceField}
         </header>
         <NodeViewContent className="daily-memo-info-block-body" />
       </NodeViewWrapper>
@@ -130,44 +174,9 @@ function MemoInfoBlockView({
         contentEditable={false}
         data-memo-info-block-ui=""
       >
-        {!editable ? <strong>{sourceName}</strong> : settingsOpen ? (
+        {editable && settingsOpen ? (
           <strong>{getText("dailyMemo.infoBlock.settingsTitle")}</strong>
-        ) : (
-          <div className="daily-memo-info-block-source-field">
-            <SelectField
-              className="daily-memo-info-block-source-select"
-              label={getText("dailyMemo.infoBlock.sourceLabel")}
-              optionVisuals={sourceVisuals}
-              value={String(node.attrs.sourceId || "")}
-              onChange={(event) => {
-                const nextSource = sourcePresets.find(
-                  (preset) => preset.id === event.target.value,
-                );
-
-                if (!nextSource) {
-                  return;
-                }
-
-                updateAttributes({
-                  sourceId: nextSource.id,
-                  sourceName: nextSource.name,
-                });
-              }}
-            >
-              {sourcePresets.length === 0 ? (
-                <option value={String(node.attrs.sourceId || "")}>
-                  {sourceName || getText("dailyMemo.infoBlock.unknownSource")}
-                </option>
-              ) : null}
-              {sourcePresets.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.name}
-                </option>
-              ))}
-            </SelectField>
-            <MemoInfoBlockCopyButton content={node.toJSON().content ?? []} />
-          </div>
-        )}
+        ) : sourceField}
         <div className="daily-memo-info-block-header-actions">
           <button
             {...dragHandleProps}

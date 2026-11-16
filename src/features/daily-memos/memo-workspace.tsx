@@ -144,7 +144,8 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
               onPointerDown={event => event.preventDefault()} onClick={() => setPreview(!preview)}>
               <BookOpen aria-hidden="true" size={18} />
             </Button>
-            <FormatToggle readOnly={readOnly} preference={toolbarPreference} />
+            <FormatToggle readOnly={!state.editable} preference={toolbarPreference}
+              onExitPreview={preview ? () => setPreview(false) : undefined} />
           </div>
         </div>
         <DailyMemoRichTextEditor
