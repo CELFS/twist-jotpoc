@@ -39,8 +39,8 @@ export function AccountPanel({ platform = "other" }: { platform?: "macos" | "win
       </div>}
     </div>
     {connected ? <>
-      {credential?.authorizationNumber && <div>
-        <div className="authorization-code">
+      {credential?.authorizationNumber && <div className="connection-details">
+        <div className="connection-authorization-number">
           <span>{getText("client.authorizationNumber")}</span><code>{credential.authorizationNumber}</code>
           <Button size="icon" variant="ghost" aria-label={getText("client.copyAuthorizationNumber")} title={getText("client.copyAuthorizationNumber")}
             onClick={async () => {
@@ -51,7 +51,7 @@ export function AccountPanel({ platform = "other" }: { platform?: "macos" | "win
             }}><Copy size={15} /></Button>
           {copyFeedback && <span role="status">{getText(copyFeedback)}</span>}
         </div>
-        {credential.lastUsedAt && <p>{getText("client.lastUsed")} <time dateTime={new Date(credential.lastUsedAt).toISOString()}>{new Date(credential.lastUsedAt).toLocaleString(getIntlLocale(), { dateStyle: "short", timeStyle: "short" })}</time></p>}
+        {credential.lastUsedAt && <span>{getText("client.lastUsed")} <time dateTime={new Date(credential.lastUsedAt).toISOString()}>{new Date(credential.lastUsedAt).toLocaleString(getIntlLocale(), { dateStyle: "short", timeStyle: "short" })}</time></span>}
       </div>}
       {confirming && <section className="client-confirmation" aria-label={getText("client.confirmDisconnect")}>
         <p><Unplug size={15} aria-hidden="true" /> {getText("client.disconnectDescription")}</p>

@@ -182,7 +182,7 @@
   border-radius: 12px;
   background: var(--app-surface);
 }
-.save-status { margin-inline-start: auto; }
+.workspace-toolbar > .daily-memo-header-status { margin-inline-start: auto; }
 .client-error { color: var(--app-danger); font-size: var(--font-size-sm); }
 .client-notice { color: var(--app-text-muted); font-size: var(--font-size-sm); }
 .client-conflict, .client-confirmation {
@@ -278,7 +278,7 @@
   overflow-wrap: anywhere; font-size: inherit; line-height: inherit;
 }
 .history-item:hover, .history-item[aria-current="true"] { background: var(--app-primary-soft); }
-.history-item time, .history-item span, .save-status { color: var(--app-text-muted); font-size: var(--font-size-xs); }
+.history-item time, .history-item span { color: var(--app-text-muted); font-size: var(--font-size-xs); }
 .history-item :is(strong, time, span) { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .history-groups { display: grid; gap: var(--sidebar-gap); }
 .history-group-toggle { display: flex; width: 100%; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border: 0; background: transparent; color: var(--app-text-muted); text-align: start; font: inherit; font-size: var(--font-size-xs); }
@@ -473,7 +473,11 @@ body:has(.app-shell[data-mode="collapsed"]) { background: transparent; }
 .connection-identity .connection-dot { background: var(--app-income); }
 .connection-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 
+.connection-details { display: grid; gap: var(--space-1); color: var(--app-text-muted); font-size: var(--font-size-xs); }
+.connection-authorization-number { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.connection-authorization-number .ui-button { width: 24px; min-width: 24px; height: 24px; min-height: 24px; color: inherit; }
 .settings-page { min-width: 0; }
+.settings-page .account-panel { width: 100%; max-width: none; }
 .settings-page .ui-field + .ui-field { margin-top: var(--field-spacing); }
 .settings-heading { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
 .floating-setting .ui-switch { flex-shrink: 0; }

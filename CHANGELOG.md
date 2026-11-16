@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 - Unreleased
+
+- Wrap editor formatting controls across rows and use the main site's optional title field for daily memos.
+- Use an icon for manual memo saves and match the main site’s autosave delay and status indicators.
+- Keep the information block insert icon visible on empty lines.
+- Align authorization details with Twill and use the available width for the account and update cards.
+
 ## 1.1.0 - Unreleased
 
 - Keep the caret inside newly inserted memo information blocks and refresh their source choices as presets load.

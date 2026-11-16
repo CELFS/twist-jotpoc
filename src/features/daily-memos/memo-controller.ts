@@ -7,6 +7,10 @@ import { getActiveCredential } from "@/platform/credential";
 import { ApiError } from "@/platform/http";
 import { publishDataChange } from "@/data/change-bus";
 
+const AUTO_SAVE_DELAY = 900;
+const SAVE_INDICATOR_MIN_DURATION = 300;
+type SaveKind = "auto" | "manual";
+
 type MemoState = {
   ready: boolean;
   title: string;
@@ -15,6 +19,8 @@ type MemoState = {
   baseVersion: number;
   dirty: boolean;
   saving: boolean;
+  saveIndicatorVisible: boolean;
+  saveResult: SaveKind | "failed" | null;
   editable: boolean;
   permissionKnown: boolean;
   error: string | null;
@@ -25,7 +31,7 @@ type MemoState = {
 export class MemoController {
   private state: MemoState = {
     ready: false, title: "", content: "", editorRevision: 0, baseVersion: 0, dirty: false,
-    saving: false, editable: false, permissionKnown: false, error: null, conflict: null,
+    saving: false, saveIndicatorVisible: false, saveResult: null, editable: false, permissionKnown: false, error: null, conflict: null,
   };
   private listeners = new Set<() => void>();
   private database = getDatabase();
@@ -33,6 +39,8 @@ export class MemoController {
   private initialization: Promise<void> | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private composing = false;
+  private indicatorTimer: ReturnType<typeof setTimeout> | undefined;
+  private savedFields: { title: string; content: string } | null = null;
 
   constructor(readonly accountId: string, readonly dateKey: string) {}
 
@@ -78,6 +86,7 @@ export class MemoController {
         const result = await cloudApi.memo.read(this.dateKey);
         const remote = result.memo;
         const version = remote?.version ?? 0;
+        this.savedFields = { title: remote?.record.title ?? "", content: remote?.record.content ?? "" };
         if (draft?.dirty) {
           const acknowledged = draft.pending && remote &&
             remote.record.title === draft.pending.title && remote.record.content === draft.pending.content;
@@ -111,8 +120,12 @@ export class MemoController {
 
   update = (patch: { title?: string; content?: string }) => {
     if (!this.state.editable) return;
-    this.publish({ ...patch, dirty: true, error: this.state.conflict ? "conflict" : null });
-    void this.persist().then(() => this.scheduleSave()).catch(() => this.publish({ error: "storage_failed" }));
+    const title = patch.title ?? this.state.title;
+    const content = patch.content ?? this.state.content;
+    const dirty = Boolean(this.state.pending || this.state.conflict) || title !== this.savedFields?.title || content !== this.savedFields?.content;
+    this.publish({ ...patch, dirty, saveResult: null, error: this.state.conflict ? "conflict" : null });
+    this.scheduleSave();
+    void this.persist().catch(() => this.publish({ error: "storage_failed", saveResult: "failed" }));
   };
 
   setComposing = (value: boolean) => {
@@ -124,13 +137,15 @@ export class MemoController {
   private scheduleSave() {
     clearTimeout(this.timer);
     if (!this.state.dirty || this.composing || this.state.conflict || !this.state.editable) return;
-    this.timer = setTimeout(() => { void this.save(); }, 1000);
+    this.timer = setTimeout(() => { void this.save("auto"); }, AUTO_SAVE_DELAY);
   }
 
-  save = async () => {
+  save = async (kind: SaveKind = "manual") => {
     clearTimeout(this.timer);
     if (this.state.saving || !this.state.dirty || this.composing || this.state.conflict || !this.state.editable) return;
-    this.publish({ saving: true, error: null });
+    clearTimeout(this.indicatorTimer);
+    const started = Date.now();
+    this.publish({ saving: true, saveIndicatorVisible: true, saveResult: null, error: null });
     try {
       while (this.state.dirty && !this.composing) {
         this.assertAccount();
@@ -145,11 +160,12 @@ export class MemoController {
         this.assertAccount();
         // An idempotent retry may return a newer cloud edit. Keep it for explicit conflict resolution.
         if (memo.record.title !== pending.title || memo.record.content !== pending.content) {
-          this.publish({ conflict: { memo }, error: "conflict" });
+          this.publish({ conflict: { memo }, error: "conflict", saveResult: "failed" });
           break;
         }
         const dirty = this.state.title !== pending.title || this.state.content !== pending.content;
-        this.publish({ baseVersion: memo.version, pending: undefined, dirty });
+        this.savedFields = { title: memo.record.title, content: memo.record.content };
+        this.publish({ baseVersion: memo.version, pending: undefined, dirty, saveResult: dirty ? null : kind });
         await this.database.memoSnapshots.put({ ...memo, dateKey: this.dateKey });
         await this.persist();
         publishDataChange({ entity: "dailyMemos", id: memo.record.id });
@@ -157,7 +173,7 @@ export class MemoController {
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       const code = error instanceof ApiError ? error.code : "storage_failed";
-      this.publish({ error: code });
+      this.publish({ error: code, saveResult: "failed" });
       if (code === "conflict") {
         try {
           const result = await cloudApi.memo.read(this.dateKey);
@@ -166,14 +182,19 @@ export class MemoController {
       }
       if (error instanceof ApiError && error.status === 403) this.publish({ permissionKnown: true, editable: false });
     } finally {
-      this.publish({ saving: false });
+      const remaining = SAVE_INDICATOR_MIN_DURATION - (Date.now() - started);
+      this.publish({ saving: false, saveIndicatorVisible: remaining > 0 });
+      if (remaining > 0) this.indicatorTimer = setTimeout(() => this.publish({ saveIndicatorVisible: false }), remaining);
     }
   };
 
   private applyCloudMemo(remote: VersionedMemo | null) {
     const content = remote?.record.content ?? "";
+    const title = remote?.record.title ?? "";
+    this.savedFields = { title, content };
     this.publish({
-      title: remote?.record.title ?? "", content, baseVersion: remote?.version ?? 0,
+      saveResult: content === this.state.content && title === this.state.title && !this.state.dirty ? this.state.saveResult : null,
+      title, content, baseVersion: remote?.version ?? 0,
       editorRevision: this.state.editorRevision + Number(content !== this.state.content),
       dirty: false, pending: undefined, conflict: null, error: null,
     });
@@ -196,8 +217,9 @@ export class MemoController {
         const acknowledged = pending && remote &&
           remote.record.title === pending.title && remote.record.content === pending.content;
         if (acknowledged) {
+          this.savedFields = { title: pending.title, content: pending.content };
           const dirty = this.state.title !== pending.title || this.state.content !== pending.content;
-          this.publish({ baseVersion: version, pending: undefined, dirty, conflict: null, error: null });
+          this.publish({ baseVersion: version, pending: undefined, dirty, saveResult: dirty ? null : "auto", conflict: null, error: null });
           await this.persist();
           this.scheduleSave();
         } else if (version !== this.state.baseVersion) {

@@ -251,7 +251,7 @@ export function DailyMemoSyntaxToolbar({
       id="daily-memo-syntax-toolbar"
       role="toolbar"
     >
-      <div className="daily-memo-syntax-toolbar-viewport no-scrollbar">
+      <div className="daily-memo-syntax-toolbar-viewport">
         <div
           aria-label={getText("dailyMemo.syntaxToolbar.blockStyle")}
           className="daily-memo-syntax-toolbar-group"

@@ -2,7 +2,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { HistoryGroups, historyDate } from "@/features/shell/history-groups";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, RefreshCw, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, BookOpen, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateSelection } from "@/components/date-selection";
 import { cloudApi } from "@/data/cloud-api";
@@ -63,6 +63,20 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
     });
   }, [controller, refresh]);
 
+  useEffect(() => {
+    const flush = () => { void controller.save("auto"); };
+    const visibilityChanged = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("popstate", flush);
+    document.addEventListener("visibilitychange", visibilityChanged);
+    return () => {
+      window.removeEventListener("popstate", flush);
+      document.removeEventListener("visibilitychange", visibilityChanged);
+    };
+  }, [controller]);
+
+  const saveStatus = state.saveResult === "failed" ? "error" : state.saveIndicatorVisible ? "saving"
+    : state.dirty ? "unsaved" : state.saveResult ? "saved" : "idle";
+
   const switchDay = (offset: number) => {
     const next = new Date(`${dateKey}T12:00:00`);
     next.setDate(next.getDate() + offset);
@@ -93,20 +107,30 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
     <RequestError code={state.error ?? sourceError ?? error ?? (toolbarPreference.failed ? "storage_failed" : null)} />
     {!state.ready || (sources === null && !sourceError) ? <LoadingState label={getText("client.load")} /> : <>
       {state.permissionKnown && !state.editable && <p className="client-notice">{getText("client.readOnly")}</p>}
-      <label className="ui-field">
-        <span className="ui-field-label">{getText("client.title")}</span>
-        <input className="ui-input" value={state.title} maxLength={120} readOnly={readOnly}
+      <div className="daily-memo-title-bar">
+        <label className="visually-hidden" htmlFor="daily-memo-title">{getText("dailyMemo.titleLabel")}</label>
+        <input className="daily-memo-title-input" id="daily-memo-title" placeholder={getText("dailyMemo.titlePlaceholder")}
+          value={state.title} maxLength={120} readOnly={readOnly}
           onCompositionStart={() => controller.setComposing(true)} onCompositionEnd={() => controller.setComposing(false)}
           onChange={event => controller.update({ title: event.target.value })} />
-      </label>
+      </div>
       <div className="workspace-toolbar">
         <EditorActions readOnly={readOnly} history={historyState} preference={toolbarPreference}
           onUndo={() => editor.current?.undo()} onRedo={() => editor.current?.redo()} />
         <Button variant="ghost" size="icon" aria-label={getText(preview ? "dailyMemo.exitPreview" : "dailyMemo.enterPreview")}
           aria-pressed={preview} disabled={!state.editable} onClick={() => setPreview(!preview)}><BookOpen size={17} /></Button>
         {preview && <span className="client-notice" role="status">{getText("dailyMemo.previewing")}</span>}
-        <span className="save-status" role="status">{getText(state.saving ? "client.saving" : state.dirty ? "client.unsaved" : "client.saved")}</span>
-        <Button disabled={readOnly || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>{getText("client.save")}</Button>
+        <div className="daily-memo-header-status" data-status={saveStatus} aria-live="polite">
+          {saveStatus === "error" ? <span role="alert">{getText("dailyMemo.saveFailed")}</span>
+            : saveStatus === "saving" ? <span className="daily-memo-save-loading-icon" role="status" aria-label={getText("dailyMemo.saving")} />
+            : saveStatus === "unsaved" ? getText("dailyMemo.unsaved")
+            : saveStatus === "saved" ? getText(state.saveResult === "auto" ? "dailyMemo.autoSaved" : "dailyMemo.saved")
+            : null}
+        </div>
+        <Button variant="ghost" size="icon" aria-label={getText("dailyMemo.save")} title={getText("dailyMemo.save")}
+          disabled={readOnly || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>
+          <Save size={17} aria-hidden="true" />
+        </Button>
       </div>
       <DailyMemoRichTextEditor
         key={`${dateKey}:${state.editorRevision}`} ref={editor} content={state.content} label={getText("client.memoContent")}
