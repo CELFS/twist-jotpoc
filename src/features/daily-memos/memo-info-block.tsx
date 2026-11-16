@@ -19,7 +19,7 @@ import {
 } from "@tiptap/react";
 import { Slice } from "@tiptap/pm/model";
 import { Plugin } from "@tiptap/pm/state";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { SelectField } from "@/components/ui/select-field";
 import type { MemoSourcePreset } from "@/data/models";
 import { MemoSourceVisual } from "@/features/daily-memos/memo-source-visual";
@@ -30,8 +30,9 @@ import { getText } from "@/i18n/get-text";
 
 export type MemoInfoBlockOptions = {
   readOnly: boolean;
-  sourcePresets: MemoSourcePreset[];
 };
+
+export const MemoSourcePresetsContext = createContext<MemoSourcePreset[]>([]);
 
 const memoInfoBlockCollapsedState = new WeakMap<object, boolean>();
 
@@ -67,7 +68,7 @@ function MemoInfoBlockView({
     () => memoInfoBlockCollapsedState.get(node) ?? false,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const sourcePresets = extension.options.sourcePresets as MemoSourcePreset[];
+  const sourcePresets = useContext(MemoSourcePresetsContext);
   const sourceName = String(node.attrs.sourceName || "");
   const currentSource = sourcePresets.find(
     (preset) => preset.id === node.attrs.sourceId,
@@ -266,7 +267,6 @@ export const MemoInfoBlock = Node.create<MemoInfoBlockOptions>({
   addOptions() {
     return {
       readOnly: false,
-      sourcePresets: [],
     };
   },
   addAttributes() {

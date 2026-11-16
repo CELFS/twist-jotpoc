@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 - Unreleased
+
+- Keep the caret inside newly inserted memo information blocks and refresh their source choices as presets load.
+- Check for macOS updates in Settings and download the matching DMG.
+- Match the installed macOS icon to the development app and preserve the window control and tab order in narrow windows.
+
 ## 1.0.31 - Unreleased
 
 - Download Android updates in Settings and open the system installer from the card or completion notification.

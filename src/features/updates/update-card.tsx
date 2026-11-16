@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { invoke } from "@tauri-apps/api/core";
 import { Download, RefreshCw } from "lucide-react";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import packageInfo from "../../../package.json";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/loading-state";
 import { getText, type MessageKey } from "@/i18n/get-text";
-import { publicFetch, readJson } from "@/platform/http";
+import { publicFetch, readJson, TWIST_BALANCE_ORIGIN } from "@/platform/http";
 
 type DownloadState = {
   platform: string;
@@ -23,9 +24,10 @@ const releaseSchema = z.object({
 });
 const readStatus = () => invoke<DownloadState>("plugin:apk-update|status");
 
-export function AndroidUpdateCard() {
+export function UpdateCard({ macos }: { macos: boolean }) {
   const [task, setTask] = useState<DownloadState | null>(null);
   const [release, setRelease] = useState<z.infer<typeof releaseSchema> | null>(null);
+  const [macRelease, setMacRelease] = useState<{ version: string; url: string } | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -36,6 +38,15 @@ export function AndroidUpdateCard() {
     setChecking(true);
     setError(null);
     async function check() {
+      if (macos) {
+        const response = await publicFetch("/api/extension/jotpoc-release?platform=macos", { signal: controller.signal });
+        const latest = z.object({
+          platform: z.literal("macos"), version: z.string().regex(/^\d+\.\d+\.\d+$/),
+          url: z.string().regex(/^\/downloads\/jotpoc\/[\w.-]+\.dmg$/),
+        }).parse(await readJson(response));
+        if (!controller.signal.aborted) setMacRelease(latest);
+        return;
+      }
       const state = await readStatus();
       if (controller.signal.aborted) return;
       setTask(state);
@@ -50,7 +61,7 @@ export function AndroidUpdateCard() {
       if (!controller.signal.aborted) setChecking(false);
     });
     return () => controller.abort();
-  }, [attempt]);
+  }, [attempt, macos]);
 
   useEffect(() => {
     if (task?.phase !== "downloading") return;
@@ -98,7 +109,14 @@ export function AndroidUpdateCard() {
         onClick={() => setAttempt(value => value + 1)}><RefreshCw size={16} /></Button>
     </div>
     <div>{getText("androidUpdate.installed")} · v{packageInfo.version}</div>
-    {checking && !release && <LoadingState compact rows={1} label={getText("androidUpdate.check")} />}
+    {macRelease && <>
+      <div>{getText("androidUpdate.latest")} · v{macRelease.version}</div>
+      {macRelease.version.localeCompare(packageInfo.version, "en", { numeric: true }) > 0
+        ? <Button onClick={() => void openUrl(new URL(macRelease.url, TWIST_BALANCE_ORIGIN).href)
+            .catch(() => setError("androidUpdate.failed"))}><Download size={16} />{getText("androidUpdate.download")}</Button>
+        : <span>{getText("androidUpdate.current")}</span>}
+    </>}
+    {checking && !release && !macRelease && <LoadingState compact rows={1} label={getText("androidUpdate.check")} />}
     {release && <div>{getText("androidUpdate.latest")} · v{release.version}</div>}
     {downloading && <div role="status">
       {getText("androidUpdate.downloading")} · v{task.targetVersion}

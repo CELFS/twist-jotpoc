@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { getThemePreference, setThemePreference, subscribeThemePreference } from "@/platform/theme";
 import { getTextSize, setTextSize, subscribeTextSize } from "@/platform/text-size";
 import { Tabs } from "@/components/ui/tabs";
-import { AndroidUpdateCard } from "@/features/updates/android-update-card";
+import { UpdateCard } from "@/features/updates/update-card";
 import { AccountPanel } from "@/features/auth/account-panel";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ export function SettingsPage({ tab, setTab, platform, language, desktop, autoHid
           <option value="standard">{getText("settings.textStandard")}</option>
           <option value="large">{getText("settings.textLarge")}</option>
         </SelectField>
-        {tab === "settings" && /Android/i.test(navigator.userAgent) && <AndroidUpdateCard />}
+        {tab === "settings" && (platform === "macos" || /Android/i.test(navigator.userAgent)) && <UpdateCard macos={platform === "macos"} />}
         {desktop && <div className="floating-setting">
           <span>{getText("client.floatingAutoHide")}</span>
           <Switch label={getText("client.floatingAutoHide")} checked={autoHide} onCheckedChange={onAutoHideChange} />
