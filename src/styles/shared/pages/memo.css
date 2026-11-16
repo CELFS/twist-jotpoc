@@ -1120,7 +1120,7 @@
   flex: 0 0 auto;
   padding: 0;
   place-items: center;
-  border: 1px solid var(--app-border);
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--app-text-muted);

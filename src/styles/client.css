@@ -164,6 +164,7 @@
 }
 
 .workspace-toolbar { flex-wrap: wrap; margin-bottom: var(--space-3); }
+.memo-return-today:disabled { visibility: hidden; }
 .workspace-toolbar time { font-variant-numeric: tabular-nums; }
 .memo-workspace > .ui-field, .note-editor > .ui-field { margin: var(--field-spacing) 0; }
 .memo-workspace, .notes-workspace:has(> .note-editor), .note-editor {
@@ -174,13 +175,21 @@
 .memo-workspace > *, .notes-workspace > .workspace-toolbar, .note-editor > * { flex-shrink: 0; }
 .notes-workspace > .note-editor { flex: 1 0 auto; }
 .note-editor > .ui-button { align-self: flex-start; }
-.memo-workspace .daily-memo-rich-text-editor, .note-editor .daily-memo-rich-text-editor {
+.memo-workspace > .daily-memo-writing-panel { flex: 1 0 auto; min-height: 8rem; }
+.note-editor .daily-memo-rich-text-editor {
   flex: 1 0 8rem;
   height: auto;
   min-height: 8rem;
   border: 1px solid var(--app-border);
   border-radius: 12px;
   background: var(--app-surface);
+}
+.daily-memo-title-actions { display: flex; align-items: center; gap: var(--space-1); }
+.daily-memo-title-actions > .daily-memo-preview-toggle {
+  --tap-target: 2.25rem;
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-sm);
 }
 .memo-header-controls { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: inherit; }
 .memo-header-controls > .daily-memo-preview-status { position: static; transform: none; margin-inline: auto; }
