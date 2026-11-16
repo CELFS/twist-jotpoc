@@ -102,7 +102,20 @@ function MemoInfoBlockView({
     }
   }, [currentSource, editable, extension.options.readOnly, sourceName, updateAttributes]);
 
-  const readOnly = extension.options.readOnly || !editable;
+  if (extension.options.readOnly) {
+    return (
+      <NodeViewWrapper className="daily-memo-info-block" data-read-only="true">
+        <header
+          className="daily-memo-info-block-header"
+          contentEditable={false}
+          data-memo-info-block-ui=""
+        >
+          <strong>{sourceName}</strong>
+        </header>
+        <NodeViewContent className="daily-memo-info-block-body" />
+      </NodeViewWrapper>
+    );
+  }
 
   return (
     <NodeViewWrapper
@@ -110,20 +123,14 @@ function MemoInfoBlockView({
       data-collapsed={collapsed || undefined}
       data-drag-source={dragging || undefined}
       data-first-node={getPos() === 0 || undefined}
-      data-read-only={readOnly || undefined}
-      data-settings-open={(!readOnly && settingsOpen) || undefined}
+      data-settings-open={(editable && settingsOpen) || undefined}
     >
       <header
         className="daily-memo-info-block-header"
         contentEditable={false}
         data-memo-info-block-ui=""
       >
-        {readOnly ? (
-          <div className="daily-memo-info-block-source-field">
-            <strong>{sourceName}</strong>
-            <MemoInfoBlockCopyButton content={node.toJSON().content ?? []} />
-          </div>
-        ) : settingsOpen ? (
+        {!editable ? <strong>{sourceName}</strong> : settingsOpen ? (
           <strong>{getText("dailyMemo.infoBlock.settingsTitle")}</strong>
         ) : (
           <div className="daily-memo-info-block-source-field">
@@ -162,27 +169,27 @@ function MemoInfoBlockView({
           </div>
         )}
         <div className="daily-memo-info-block-header-actions">
-          {!readOnly && <>
-            <button
-              {...dragHandleProps}
-              className="daily-memo-info-block-drag-handle"
-              contentEditable={false}
-              data-drag-handle=""
-              aria-label={getText("dailyMemo.infoBlock.reorder")}
-              title={getText("dailyMemo.infoBlock.reorder")}
-              type="button"
-            >
-              <GripVertical aria-hidden="true" size={18} />
-            </button>
-            <button
-              aria-label={getText("dailyMemo.infoBlock.settings")}
-              className="daily-memo-info-block-icon-button"
-              type="button"
-              onClick={() => setSettingsOpen((value) => !value)}
-            >
-              <ArrowRightLeft aria-hidden="true" size={17} />
-            </button>
-          </>}
+          <button
+            {...dragHandleProps}
+            disabled={!editable}
+            className="daily-memo-info-block-drag-handle"
+            contentEditable={false}
+            data-drag-handle=""
+            aria-label={getText("dailyMemo.infoBlock.reorder")}
+            title={getText("dailyMemo.infoBlock.reorder")}
+            type="button"
+          >
+            <GripVertical aria-hidden="true" size={18} />
+          </button>
+          <button
+            aria-label={getText("dailyMemo.infoBlock.settings")}
+            disabled={!editable}
+            className="daily-memo-info-block-icon-button"
+            type="button"
+            onClick={() => setSettingsOpen((value) => !value)}
+          >
+            <ArrowRightLeft aria-hidden="true" size={17} />
+          </button>
           <button
             aria-label={getText(
               collapsed
@@ -207,7 +214,7 @@ function MemoInfoBlockView({
           </button>
         </div>
       </header>
-      {settingsOpen && !readOnly ? (
+      {settingsOpen && editable ? (
         <div
           className="daily-memo-info-block-settings"
           contentEditable={false}

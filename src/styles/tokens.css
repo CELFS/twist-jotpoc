@@ -5,6 +5,7 @@
   --memo-info-divider: rgb(186 230 253 / 55%);
   --memo-info-background: rgb(240 249 255 / 52%);
   --robin-sky: #83b9e7;
+  --robin-lilac: #bba8e4;
   --robin-sky-soft: #e7f2fb;
   --robin-orange: #f28a2a;
   --robin-gold: #d9b85e;
@@ -91,6 +92,7 @@
   --memo-info-divider: var(--memo-info-border);
   --memo-info-background: rgb(23 45 56 / 72%);
   --robin-sky: #78acd0;
+  --robin-lilac: #a58bcf;
   --robin-sky-soft: #253746;
   --robin-orange: #f0a15b;
   --robin-gold: #d6b85f;

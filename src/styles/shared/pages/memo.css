@@ -337,7 +337,7 @@
 }
 
 .daily-memo-preview-status,
-.daily-memo-date-panel .daily-memo-preview-toggle[data-active="true"]::before,
+.daily-memo-preview-toggle[data-active="true"]::before,
 .daily-memo-action-menu .daily-memo-action-menu-item[data-active="true"] {
   border: 1px solid transparent;
   border-radius: 999px;
@@ -345,12 +345,12 @@
     linear-gradient(
       115deg,
       color-mix(in srgb, var(--robin-sky) 28%, var(--app-surface)),
-      color-mix(in srgb, var(--app-primary) 36%, var(--app-surface))
+      color-mix(in srgb, var(--robin-lilac) 36%, var(--app-surface))
     ) padding-box,
-    linear-gradient(115deg, var(--robin-sky), var(--app-primary)) border-box;
+    linear-gradient(115deg, var(--robin-sky), var(--robin-lilac)) border-box;
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--app-surface) 75%, transparent),
-    0 3px 12px color-mix(in srgb, var(--app-primary) 22%, transparent);
+    0 3px 12px color-mix(in srgb, var(--robin-lilac) 22%, transparent);
 }
 
 .daily-memo-preview-status {
@@ -790,41 +790,38 @@
   );
 }
 
-.daily-memo-date-panel .daily-memo-preview-toggle {
+.daily-memo-preview-toggle {
   position: relative;
   color: var(--app-text-muted);
   background: transparent;
 }
 
-.daily-memo-date-panel .daily-memo-preview-toggle:hover:not(:disabled),
-.daily-memo-date-panel .daily-memo-preview-toggle:active {
+.daily-memo-preview-toggle:hover:not(:disabled),
+.daily-memo-preview-toggle:active {
   background: transparent;
 }
 
-.daily-memo-date-panel .daily-memo-preview-toggle[data-active="true"],
+.daily-memo-preview-toggle[data-active="true"],
 .daily-memo-action-menu-item[data-active="true"] {
   color: var(--app-primary);
 }
 
-.daily-memo-date-panel .daily-memo-preview-toggle[data-active="true"]::before {
+.daily-memo-preview-toggle[data-active="true"]::before {
   content: "";
   position: absolute;
-  width: 2.25rem;
-  height: 2.25rem;
   inset: 0;
-  margin: auto;
   border-color: color-mix(in srgb, var(--app-primary) 42%, var(--app-border));
   border-radius: var(--radius-sm);
   background: linear-gradient(
     115deg,
     color-mix(in srgb, var(--robin-sky) 28%, var(--app-surface)),
-    color-mix(in srgb, var(--app-primary) 36%, var(--app-surface))
+    color-mix(in srgb, var(--robin-lilac) 36%, var(--app-surface))
   );
   box-shadow: none;
   pointer-events: none;
 }
 
-.daily-memo-date-panel .daily-memo-preview-toggle > svg {
+.daily-memo-preview-toggle > svg {
   position: relative;
 }
 
@@ -1207,21 +1204,18 @@
 
 .daily-memo-rich-text-editor {
   position: relative;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-  grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
-}
-
-.daily-memo-rich-text-editor[data-toolbar-expanded="true"] {
-  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .daily-memo-syntax-toolbar {
   position: relative;
+  flex: none;
   min-width: 0;
   min-height: var(--tap-target);
   margin: 0 var(--space-4);
@@ -1413,6 +1407,7 @@
 }
 
 .daily-memo-rich-text-editor-content {
+  flex: 1 1 auto;
   width: 100%;
   height: auto;
   min-width: 0;

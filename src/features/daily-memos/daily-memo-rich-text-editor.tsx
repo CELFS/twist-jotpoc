@@ -231,7 +231,7 @@ export const DailyMemoRichTextEditor = forwardRef<
     if (!editor || editor.isDestroyed) return;
     if (preview) {
       editor.view.dom.blur();
-      const title = editorRootRef.current?.closest(".daily-memo-writing-panel")
+      const title = editorRootRef.current?.closest(".daily-memo-writing-panel, .memo-workspace")
         ?.querySelector<HTMLInputElement>(".daily-memo-title-input");
       title?.blur();
       setEmptyLineAction(null);

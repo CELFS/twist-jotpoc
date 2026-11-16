@@ -10,7 +10,8 @@ import type { MemoSourcePreset } from "@/data/models";
 import { subscribeToDataChanges } from "@/data/change-bus";
 import { getText } from "@/i18n/get-text";
 import { todayKey } from "@/lib/date";
-import { EditorActions, useFormattingPreference } from "./editor-actions";
+import { FormatToggle, HistoryActions, useFormattingPreference } from "./editor-actions";
+import { DailyMemoPreviewStatus } from "./daily-memo-preview-status";
 import { useDailyMemoPreviewPreference } from "./use-daily-memo-preview-preference";
 import { RequestError } from "@/features/shell/request-error";
 import { memoController, useMemoController } from "./memo-controller";
@@ -90,6 +91,29 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
       <Button variant="ghost" size="icon" aria-label={getText("client.nextDay")} onClick={() => switchDay(1)}><ChevronRight size={18} /></Button>
       <Button variant="ghost" onClick={() => setDateKey(todayKey())}>{getText("client.today")}</Button>
       <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} onClick={() => { void refresh(); void controller.refresh(); }}><RefreshCw size={17} /></Button>
+      {state.ready && <div className="memo-header-controls">
+        <Button variant="ghost" size="icon" className="daily-memo-preview-toggle"
+          aria-label={getText(preview ? "dailyMemo.exitPreview" : "dailyMemo.enterPreview")}
+          title={getText(preview ? "dailyMemo.exitPreview" : "dailyMemo.enterPreview")}
+          aria-pressed={preview} data-active={preview || undefined} disabled={!state.editable}
+          onPointerDown={event => event.preventDefault()} onClick={() => setPreview(!preview)}>
+          <BookOpen aria-hidden="true" size={19} />
+        </Button>
+        {preview && <DailyMemoPreviewStatus />}
+        <div className="daily-memo-header-status" data-status={saveStatus} aria-live="polite">
+          {saveStatus === "error" ? <span role="alert">{getText("dailyMemo.saveFailed")}</span>
+            : saveStatus === "saving" ? <span className="daily-memo-save-loading-icon" role="status" aria-label={getText("dailyMemo.saving")} />
+            : saveStatus === "unsaved" ? getText("dailyMemo.unsaved")
+            : saveStatus === "saved" ? getText(state.saveResult === "auto" ? "dailyMemo.autoSaved" : "dailyMemo.saved")
+            : null}
+        </div>
+        <Button variant="ghost" size="icon" aria-label={getText("dailyMemo.save")} title={getText("dailyMemo.save")}
+          disabled={readOnly || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>
+          <Save size={17} aria-hidden="true" />
+        </Button>
+        <HistoryActions readOnly={readOnly} history={historyState}
+          onUndo={() => editor.current?.undo()} onRedo={() => editor.current?.redo()} />
+      </div>}
     </div>
     <SidebarHistory tab="memos">
       <RequestError code={error} />
@@ -113,24 +137,7 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
           value={state.title} maxLength={120} readOnly={readOnly}
           onCompositionStart={() => controller.setComposing(true)} onCompositionEnd={() => controller.setComposing(false)}
           onChange={event => controller.update({ title: event.target.value })} />
-      </div>
-      <div className="workspace-toolbar">
-        <EditorActions readOnly={readOnly} history={historyState} preference={toolbarPreference}
-          onUndo={() => editor.current?.undo()} onRedo={() => editor.current?.redo()} />
-        <Button variant="ghost" size="icon" aria-label={getText(preview ? "dailyMemo.exitPreview" : "dailyMemo.enterPreview")}
-          aria-pressed={preview} disabled={!state.editable} onClick={() => setPreview(!preview)}><BookOpen size={17} /></Button>
-        {preview && <span className="client-notice" role="status">{getText("dailyMemo.previewing")}</span>}
-        <div className="daily-memo-header-status" data-status={saveStatus} aria-live="polite">
-          {saveStatus === "error" ? <span role="alert">{getText("dailyMemo.saveFailed")}</span>
-            : saveStatus === "saving" ? <span className="daily-memo-save-loading-icon" role="status" aria-label={getText("dailyMemo.saving")} />
-            : saveStatus === "unsaved" ? getText("dailyMemo.unsaved")
-            : saveStatus === "saved" ? getText(state.saveResult === "auto" ? "dailyMemo.autoSaved" : "dailyMemo.saved")
-            : null}
-        </div>
-        <Button variant="ghost" size="icon" aria-label={getText("dailyMemo.save")} title={getText("dailyMemo.save")}
-          disabled={readOnly || !state.dirty || state.saving || Boolean(state.conflict)} onClick={() => void controller.save()}>
-          <Save size={17} aria-hidden="true" />
-        </Button>
+        <FormatToggle readOnly={readOnly} preference={toolbarPreference} />
       </div>
       <DailyMemoRichTextEditor
         key={`${dateKey}:${state.editorRevision}`} ref={editor} content={state.content} label={getText("client.memoContent")}

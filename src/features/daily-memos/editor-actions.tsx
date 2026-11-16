@@ -8,19 +8,35 @@ export function useFormattingPreference() {
   return useTranslationPreference("dailyMemo.syntaxToolbarExpanded", false);
 }
 
-export function EditorActions({ readOnly, history, preference, onUndo, onRedo }: {
+type HistoryActionsProps = {
   readOnly: boolean;
   history: DailyMemoEditorHistoryState;
-  preference: ReturnType<typeof useFormattingPreference>;
   onUndo: () => void;
   onRedo: () => void;
-}) {
-  const label = getText(preference.value ? "dailyMemo.syntaxToolbar.collapse" : "dailyMemo.syntaxToolbar.expand");
+};
+
+type FormatToggleProps = {
+  readOnly: boolean;
+  preference: ReturnType<typeof useFormattingPreference>;
+};
+
+export function HistoryActions({ readOnly, history, onUndo, onRedo }: HistoryActionsProps) {
   return <>
     <Button variant="ghost" size="icon" aria-label={getText("client.undo")} disabled={readOnly || !history.canUndo} onClick={onUndo}><Undo2 size={17} /></Button>
     <Button variant="ghost" size="icon" aria-label={getText("client.redo")} disabled={readOnly || !history.canRedo} onClick={onRedo}><Redo2 size={17} /></Button>
-    <Button variant="ghost" size="icon" aria-label={label} title={label} aria-expanded={!readOnly && preference.value}
+  </>;
+}
+
+export function FormatToggle({ readOnly, preference }: FormatToggleProps) {
+  const label = getText(preference.value ? "dailyMemo.syntaxToolbar.collapse" : "dailyMemo.syntaxToolbar.expand");
+  return <Button variant="ghost" size="icon" aria-label={label} title={label} aria-controls="daily-memo-syntax-toolbar" aria-expanded={!readOnly && preference.value}
       disabled={readOnly || !preference.ready || preference.saving} onPointerDown={event => event.preventDefault()}
-      onClick={() => void preference.toggle()}><Type size={17} /></Button>
+      onClick={() => void preference.toggle()}><Type size={17} /></Button>;
+}
+
+export function EditorActions({ preference, ...historyProps }: HistoryActionsProps & FormatToggleProps) {
+  return <>
+    <HistoryActions {...historyProps} />
+    <FormatToggle readOnly={historyProps.readOnly} preference={preference} />
   </>;
 }
