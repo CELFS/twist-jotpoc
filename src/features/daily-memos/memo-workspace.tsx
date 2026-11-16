@@ -10,6 +10,7 @@ import type { MemoSourcePreset } from "@/data/models";
 import { subscribeToDataChanges } from "@/data/change-bus";
 import { getText } from "@/i18n/get-text";
 import { todayKey } from "@/lib/date";
+import { MemoSourcePresetsContext } from "./memo-info-block";
 import { FormatToggle, HistoryActions, useFormattingPreference } from "./editor-actions";
 import { DailyMemoPreviewStatus } from "./daily-memo-preview-status";
 import { useDailyMemoPreviewPreference } from "./use-daily-memo-preview-preference";
@@ -17,6 +18,7 @@ import { RequestError } from "@/features/shell/request-error";
 import { memoController, useMemoController } from "./memo-controller";
 import { DailyMemoRichTextEditor, type DailyMemoRichTextEditorHandle, type DailyMemoEditorHistoryState } from "./daily-memo-rich-text-editor";
 
+const emptySources: MemoSourcePreset[] = [];
 const noop = () => undefined;
 
 export function MemoWorkspace({ accountId }: { accountId: string }) {
@@ -148,13 +150,15 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
               onExitPreview={preview ? () => setPreview(false) : undefined} />
           </div>
         </div>
-        <DailyMemoRichTextEditor
-          key={`${dateKey}:${state.editorRevision}`} ref={editor} content={state.content} label={getText("client.memoContent")}
-          preview={readOnly} placeholder={getText("client.memoPlaceholder")}
-          sourcePresets={sources ?? []} sourceError={sourceError} toolbarExpanded={!readOnly && toolbarPreference.value} onChange={content => controller.update({ content })}
-          onCompositionChange={controller.setComposing} onHistoryStateChange={setHistoryState}
-          onCursorNearFloatingControlsChange={noop} onScrollActivity={noop} onScrollGestureEnd={noop} onScrollGestureStart={noop}
-        />
+        <MemoSourcePresetsContext.Provider value={sources}>
+          <DailyMemoRichTextEditor
+            key={`${dateKey}:${state.editorRevision}`} ref={editor} content={state.content} label={getText("client.memoContent")}
+            preview={readOnly} placeholder={getText("client.memoPlaceholder")}
+            sourcePresets={sources ?? emptySources} sourceError={sourceError} toolbarExpanded={!readOnly && toolbarPreference.value} onChange={content => controller.update({ content })}
+            onCompositionChange={controller.setComposing} onHistoryStateChange={setHistoryState}
+            onCursorNearFloatingControlsChange={noop} onScrollActivity={noop} onScrollGestureEnd={noop} onScrollGestureStart={noop}
+          />
+        </MemoSourcePresetsContext.Provider>
       </div>
       {state.conflict && <section className="client-conflict" role="alert">
         <strong>{getText("client.conflictTitle")}</strong>

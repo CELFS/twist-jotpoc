@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3 - Unreleased
+
+- Align the memo editor and its rich-text dependencies with the main site for information block editing, caret placement, and empty-line insertion.
+
 ## 1.1.2 - Unreleased
 
 - Detect updates by installer SHA-256 on all platforms, including rebuilds with the same display version.

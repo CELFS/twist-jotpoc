@@ -30,9 +30,10 @@ import { getText } from "@/i18n/get-text";
 
 export type MemoInfoBlockOptions = {
   readOnly: boolean;
+  sourcePresets: MemoSourcePreset[];
 };
 
-export const MemoSourcePresetsContext = createContext<MemoSourcePreset[]>([]);
+export const MemoSourcePresetsContext = createContext<MemoSourcePreset[] | null>(null);
 
 const memoInfoBlockCollapsedState = new WeakMap<object, boolean>();
 
@@ -68,7 +69,7 @@ function MemoInfoBlockView({
     () => memoInfoBlockCollapsedState.get(node) ?? false,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const sourcePresets = useContext(MemoSourcePresetsContext);
+  const sourcePresets: MemoSourcePreset[] = useContext(MemoSourcePresetsContext) ?? extension.options.sourcePresets;
   const sourceName = String(node.attrs.sourceName || "");
   const currentSource = sourcePresets.find(
     (preset) => preset.id === node.attrs.sourceId,
@@ -283,6 +284,7 @@ export const MemoInfoBlock = Node.create<MemoInfoBlockOptions>({
   addOptions() {
     return {
       readOnly: false,
+      sourcePresets: [],
     };
   },
   addAttributes() {

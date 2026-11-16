@@ -29,7 +29,7 @@ import {
 } from "@/features/daily-memos/daily-memo-task-extensions";
 import { MemoEmptyLineAction } from "@/features/daily-memos/memo-empty-line-action";
 import { MemoCaretPlacement } from "@/features/daily-memos/memo-caret-placement";
-import { MemoInfoBlock, MemoSourcePresetsContext } from "@/features/daily-memos/memo-info-block";
+import { MemoInfoBlock } from "@/features/daily-memos/memo-info-block";
 import { MemoSourceNoteReference } from "@/features/daily-memos/memo-source-note-reference";
 import { MemoInfoBlockSourceDrawer } from "@/features/daily-memos/memo-info-block-source-drawer";
 import { parseNormalizedMemoMarkdown } from "@/features/daily-memos/normalize-empty-list-items";
@@ -189,14 +189,14 @@ export const DailyMemoRichTextEditor = forwardRef<
       MemoCaretPlacement,
       ...(memoInfoEnabled
         ? [
-            MemoInfoBlock,
+            MemoInfoBlock.configure({ sourcePresets }),
             MemoSourceNoteReference,
             MemoInfoBlockDragPlaceholder,
             MemoEmptyLineAction,
           ]
         : []),
     ],
-    [memoInfoEnabled, placeholder],
+    [memoInfoEnabled, placeholder, sourcePresets],
   );
   const [initialEditorContent] = useState(() =>
     parseNormalizedMemoMarkdown(initialContentRef.current, extensions),
@@ -231,7 +231,7 @@ export const DailyMemoRichTextEditor = forwardRef<
     if (!editor || editor.isDestroyed) return;
     if (preview) {
       editor.view.dom.blur();
-      const title = editorRootRef.current?.closest(".daily-memo-writing-panel, .memo-workspace")
+      const title = editorRootRef.current?.closest(".daily-memo-writing-panel")
         ?.querySelector<HTMLInputElement>(".daily-memo-title-input");
       title?.blur();
       setEmptyLineAction(null);
@@ -600,20 +600,18 @@ export const DailyMemoRichTextEditor = forwardRef<
       data-toolbar-expanded={toolbarExpanded || undefined}
     >
       {toolbarExpanded ? <DailyMemoSyntaxToolbar editor={editor} /> : null}
-      <MemoSourcePresetsContext.Provider value={sourcePresets}>
-        <EditorContent
-          className="daily-memo-rich-text-editor-content custom-scrollbar"
-          editor={editor}
-          onScrollCapture={handleEditorScroll}
-          onTouchCancel={onScrollGestureEnd}
-          onTouchEnd={(event) => {
-            if (event.touches.length === 0) {
-              onScrollGestureEnd();
-            }
-          }}
-          onTouchStart={onScrollGestureStart}
-        />
-      </MemoSourcePresetsContext.Provider>
+      <EditorContent
+        className="daily-memo-rich-text-editor-content custom-scrollbar"
+        editor={editor}
+        onScrollCapture={handleEditorScroll}
+        onTouchCancel={onScrollGestureEnd}
+        onTouchEnd={(event) => {
+          if (event.touches.length === 0) {
+            onScrollGestureEnd();
+          }
+        }}
+        onTouchStart={onScrollGestureStart}
+      />
       {floatingLayer}
       {sourceDrawerLayer}
     </div>
