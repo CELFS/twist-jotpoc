@@ -109,7 +109,7 @@ export function App() {
               {credential ? <Workspace tab={tab} setTab={setTab} key={credential.accountId} accountId={credential.accountId} /> : <AccountPanel platform={platform} />}
             </main>
           </SidebarContext.Provider>
-          {managementTab && <SettingsPage tab={managementTab} setTab={setManagementTab} platform={platform} language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
+          {managementTab && <SettingsPage tab={managementTab} setTab={setManagementTab} updatePlatform={windowState?.platform} platform={platform} language={language} desktop={Boolean(windowState?.desktop)} autoHide={autoHide}
             onAutoHideChange={value => {
               localStorage.setItem("jotpoc.floating.autoHide", String(value));
               setAutoHide(value);

@@ -13,6 +13,7 @@ pub enum WindowMode {
 
 #[derive(Clone, Serialize)]
 pub struct WindowState {
+    platform: &'static str,
     desktop: bool,
     macos: bool,
     windows: bool,
@@ -24,6 +25,7 @@ pub struct WindowState {
 impl Default for WindowState {
     fn default() -> Self {
         Self {
+            platform: std::env::consts::OS,
             desktop: cfg!(desktop),
             macos: cfg!(target_os = "macos"),
             windows: cfg!(target_os = "windows"),

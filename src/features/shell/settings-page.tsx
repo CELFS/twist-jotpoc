@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { getThemePreference, setThemePreference, subscribeThemePreference } from "@/platform/theme";
 import { getTextSize, setTextSize, subscribeTextSize } from "@/platform/text-size";
 import { Tabs } from "@/components/ui/tabs";
-import { UpdateCard } from "@/features/updates/update-card";
+import { supportsUpdates, UpdateCard } from "@/features/updates/update-card";
 import { AccountPanel } from "@/features/auth/account-panel";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,10 @@ import { getText } from "@/i18n/get-text";
 
 export type ManagementTab = "settings" | "account";
 
-export function SettingsPage({ tab, setTab, platform, language, desktop, autoHide, onAutoHideChange, onBack }: {
+export function SettingsPage({ tab, setTab, platform, updatePlatform, language, desktop, autoHide, onAutoHideChange, onBack }: {
   tab: ManagementTab;
   setTab: (tab: ManagementTab) => void;
+  updatePlatform?: string;
   platform: "macos" | "windows" | "other";
   language: AppLanguagePreference;
   desktop: boolean;
@@ -56,7 +57,7 @@ export function SettingsPage({ tab, setTab, platform, language, desktop, autoHid
           <option value="standard">{getText("settings.textStandard")}</option>
           <option value="large">{getText("settings.textLarge")}</option>
         </SelectField>
-        {tab === "settings" && (platform === "macos" || /Android/i.test(navigator.userAgent)) && <UpdateCard macos={platform === "macos"} />}
+        {tab === "settings" && supportsUpdates(updatePlatform) && <UpdateCard platform={updatePlatform} />}
         {desktop && <div className="floating-setting">
           <span>{getText("client.floatingAutoHide")}</span>
           <Switch label={getText("client.floatingAutoHide")} checked={autoHide} onCheckedChange={onAutoHideChange} />

@@ -24,10 +24,28 @@ const releaseSchema = z.object({
 });
 const readStatus = () => invoke<DownloadState>("plugin:apk-update|status");
 
-export function UpdateCard({ macos }: { macos: boolean }) {
+const desktopPackageExtensions = {
+  macos: ".dmg",
+  windows: ".exe",
+  linux: ".deb",
+} as const;
+
+type UpdatePlatform = keyof typeof desktopPackageExtensions | "android";
+
+export function supportsUpdates(platform?: string): platform is UpdatePlatform {
+  return platform === "android" || (platform !== undefined && Object.hasOwn(desktopPackageExtensions, platform));
+}
+
+const desktopReleaseSchema = z.object({
+  platform: z.string(),
+  version: z.string().regex(/^\d+\.\d+\.\d+$/),
+  url: z.string().regex(/^\/downloads\/jotpoc\/[\w.-]+$/),
+});
+
+export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
   const [task, setTask] = useState<DownloadState | null>(null);
   const [release, setRelease] = useState<z.infer<typeof releaseSchema> | null>(null);
-  const [macRelease, setMacRelease] = useState<{ version: string; url: string } | null>(null);
+  const [desktopRelease, setDesktopRelease] = useState<{ version: string; url: string } | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -38,13 +56,13 @@ export function UpdateCard({ macos }: { macos: boolean }) {
     setChecking(true);
     setError(null);
     async function check() {
-      if (macos) {
-        const response = await publicFetch("/api/extension/jotpoc-release?platform=macos", { signal: controller.signal });
-        const latest = z.object({
-          platform: z.literal("macos"), version: z.string().regex(/^\d+\.\d+\.\d+$/),
-          url: z.string().regex(/^\/downloads\/jotpoc\/[\w.-]+\.dmg$/),
-        }).parse(await readJson(response));
-        if (!controller.signal.aborted) setMacRelease(latest);
+      if (platform !== "android") {
+        const response = await publicFetch("/api/extension/jotpoc-release?platform=" + platform, { signal: controller.signal });
+        const latest = desktopReleaseSchema.parse(await readJson(response));
+        if (latest.platform !== platform || !latest.url.endsWith(desktopPackageExtensions[platform])) {
+          throw new Error("platform");
+        }
+        if (!controller.signal.aborted) setDesktopRelease(latest);
         return;
       }
       const state = await readStatus();
@@ -61,7 +79,7 @@ export function UpdateCard({ macos }: { macos: boolean }) {
       if (!controller.signal.aborted) setChecking(false);
     });
     return () => controller.abort();
-  }, [attempt, macos]);
+  }, [attempt, platform]);
 
   useEffect(() => {
     if (task?.phase !== "downloading") return;
@@ -109,14 +127,14 @@ export function UpdateCard({ macos }: { macos: boolean }) {
         onClick={() => setAttempt(value => value + 1)}><RefreshCw size={16} /></Button>
     </div>
     <div>{getText("androidUpdate.installed")} · v{packageInfo.version}</div>
-    {macRelease && <>
-      <div>{getText("androidUpdate.latest")} · v{macRelease.version}</div>
-      {macRelease.version.localeCompare(packageInfo.version, "en", { numeric: true }) > 0
-        ? <Button onClick={() => void openUrl(new URL(macRelease.url, TWIST_BALANCE_ORIGIN).href)
+    {desktopRelease && <>
+      <div>{getText("androidUpdate.latest")} · v{desktopRelease.version}</div>
+      {desktopRelease.version.localeCompare(packageInfo.version, "en", { numeric: true }) > 0
+        ? <Button onClick={() => void openUrl(new URL(desktopRelease.url, TWIST_BALANCE_ORIGIN).href)
             .catch(() => setError("androidUpdate.failed"))}><Download size={16} />{getText("androidUpdate.download")}</Button>
         : <span>{getText("androidUpdate.current")}</span>}
     </>}
-    {checking && !release && !macRelease && <LoadingState compact rows={1} label={getText("androidUpdate.check")} />}
+    {checking && !release && !desktopRelease && <LoadingState compact rows={1} label={getText("androidUpdate.check")} />}
     {release && <div>{getText("androidUpdate.latest")} · v{release.version}</div>}
     {downloading && <div role="status">
       {getText("androidUpdate.downloading")} · v{task.targetVersion}

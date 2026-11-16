@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 export type WindowMode = "full" | "mini" | "collapsed";
 
 export type WindowState = {
+  platform: string;
   desktop: boolean;
   macos: boolean;
   windows: boolean;

@@ -3,7 +3,7 @@
 ## 1.1.0 - Unreleased
 
 - Keep the caret inside newly inserted memo information blocks and refresh their source choices as presets load.
-- Check for macOS updates in Settings and download the matching DMG.
+- Check for desktop updates in Settings and download the matching macOS, Windows, or Linux installer.
 - Match the installed macOS icon to the development app and preserve the window control and tab order in narrow windows.
 
 ## 1.0.31 - Unreleased
