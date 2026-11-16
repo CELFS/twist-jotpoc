@@ -71,7 +71,7 @@ export function NotesWorkspace({ view, setView, active }: {
       <HistoryGroups items={notes} groupKey={note => note.dateKey}>{note =>
         <button className="history-item" key={note.id} type="button" aria-current={selectedId === note.id || undefined}
           onClick={() => { setView({ id: note.id, editing: false }); finishSelection?.(); }}>
-          <strong>{note.pageTitle || getText("dailyMemo.sourceNote.untitledPage")}</strong>
+          <strong>{note.customTitle || note.pageTitle || getText("dailyMemo.sourceNote.untitledPage")}</strong>
           <span>{note.url}</span>
           {note.summary.trim() && <span>{note.summary.replace(/\s+/g, " ").trim().slice(0, 96)}</span>}
         </button>}</HistoryGroups>

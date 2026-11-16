@@ -2,7 +2,6 @@ import { MarkSources } from "./mark-sources";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { authenticatedFetch } from "@/platform/http";
 
-import { MarksIcon } from "@/components/ui/marks-icon";
 import type { MarkItem } from "./collection-groups";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -100,19 +99,16 @@ export function CollectionsPage({ active = true }: { active?: boolean }) {
 
   const library = (
     <div className="collections-page">
+      {source && <Button variant="ghost" onClick={() => setSource(null)}>{getText("collections.backAll")}</Button>}
       <header className="collections-heading">
-        <div className="experiments-heading">
-          <MarksIcon size={16} /><h2>{getText("collections.title")}</h2>
+        <div className="mark-filters" role="group" aria-label={getText("collections.title")}>
+          {(["all", "ink", "excerpt"] as const).map(value => <Button key={value} variant="ghost"
+            aria-pressed={value === filter} onClick={() => setFilter(value)}>{getText(`collections.${value}`)}</Button>)}
         </div>
         <Button variant="ghost" size="icon" aria-label={getText("collections.refresh")} title={getText("collections.refresh")} disabled={status === "loading"} onClick={() => { setDirectoryRevision(value => value + 1); void load(); }}>
           <RefreshCw aria-hidden="true" size={16} />
         </Button>
       </header>
-      {source && <Button variant="ghost" onClick={() => setSource(null)}>{getText("collections.backAll")}</Button>}
-      <div className="mark-filters" role="group" aria-label={getText("collections.title")}>
-        {(["all", "ink", "excerpt"] as const).map(value => <Button key={value} variant="ghost"
-          aria-pressed={value === filter} onClick={() => setFilter(value)}>{getText(`collections.${value}`)}</Button>)}
-      </div>
       <CollectionStatus status={status} empty={items.length === 0} onRetry={() => void load(items.length > 0 ? nextCursor : null)} />
       <section className="collections-list" aria-label={getText("collections.title")}>
         {groupCollectionsBySource(items).map((group) => <CollectionCard key={group.urlKey} group={group} onManage={manage} />)}

@@ -48,7 +48,7 @@ export const cloudApi = {
       if (cursor) query.set("cursor", cursor);
       const response = await authenticatedFetch(`/api/extension/source-notes?${query}`, { signal });
       const page = z.object({ notes: z.array(z.object({
-        id: z.string(), url: z.string(), pageTitle: z.string(), dateKey: z.string(), summary: z.string(),
+        id: z.string(), url: z.string(), pageTitle: z.string(), customTitle: z.string().nullish(), dateKey: z.string(), summary: z.string(),
       })), nextCursor: z.string().nullable() }).parse(await readJson(response));
       if (getActiveCredential() !== owner) throw new DOMException("Account changed", "AbortError");
       return { ...page, resourceVersion: response.headers.get("X-Resource-Version") };

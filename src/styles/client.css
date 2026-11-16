@@ -95,6 +95,7 @@
   border-radius: 8px;
 }
 .app-content { margin: 0 var(--content-inset, 6px) var(--content-inset, 6px); background: var(--app-background); border-radius: var(--content-top-radius, 12px); padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.app-content.custom-scrollbar { clip-path: border-box; }
 .workspace-host, .workspace {
   display: flex;
   flex: 1;
@@ -175,7 +176,7 @@
 .memo-workspace > *, .notes-workspace > .workspace-toolbar, .note-editor > * { flex-shrink: 0; }
 .notes-workspace > .note-editor { flex: 1 0 auto; }
 .note-editor > .ui-button { align-self: flex-start; }
-.memo-workspace > .daily-memo-writing-panel { flex: 1 0 auto; min-height: 8rem; }
+.memo-workspace > .daily-memo-writing-panel { flex: 1 1 0; min-height: 0; }
 .note-editor .daily-memo-rich-text-editor {
   flex: 1 0 8rem;
   height: auto;

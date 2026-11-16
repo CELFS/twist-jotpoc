@@ -212,6 +212,8 @@
 .translation-error > .ui-button { margin-inline-start: 6px; vertical-align: middle; }
 
 .translation-settings:not([hidden]) { display: grid; gap: 12px; padding: 12px; border: 1px solid var(--app-border); border-radius: 12px; min-width: 0; }
+.translation-settings-group { display: grid; gap: var(--space-2); min-width: 0; }
+.translation-settings-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .translation-controls > .translation-settings-toggle { margin-left: auto; flex-shrink: 0; }
 
 .translation-vocabulary, .translation-vocabulary dl { display: grid; gap: 8px; min-width: 0; margin: 0; }

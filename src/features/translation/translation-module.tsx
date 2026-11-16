@@ -1,7 +1,5 @@
 import { useRef, useState } from "react";
-import { Plus } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
-import { Button } from "@/components/ui/button";
 import { SidebarHistory, useSidebarSelection } from "@/features/shell/workspace-sidebar";
 import { getText } from "@/i18n/get-text";
 import type { LocalTranslation } from "@/translation/contracts";
@@ -31,11 +29,6 @@ export function TranslationModule({ accountId, active }: { accountId: string; ac
 
   const [change, setChange] = useState<TranslationChange>();
   return <section className="translation-module">
-    <div className="workspace-toolbar">
-      <Button variant="secondary" onClick={() => { setLoadingRecord(false); setWorkspace({ key: ++revision.current }); }}>
-        <Plus size={16} />{getText("client.newTranslation")}
-      </Button>
-    </div>
     {loadingRecord && <LoadingState label={getText("translation.loading")} />}
     <div hidden={loadingRecord}>
       <TranslationWorkspace key={workspace.key} initialRecord={workspace.record} client={websiteTranslationClient} active={active} accountId={accountId}
