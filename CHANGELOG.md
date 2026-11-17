@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.5 - Unreleased
+
+- Translate with Enter and insert a new line with Shift+Enter. Align translation actions, scrolling, and the settings card with Twill.
+
 ## 1.1.4 - Unreleased
 
 - Install macOS updates from Settings and restart JotPoc, including when the installer changes for the same version.

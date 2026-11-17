@@ -103,6 +103,7 @@
   min-height: 0;
   min-width: 0;
 }
+#workspace-panel-translation { overscroll-behavior: contain; }
 .workspace-panel { container: workspace-panel / inline-size; }
 .workspace-panel > section { max-width: 1080px; margin-inline: auto; }
 .header-pages .ui-tabs {

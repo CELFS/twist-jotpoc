@@ -252,6 +252,7 @@ export function TranslationWorkspace({ client, initial, initialRecord, autoTrans
     setSource({ originalText: item.originalText, sourceUrl: item.sourceUrl, pageTitle: item.pageTitle });
     setAnalysisModel(item.learning?.analysis.model ?? "qwen"); setError(""); setNotice("");
   }
+  const canTranslate = active && modelReady && !savingModel && languagesReady && !savingLanguages && !working && !analysisWorking && !!text.trim();
   return <div className="translation-workspace">
     <section className="translation-editor">
       <header className="translation-controls">
@@ -263,26 +264,32 @@ export function TranslationWorkspace({ client, initial, initialRecord, autoTrans
       </header>
       <TranslationSettings id={settingsId} hidden={!settingsOpen} model={model} modelDisabled={!modelReady || savingModel || working || analysisWorking} onModel={value => { cancelCurrent(); void selectModel(value); setRecord(null); setNotice(""); }} analysisModel={analysisModel} analysisDisabled={working || analysisWorking} onAnalysisModel={value => { analysisStopped.current = false; setAnalysisModel(value); }} autoAnalysis={autoAnalysis} onAutoAnalysis={value => { analysisStopped.current = !value; setAutoAnalysis(value); }} speech={speech} />
       <div className="translation-input">
-        <TextareaField labelHidden lang={languages.sourceLanguage === "en" ? "en" : "zh-CN"} label={getText("translation.original")} value={text} rows={3} maxLength={10000} onChange={event => { cancelCurrent(); setText(event.target.value); setRecord(null); setNotice(""); }} />
+        <TextareaField labelHidden lang={languages.sourceLanguage === "en" ? "en" : "zh-CN"} label={getText("translation.original")} value={text} rows={3} maxLength={10000} onKeyDown={event => {
+          if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+          event.preventDefault();
+          if (!event.repeat && canTranslate) void generate();
+        }} onChange={event => { cancelCurrent(); setText(event.target.value); setRecord(null); setNotice(""); }} />
         <Button variant="ghost" size="icon" className="translation-input-clear" disabled={!text || saving} aria-label={getText("translation.clearInput")} title={getText("translation.clearInput")} onClick={() => { cancelCurrent(); setText(""); setRecord(null); setVersionBase(null); setError(""); setNotice(""); }}><X size={16} aria-hidden="true" /></Button>
-        <Button variant="ghost" size="icon" className="translation-input-copy" disabled={!text} aria-label={getText("translation.copy")} title={getText("translation.copy")} onClick={() => { void navigator.clipboard.writeText(text).then(() => setNotice(getText("translation.copied"))).catch(() => setError(getText("translation.copyFailed"))); }}><Copy size={16} aria-hidden="true" /></Button>
         <div className="translation-input-footer">
-        {(record ?? versionBase) && !(record ?? versionBase)!.localSaveFailed && <TranslationVersions record={(record ?? versionBase)!} client={client} disabled={!modelReady || savingModel || saving || savingLanguages} onSelect={selectVersion} />}
-        <Button className="translation-input-action" disabled={!modelReady || savingModel || !languagesReady || savingLanguages || !translationWorking && (working || analysisWorking || !text.trim())} onClick={() => translationWorking ? stopTranslation() : void generate()}>
-          {translationWorking ? <Square size={16} aria-hidden="true" /> : <Languages size={16} aria-hidden="true" />}
-          {getText(translationWorking ? "translation.stopAction" : "translation.translateAction")}
-        </Button>
+          {(record ?? versionBase) && !(record ?? versionBase)!.localSaveFailed && <TranslationVersions record={(record ?? versionBase)!} client={client} disabled={!modelReady || savingModel || saving || savingLanguages} onSelect={selectVersion} />}
+          <div className="translation-input-actions">
+            <Button variant="ghost" size="icon" className="translation-input-copy" disabled={!text} aria-label={getText("translation.copy")} title={getText("translation.copy")} onClick={() => { void navigator.clipboard.writeText(text).then(() => setNotice(getText("translation.copied"))).catch(() => setError(getText("translation.copyFailed"))); }}><Copy size={16} aria-hidden="true" /></Button>
+            <Button className="translation-input-action" disabled={!translationWorking && !canTranslate} onClick={() => translationWorking ? stopTranslation() : void generate()}>
+              {translationWorking ? <Square size={16} aria-hidden="true" /> : <Languages size={16} aria-hidden="true" />}
+              {getText(translationWorking ? "translation.stopAction" : "translation.translateAction")}
+            </Button>
+          </div>
         </div>
       </div>
       {modelPreferenceFailed && <ErrorNotice text={getText("translation.saveFailed")} />}
       {error && <><ErrorNotice text={error} />{translationFailed && <Button variant="ghost" size="icon" disabled={working || saving} aria-label={getText("translation.retry")} title={getText("translation.retry")} onClick={() => void generate(true)}><RefreshCw size={15} /></Button>}</>}
       {!!(record || streamText || working || pendingAnalysis || earlyDictionary?.status === "available") && <TranslationResultToggle
         onExpandedChange={setResultExpanded}
-        status={record && !record.localSaveFailed && <span className="translation-tag">{getText(collected ? "translation.saved" : "translation.local")}</span>}
+        status={record && !collected && !record.localSaveFailed && <span className="translation-tag">{getText("translation.local")}</span>}
         actions={<>
           {onDiscuss && <Button variant="ghost" size="icon" aria-label={getText("translation.conversationOpen")} title={getText("translation.conversationOpen")} disabled={!record || !accountId} onClick={() => { if (record) onDiscuss(record); }}><MessageCircle size={15} aria-hidden="true" /></Button>}
-          <Button variant="ghost" size="icon" aria-label={getText("translation.copy")} title={getText("translation.copy")} disabled={!record} onClick={() => { if (record) void navigator.clipboard.writeText(record.translatedText).then(() => setNotice(getText("translation.copied"))).catch(() => setError(getText("translation.copyFailed"))); }}><Copy size={15} aria-hidden="true" /></Button>
           <Button variant="ghost" size="icon" aria-label={getText(collected ? "translation.saved" : "translation.collect")} title={getText(collected ? "translation.saved" : "translation.collect")} className="translation-collect-button" data-collected={collected || undefined} disabled={!record || working || saving || record.localSaveFailed || collected} onClick={() => void collect()}><Star size={15} aria-hidden="true" /></Button>
+          <Button variant="ghost" size="icon" aria-label={getText("translation.copy")} title={getText("translation.copy")} disabled={!record} onClick={() => { if (record) void navigator.clipboard.writeText(record.translatedText).then(() => setNotice(getText("translation.copied"))).catch(() => setError(getText("translation.copyFailed"))); }}><Copy size={15} aria-hidden="true" /></Button>
         </>}>
         {record ? <>
         <div className="translation-reading-block"><p lang={record.targetLanguage === "zh" ? "zh-CN" : "en"}>{record.translatedText}</p></div>

@@ -43,8 +43,8 @@
 
 .language-page [hidden], .translation-result-body[hidden] { display: none; }
 .translation-input { position: relative; min-width: 0; }
-.translation-input .ui-textarea { min-height: 132px; padding-bottom: 60px; padding-right: 44px; resize: vertical; }
-.translation-input-footer .translation-input-action { margin-left: auto; flex-shrink: 0; min-height: 32px; height: 32px; padding: 5px 9px; font-size: var(--font-size-xs); }
+.translation-input .ui-textarea { height: 112px; min-height: 112px; max-height: 320px; overflow-y: auto; padding-bottom: 48px; padding-right: 44px; resize: vertical; }
+.translation-input-footer .translation-input-action { flex-shrink: 0; min-height: 32px; height: 32px; padding: 5px 9px; font-size: var(--font-size-xs); }
 .translation-result-toggle { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 4px 0; border: 0; background: transparent; color: inherit; text-align: start; font: inherit; cursor: pointer; }
 .translation-result-toggle .translation-model { margin-inline-start: auto; text-align: end; }
 .translation-result-toggle > svg { flex-shrink: 0; color: var(--app-primary); }
@@ -149,7 +149,7 @@
 .translation-navigation-existing-conversation { color: #438564; }
 
 .translation-input-clear, .translation-input-copy { width: 32px; min-width: 32px; min-height: 32px; height: 32px; }
-.translation-input-copy { position: absolute; right: 8px; top: 44px; }
+.translation-input-actions { display: flex; align-items: center; gap: 4px; margin-inline-start: auto; flex-shrink: 0; }
 .translation-input-clear { position: absolute; right: 8px; top: 8px; }
 
 .translation-pronunciation > header { flex-wrap: nowrap; }
@@ -197,7 +197,7 @@
 
 .language-page .ui-input.ui-select-trigger, .translation-workspace .ui-input.ui-select-trigger, .translation-drawer .ui-input.ui-select-trigger { background: transparent; }
 .language-page .ui-tag-select-tag { background: transparent; border: 1px solid var(--app-border); }
-.translation-result-heading[data-result-actions] > .translation-result-collapse { margin-inline-start: auto; }
+.translation-result-heading[data-result-actions] > .translation-actions { margin-inline-start: auto; }
 .translation-result-heading > .translation-actions { flex-wrap: nowrap; gap: 2px; }
 .translation-result-heading > .translation-actions > .ui-button--icon { width: 32px; min-width: 32px; min-height: 32px; }
 .translation-input-footer > .ui-field { flex: 0 0 auto; }
@@ -211,7 +211,7 @@
 
 .translation-error > .ui-button { margin-inline-start: 6px; vertical-align: middle; }
 
-.translation-settings:not([hidden]) { display: grid; gap: 12px; padding: 12px; border: 1px solid var(--app-border); border-radius: 12px; min-width: 0; }
+.translation-settings:not([hidden]) { display: grid; gap: 12px; padding: 12px; border: 1px solid color-mix(in srgb, var(--app-primary) 42%, var(--app-border)); border-radius: 12px; background: color-mix(in srgb, var(--app-primary) 3%, transparent); min-width: 0; }
 .translation-settings-group { display: grid; gap: var(--space-2); min-width: 0; }
 .translation-settings-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .translation-controls > .translation-settings-toggle { margin-left: auto; flex-shrink: 0; }
