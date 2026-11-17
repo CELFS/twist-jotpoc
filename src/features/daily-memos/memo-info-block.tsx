@@ -165,6 +165,7 @@ function MemoInfoBlockView({
   return (
     <NodeViewWrapper
       className="daily-memo-info-block"
+      contentEditable={false}
       data-collapsed={collapsed || undefined}
       data-drag-source={dragging || undefined}
       data-first-node={getPos() === 0 || undefined}
@@ -243,6 +244,7 @@ function MemoInfoBlockView({
       ) : null}
       <NodeViewContent
         className="daily-memo-info-block-body"
+        contentEditable={editable}
         data-hidden={collapsed || undefined}
       />
     </NodeViewWrapper>
@@ -344,6 +346,16 @@ export const MemoInfoBlock = Node.create<MemoInfoBlockOptions>({
   addProseMirrorPlugins() {
     return [
       new Plugin({
+        view(view) {
+          // WebKit IME targets the block body as its editing host. ProseMirror
+          // must also synchronize selections while that host has native focus.
+          const hasFocus = view.hasFocus;
+          view.hasFocus = () => {
+            const active = view.root.activeElement;
+            return hasFocus.call(view) || Boolean(active?.matches('.daily-memo-info-block-body[contenteditable="true"]') && view.dom.contains(active));
+          };
+          return { destroy() { view.hasFocus = hasFocus; } };
+        },
         props: {
           transformCopied: stripMemoInfoBlockClipboardContext,
           transformPasted: (slice, view) => {

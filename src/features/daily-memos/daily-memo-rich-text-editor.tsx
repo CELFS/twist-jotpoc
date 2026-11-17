@@ -230,7 +230,8 @@ export const DailyMemoRichTextEditor = forwardRef<
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
     if (preview) {
-      editor.view.dom.blur();
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && editor.view.dom.contains(active)) active.blur();
       const title = editorRootRef.current?.closest(".daily-memo-writing-panel")
         ?.querySelector<HTMLInputElement>(".daily-memo-title-input");
       title?.blur();
@@ -526,11 +527,12 @@ export const DailyMemoRichTextEditor = forwardRef<
         },
       )
       .setTextSelection(from + 2)
-      .focus()
       .run();
 
     if (inserted) {
       setSourceDrawer(null);
+      // Sync the DOM caret only after the insertion transaction has been applied.
+      editor.view.focus();
     }
   };
 
@@ -568,7 +570,7 @@ export const DailyMemoRichTextEditor = forwardRef<
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
-              editor?.commands.blur();
+              editor?.view.dom.blur();
               setSourceDrawer({
                 from: emptyLineAction.from,
                 to: emptyLineAction.to,

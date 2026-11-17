@@ -6,7 +6,7 @@ export function placeMemoCaret(view: EditorView, _position: number, event: Mouse
   if (view.editable === false) return false;
   if (event.detail > 1 || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return false;
   const target = event.target;
-  if (!(target instanceof Element) || target.closest('[contenteditable="false"]')) return false;
+  if (!(target instanceof Element) || target.closest("[contenteditable]")?.getAttribute("contenteditable") === "false") return false;
 
   const selector = "p, h1, h2, h3, h4, h5, h6";
   const targetBlock = target.closest<HTMLElement>(selector);
@@ -22,7 +22,7 @@ export function placeMemoCaret(view: EditorView, _position: number, event: Mouse
       const rect = element.getBoundingClientRect();
       return rect.height > 0 && event.clientY >= rect.top && event.clientY < rect.bottom;
     });
-  if (!block || block.closest('[contenteditable="false"]')) return false;
+  if (!block || !block.isContentEditable) return false;
 
   const start = view.posAtDOM(block, 0);
   const parent = view.state.doc.resolve(start).parent;
@@ -45,7 +45,7 @@ export function placeMemoCaret(view: EditorView, _position: number, event: Mouse
   let textNode: Node | null;
   let lineEnd: { position: number; right: number } | null = null;
   while ((textNode = walker.nextNode())) {
-    if (textNode.parentElement?.closest('[contenteditable="false"]')) continue;
+    if (!textNode.parentElement?.isContentEditable) continue;
     range.selectNodeContents(textNode);
     if (!Array.from(range.getClientRects()).some((rect) =>
       event.clientY >= rect.top && event.clientY <= rect.bottom,
