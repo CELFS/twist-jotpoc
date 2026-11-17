@@ -1,5 +1,7 @@
 mod window;
 mod network_log;
+#[cfg(target_os = "macos")]
+mod macos_update;
 #[cfg(target_os = "android")]
 mod android_update;
 
@@ -66,6 +68,8 @@ pub fn run() {
         .plugin(tauri_plugin_secure_keystore::init())
         .manage(window::WindowController::default())
         .invoke_handler(tauri::generate_handler![
+            #[cfg(target_os = "macos")]
+            macos_update::install_macos_update,
             log_auth_failure,
             network_log::log_network_failure,
             authorization_device_info,

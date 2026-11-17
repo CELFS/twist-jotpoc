@@ -122,6 +122,21 @@ export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
     finally { setBusy(false); }
   }
 
+  async function updateDesktop() {
+    if (!desktopRelease || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (platform === "macos") {
+        await invoke("install_macos_update", { expectedHash: desktopRelease.sha256 });
+      } else {
+        await openUrl(new URL(desktopRelease.url, TWIST_BALANCE_ORIGIN).href);
+      }
+    } catch {
+      setError(platform === "macos" ? "androidUpdate.macFailed" : "androidUpdate.failed");
+    } finally { setBusy(false); }
+  }
+
   const available = release && task && release.sha256 !== task.installedHash && release.versionCode >= task.installedCode;
   const downloading = task?.phase === "downloading";
   const ready = task?.phase === "ready" && (!release || task.targetHash === release.sha256);
@@ -134,8 +149,7 @@ export function UpdateCard({ platform }: { platform: UpdatePlatform }) {
     {desktopRelease && <>
       <div>{getText("androidUpdate.latest")} · v{desktopRelease.version}</div>
       {desktopRelease.sha256 !== desktopRelease.installedSha256
-        ? <Button onClick={() => void openUrl(new URL(desktopRelease.url, TWIST_BALANCE_ORIGIN).href)
-            .catch(() => setError("androidUpdate.failed"))}><Download size={16} />{getText("androidUpdate.download")}</Button>
+        ? <Button disabled={busy || checking} onClick={() => void updateDesktop()}><Download size={16} />{getText(platform === "macos" ? busy ? "androidUpdate.macUpdating" : "androidUpdate.macUpdate" : "androidUpdate.download")}</Button>
         : <span>{getText("androidUpdate.current")}</span>}
     </>}
     {checking && !release && !desktopRelease && <LoadingState compact rows={1} label={getText("androidUpdate.check")} />}

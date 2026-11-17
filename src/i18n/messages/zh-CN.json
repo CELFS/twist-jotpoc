@@ -615,6 +615,9 @@
     "checkFailed": "无法检查更新",
     "installFailed": "无法打开安装包，请重试",
     "ready": "更新已下载，点此安装",
-    "retry": "重试"
+    "retry": "重试",
+    "macUpdate": "更新并重启",
+    "macUpdating": "正在更新…",
+    "macFailed": "未能安装更新。请确认已从“应用程序”启动 JotPoc 后重试。"
   }
 }

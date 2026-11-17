@@ -615,6 +615,9 @@
     "checkFailed": "Could not check for updates",
     "installFailed": "Could not open the installer. Try again.",
     "ready": "Update downloaded. Tap to install.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "macUpdate": "Update and restart",
+    "macUpdating": "Updating…",
+    "macFailed": "Could not install the update. Check that JotPoc is running from Applications and try again."
   }
 }
