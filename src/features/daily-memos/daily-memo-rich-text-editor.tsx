@@ -301,7 +301,7 @@ export const DailyMemoRichTextEditor = forwardRef<
       return;
     }
 
-    if (!editorFocusedRef.current) {
+    if (!editorFocusedRef.current && !editor.view.hasFocus()) {
       setEmptyLineAction(null);
       onCursorNearFloatingControlsChange(false);
       return;

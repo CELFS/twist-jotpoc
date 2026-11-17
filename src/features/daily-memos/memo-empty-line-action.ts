@@ -43,13 +43,15 @@ export const MemoEmptyLineAction = Extension.create<MemoEmptyLineActionOptions>(
         return false;
       }
 
+      if (!view.editable) return false;
+
       pointerEvent.preventDefault();
-      view.focus();
+      // The gap belongs to the root editor, even when a block body owns focus.
       view.dispatch(
-        view.state.tr.setSelection(
-          new GapCursor(view.state.doc.resolve(0)),
-        ),
+        view.state.tr.setSelection(new GapCursor(view.state.doc.resolve(0)))
+          .setMeta(pluginKey, { focused: true }),
       );
+      view.focus();
       return true;
     };
 

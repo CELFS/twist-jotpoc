@@ -1413,6 +1413,7 @@
 
 .daily-memo-rich-text-content .daily-memo-empty-line--gap {
   display: block;
+  min-height: 1.7em;
   width: 100%;
   box-sizing: border-box;
   margin: 0;
@@ -1546,6 +1547,10 @@
 .daily-memo-rich-text-content
   .daily-memo-info-block[data-first-node="true"] {
   margin-top: 0.3rem;
+}
+
+.daily-memo-info-block-body[contenteditable="true"]:focus {
+  outline: none;
 }
 
 .daily-memo-info-block-header {
