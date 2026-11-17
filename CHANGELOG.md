@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4 - Unreleased
+
+- Install macOS updates from Settings and restart JotPoc, including when the installer changes for the same version.
+
 ## 1.1.3 - Unreleased
 
 - Align the memo editor and its rich-text dependencies with the main site for information block editing, caret placement, and empty-line insertion.
