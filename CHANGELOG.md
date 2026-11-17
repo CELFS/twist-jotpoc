@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.7 - Unreleased
+
+- Remove the Android tap highlight and move mobile settings and account shortcuts to the left of the top bar.
+
 ## 1.1.6 - Unreleased
 
 - Keep JotPoc running when its macOS window closes and restore the main panel from the Dock, including from the floating entry.

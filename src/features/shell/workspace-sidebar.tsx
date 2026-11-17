@@ -22,12 +22,23 @@ export function useSidebarSelection() {
   return useContext(SidebarContext)?.onSelect;
 }
 
-export function WorkspaceSidebar({ open, setTarget, onManage, current, children }: {
+export function ManagementButtons({ current, onManage }: {
+  current: ManagementTab | null;
+  onManage: (tab: ManagementTab) => void;
+}) {
+  return <>
+    <button type="button" aria-label={getText("settings.shortLabel")} title={getText("settings.shortLabel")}
+      aria-current={current === "settings" ? "page" : undefined} onClick={() => onManage("settings")}><Settings size={17} aria-hidden="true" /></button>
+    <button type="button" aria-label={getText("client.account")} title={getText("client.account")}
+      aria-current={current === "account" ? "page" : undefined} onClick={() => onManage("account")}><UserRound size={17} aria-hidden="true" /></button>
+  </>;
+}
+
+export function WorkspaceSidebar({ open, setTarget, management, children }: {
   open: boolean;
   setTarget: (target: HTMLDivElement | null) => void;
   children: ReactNode;
-  current: ManagementTab | null;
-  onManage: (tab: ManagementTab) => void;
+  management: ReactNode;
 }) {
   return <aside id="workspace-sidebar" inert={!open} aria-hidden={!open} className="workspace-sidebar" aria-label={getText("client.sidebar")}>
     {children}
@@ -36,11 +47,6 @@ export function WorkspaceSidebar({ open, setTarget, onManage, current, children 
         <div ref={setTarget} />
       </div>
     </div>
-    <footer className="sidebar-management">
-      <button type="button" aria-label={getText("settings.shortLabel")} title={getText("settings.shortLabel")}
-        aria-current={current === "settings" ? "page" : undefined} onClick={() => onManage("settings")}><Settings size={17} aria-hidden="true" /></button>
-      <button type="button" aria-label={getText("client.account")} title={getText("client.account")}
-        aria-current={current === "account" ? "page" : undefined} onClick={() => onManage("account")}><UserRound size={17} aria-hidden="true" /></button>
-    </footer>
+    {management && <footer className="sidebar-management">{management}</footer>}
   </aside>;
 }

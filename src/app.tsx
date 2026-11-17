@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { Globe, Languages, NotebookPen, PanelRight } from "lucide-react";
 import { MarksIcon } from "@/components/ui/marks-icon";
 import { Tabs } from "@/components/ui/tabs";
-import { SidebarContext, WorkspaceSidebar } from "@/features/shell/workspace-sidebar";
+import { ManagementButtons, SidebarContext, WorkspaceSidebar } from "@/features/shell/workspace-sidebar";
 import { SettingsPage, type ManagementTab } from "@/features/shell/settings-page";
 import { SidebarResizer } from "@/features/shell/sidebar-resizer";
 import { FloatingEntry } from "@/features/shell/floating-entry";
@@ -83,11 +83,14 @@ export function App() {
     collections: "collections.title", translation: "translation.library",
   } as const)[tab]);
   const platform = windowState?.macos ? "macos" : windowState?.windows ? "windows" : "other";
+  const mobile = windowState?.desktop === false;
+  const management = <ManagementButtons current={managementTab} onManage={setManagementTab} />;
   const collapsed = windowState?.mode === "collapsed";
-  return <div className="app-shell" data-mode={windowState?.mode ?? "full"} data-language={language}>
+  return <div className="app-shell" data-platform={windowState?.platform} data-mode={windowState?.mode ?? "full"} data-language={language}>
     <div className="expanded-shell" data-sidebar-open={sidebarOpen} hidden={collapsed}>
       <header className="app-header" data-macos={windowState?.macos || undefined} data-tauri-drag-region>
         <div className="header-window" data-tauri-drag-region>
+          {mobile && <div className="header-management">{management}</div>}
           {windowState && <WindowControls busy={busy} state={windowState}
             onModeChange={mode => void updateWindow(() => setWindowMode(mode))}
             onPinChange={changePin} />}
@@ -119,7 +122,7 @@ export function App() {
               setAutoHide(value);
             }} onBack={() => setManagementTab(null)} />}
         </div>
-        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} onManage={setManagementTab} current={managementTab}>
+        <WorkspaceSidebar open={sidebarOpen} setTarget={setSidebarTarget} management={mobile ? null : management}>
           {!collapsed && <SidebarResizer key={windowState?.mode ?? "full"} mode={windowState?.mode === "mini" ? "mini" : "full"} open={sidebarOpen} />}
         </WorkspaceSidebar>
       </div>

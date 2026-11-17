@@ -280,6 +280,13 @@
   display: flex; align-items: flex-end; gap: var(--actions-gap);
   color: var(--frame-text);
 }
+.header-management { display: flex; gap: var(--actions-gap); }
+.workspace-sidebar:not(:has(> .sidebar-management)) .sidebar-viewport {
+  --cut-height: 0px;
+  border-radius: var(--content-top-radius);
+  -webkit-mask: none;
+  mask: none;
+}
 .sidebar-history-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-1); }
 .sidebar-scroll :is(.sidebar-history-heading, .collections-heading) { justify-content: flex-end; }
 .sidebar-scroll .collections-heading .experiments-heading { display: none; }
@@ -339,14 +346,14 @@
 .note-reader time { color: var(--app-text-muted); }
 .note-reader > a { color: var(--app-primary); }
 .note-reader .daily-memo-rich-text-editor { height: auto; min-height: 0; }
-.sidebar-management button, .sidebar-toggle {
+:is(.sidebar-management, .header-management) button, .sidebar-toggle {
   align-self: center;
   display: grid; place-items: center; height: var(--header-button-size); width: var(--header-button-size);
   padding: 0; border: 0; border-radius: var(--sidebar-radius);
   color: inherit; background: transparent;
 }
-.sidebar-management button { align-self: flex-end; }
-.sidebar-management button:hover, .sidebar-management button[aria-current="page"],
+:is(.sidebar-management, .header-management) button { align-self: flex-end; }
+:is(.sidebar-management, .header-management) button:hover, :is(.sidebar-management, .header-management) button[aria-current="page"],
 .sidebar-toggle:hover, .sidebar-toggle[aria-expanded="true"] { background: rgb(var(--frame-interaction) / 12%); }
 @media (max-width: 520px) {
   .expanded-shell { --sidebar-gutter: var(--space-1); }
