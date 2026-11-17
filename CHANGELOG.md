@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.6 - Unreleased
+
+- Keep JotPoc running when its macOS window closes and restore the main panel from the Dock, including from the floating entry.
+
 ## 1.1.5 - Unreleased
 
 - Translate with Enter and insert a new line with Shift+Enter. Align translation actions, scrolling, and the settings card with Twill.

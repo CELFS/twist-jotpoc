@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { Globe, Languages, NotebookPen, PanelRight } from "lucide-react";
 import { MarksIcon } from "@/components/ui/marks-icon";
 import { Tabs } from "@/components/ui/tabs";
@@ -37,7 +38,10 @@ export function App() {
     let active = true;
     void readWindowState().then(state => { if (active) setState(state); })
       .catch(() => { if (active) setError(getText("app.startupError")); });
-    return () => { active = false; };
+    const unsubscribe = listen<WindowState>("jotpoc-window-restored", ({ payload }) => {
+      if (active) setState(payload);
+    }).catch(() => { if (active) setError(getText("app.windowError")); });
+    return () => { active = false; void unsubscribe.then(stop => stop?.()); };
   }, []);
 
   useEffect(() => {

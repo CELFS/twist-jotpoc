@@ -53,6 +53,14 @@ pub fn run() {
     let builder = tauri::Builder::default();
     #[cfg(target_os = "macos")]
     let builder = builder.on_window_event(|window, event| {
+        if window.label() == "main" {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                if let Err(error) = window.hide() {
+                    eprintln!("[JotPoc window] hide failed: {error}");
+                }
+            }
+        }
         if matches!(event, tauri::WindowEvent::Focused(_) | tauri::WindowEvent::Resized(_)) {
             let Ok(handle) = window.ns_window() else { return };
             // Native window events are delivered on the AppKit main thread.
@@ -78,6 +86,14 @@ pub fn run() {
             window::set_window_mode,
             window::set_window_pinned,
         ])
-        .run(tauri::generate_context!())
-        .expect("Unable to run JotPoc");
+        .build(tauri::generate_context!())
+        .expect("Unable to build JotPoc")
+        .run(|_app, _event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { .. } = _event {
+                if let Err(error) = window::reopen_main_window(_app) {
+                    eprintln!("[JotPoc window] reopen failed: {error}");
+                }
+            }
+        });
 }

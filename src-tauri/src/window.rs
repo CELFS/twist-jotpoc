@@ -67,6 +67,22 @@ pub fn read_window_state(controller: State<'_, WindowController>) -> Result<Wind
 }
 
 #[cfg(target_os = "macos")]
+pub fn reopen_main_window(app: &tauri::AppHandle) -> Result<(), String> {
+    use tauri::{Emitter, Manager};
+    let window = app.get_webview_window("main").ok_or("Main window unavailable")?;
+    if window.is_minimized().map_err(|e| e.to_string())? {
+        window.unminimize().map_err(|e| e.to_string())?;
+    }
+    window.show().map_err(|e| e.to_string())?;
+    let controller = app.state::<WindowController>();
+    if read_window_state(controller.clone())?.mode == WindowMode::Collapsed {
+        let state = set_window_mode(window.clone(), controller, WindowMode::Full)?;
+        window.emit("jotpoc-window-restored", state).map_err(|e| e.to_string())?;
+    }
+    window.set_focus().map_err(|e| e.to_string())
+}
+
+#[cfg(target_os = "macos")]
 pub fn update_inactive_controls(native: &objc2_app_kit::NSWindow) {
     use objc2_app_kit::{NSColor, NSWindowButton, NSWindowStyleMask};
     use objc2_foundation::NSString;
