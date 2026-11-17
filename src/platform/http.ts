@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { fetch as nativeFetch } from "@tauri-apps/plugin-http";
 import { getActiveCredential, getCredentialSignal } from "./credential";
 
@@ -18,11 +19,35 @@ export function apiUrl(path: string) {
   return url.href;
 }
 
+type RequestContext = { method: string; endpoint: string; started: number; signal?: AbortSignal | null };
+const requests = new WeakMap<Response, RequestContext>();
+const loggedBodyFailures = new WeakSet<Response>();
+
+function logFailure(context: RequestContext, stage: string, reason: string, status?: number) {
+  if (context.signal?.aborted) return;
+  // Native errors may include the full URL, including private query parameters.
+  const detail = reason.replace(/https?:\/\/[^\s)]+/gi, "[url]");
+  const record = JSON.stringify({ method: context.method, endpoint: context.endpoint, stage, status,
+    elapsedMs: Math.round(performance.now() - context.started), reason: detail });
+  void invoke("log_network_failure", { record }).catch(() => console.error("[JotPoc network]", record));
+}
+
+function errorDetail(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export async function publicFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const url = apiUrl(path);
+  const context = { method: init.method ?? "GET", endpoint: new URL(url).pathname,
+    started: performance.now(), signal: init.signal };
   try {
-    return await nativeFetch(apiUrl(path), { ...init, credentials: "omit", connectTimeout: 15_000, maxRedirections: 0 });
+    const response = await nativeFetch(url, { ...init, credentials: "omit", connectTimeout: 15_000, maxRedirections: 0 });
+    requests.set(response, context);
+    if (!response.ok) logFailure(context, "http-status", response.statusText, response.status);
+    return response;
   } catch (error) {
     if (init.signal?.aborted) throw init.signal.reason;
+    logFailure(context, "request", errorDetail(error));
     throw error instanceof ApiError ? error : new ApiError("network_error");
   }
 }
@@ -62,6 +87,7 @@ export async function authenticatedFetch(path: string, init: RequestInit = {}): 
     window.dispatchEvent(new Event("jotpoc:authorization-required"));
   }
   if (!response.body) { dispose(); return response; }
+  const context = requests.get(response);
   const reader = response.body.getReader();
   const body = new ReadableStream<Uint8Array>({
     async pull(output) {
@@ -74,16 +100,28 @@ export async function authenticatedFetch(path: string, init: RequestInit = {}): 
       } catch (error) {
         dispose();
         void reader.cancel(error).catch(() => undefined);
+        loggedBodyFailures.add(wrapped);
+        if (context) logFailure(context, "read-body", errorDetail(error), response.status);
         output.error(error);
       }
     },
     cancel(reason) { dispose(); controller.abort(reason); return reader.cancel(reason); },
   });
-  return new Response(body, { status: response.status, statusText: response.statusText, headers: response.headers });
+  const wrapped = new Response(body, { status: response.status, statusText: response.statusText, headers: response.headers });
+  if (context) requests.set(wrapped, context);
+  return wrapped;
 }
 
 export async function readJson(response: Response): Promise<unknown> {
-  const body: unknown = await response.json().catch(() => null);
+  const body: unknown = await response.json().catch((error: unknown) => {
+    const context = requests.get(response);
+    if (context && !loggedBodyFailures.has(response)) {
+      // JSON parser messages can quote the response body.
+      const invalid = error instanceof SyntaxError;
+      logFailure(context, invalid ? "decode-json" : "read-body", invalid ? error.name : errorDetail(error), response.status);
+    }
+    return null;
+  });
   if (!response.ok) {
     const code = body && typeof body === "object" && "code" in body && typeof body.code === "string"
       ? body.code : "unavailable";

@@ -1,4 +1,5 @@
 mod window;
+mod network_log;
 #[cfg(target_os = "android")]
 mod android_update;
 
@@ -66,6 +67,7 @@ pub fn run() {
         .manage(window::WindowController::default())
         .invoke_handler(tauri::generate_handler![
             log_auth_failure,
+            network_log::log_network_failure,
             authorization_device_info,
             window::position_floating_entry,
             window::read_window_state,
