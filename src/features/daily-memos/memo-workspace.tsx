@@ -86,12 +86,21 @@ export function MemoWorkspace({ accountId }: { accountId: string }) {
     setDateKey(`${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-${String(next.getDate()).padStart(2, "0")}`);
   };
 
+  const datesWithData = useMemo(() => {
+    const dates = new Set(history.map(memo => memo.dateKey));
+    if (state.ready) {
+      if (state.title.trim() || state.content.trim()) dates.add(dateKey);
+      else dates.delete(dateKey);
+    }
+    return dates;
+  }, [history, dateKey, state.ready, state.title, state.content]);
+
   const refreshButton = <Button variant="ghost" size="icon" aria-label={getText("client.refresh")} onClick={() => { void refresh(); void controller.refresh(); }}><RefreshCw size={17} /></Button>;
 
   return <section className="memo-workspace">
     <div className="workspace-toolbar">
       <Button variant="ghost" size="icon" aria-label={getText("client.previousDay")} onClick={() => switchDay(-1)}><ChevronLeft size={18} /></Button>
-      <DateSelection value={dateKey} onChange={setDateKey} />
+      <DateSelection value={dateKey} onChange={setDateKey} datesWithData={datesWithData} />
       <Button variant="ghost" size="icon" aria-label={getText("client.nextDay")} onClick={() => switchDay(1)}><ChevronRight size={18} /></Button>
       <Button variant="ghost" size="icon" className="memo-return-today" disabled={dateKey === todayKey()}
         aria-label={getText("client.today")} title={getText("client.today")} onClick={() => setDateKey(todayKey())}>

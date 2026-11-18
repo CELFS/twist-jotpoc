@@ -419,3 +419,110 @@
 .ui-date-picker-panel .ui-calendar-grid[data-lunar="true"] button {
   min-height: 3.25rem;
 }
+
+.client-date-selection {
+  min-width: 0;
+}
+
+.client-date-popover {
+  position: fixed;
+  z-index: 90;
+  padding: 0.75rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow-raised);
+  color: var(--app-text);
+}
+
+.client-date-popover-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.client-date-popover-header strong {
+  font-size: 0.875rem;
+}
+
+.client-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.2rem;
+}
+
+.client-calendar-weekdays {
+  margin-bottom: 0.25rem;
+  color: var(--app-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.client-calendar-day {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--app-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  place-items: center;
+}
+
+.client-date-activity {
+  position: absolute;
+  bottom: 0.12rem;
+  left: 50%;
+  display: grid;
+  width: 0.5rem;
+  height: 0.5rem;
+  place-items: center;
+  transform: translateX(-50%);
+}
+
+.client-date-activity::after {
+  width: 0.22rem;
+  height: 0.22rem;
+  border-radius: 999px;
+  background: var(--app-primary);
+  content: "";
+}
+
+.client-date-trigger-activity {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  flex: 0 0 0.5rem;
+  transform: none;
+}
+
+.client-calendar-day[data-outside="true"] {
+  color: var(--app-text-muted);
+}
+
+.client-calendar-day:hover,
+.client-calendar-day[aria-current="date"] {
+  background: var(--app-primary-soft);
+  color: var(--app-primary);
+}
+
+.client-calendar-day[data-selected="true"] {
+  background: var(--app-primary);
+  color: var(--app-on-color);
+  font-weight: 800;
+}
+
+.client-calendar-day[data-selected="true"] .client-date-activity::after {
+  background: var(--app-on-color);
+}

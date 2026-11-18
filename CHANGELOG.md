@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.8 - Unreleased
+
+- Show memo activity dots beside the selected date and in the calendar, and replace the date drawer with a Twill-style calendar popover.
+
 ## 1.1.7 - Unreleased
 
 - Remove the Android tap highlight and move mobile settings and account shortcuts to the left of the top bar.
