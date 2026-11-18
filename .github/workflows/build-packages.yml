@@ -140,13 +140,21 @@ jobs:
           git -C site config user.name "$BOT"
           git -C site config user.email "$(gh api "/users/$BOT" --jq .id)+$BOT@users.noreply.github.com"
           for attempt in 1 2 3; do
-            git -C site fetch origin main
+            git -C site fetch --quiet origin main
             tree="$RUNNER_TEMP/site-$attempt"
-            git -C site worktree add --detach "$tree" origin/main
+            git -C site worktree add --quiet --detach "$tree" origin/main
             python3 "$tree/claude_jobs/scripts/sync-jotpoc-release.py" client packages
             git -C "$tree" add -- src/extension/jotpoc-release.json src/extension/jotpoc-build-hashes.json public/downloads/jotpoc
-            git -C "$tree" diff --cached --quiet && exit 0
-            git -C "$tree" commit -m "chore: sync JotPoc packages for ${GITHUB_SHA:0:12}"
-            git -C "$tree" push origin HEAD:main && exit 0
+            if git -C "$tree" diff --cached --quiet; then
+              echo "Download entries are already up to date."
+              exit 0
+            fi
+            git -C "$tree" commit --quiet -m "chore: sync JotPoc packages for ${GITHUB_SHA:0:12}"
+            if git -C "$tree" push --quiet origin HEAD:main; then
+              echo "Release packages and download entries synchronized."
+              exit 0
+            fi
+            echo "Publication attempt $attempt failed."
           done
+          echo "::error::Release package publication failed after three attempts."
           exit 1
